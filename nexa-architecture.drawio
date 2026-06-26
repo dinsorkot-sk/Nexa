@@ -4,26 +4,26 @@
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="c1" value="👤 &lt;b&gt;System Admin&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Person]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#64748B;strokeColor=#475569;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
-                    <mxGeometry x="60" y="330" width="180" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="c2" value="👤 &lt;b&gt;End User&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Person]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#64748B;strokeColor=#475569;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
-                    <mxGeometry x="60" y="530" width="180" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="c3" value="&lt;b&gt;Nexa Platform&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Software System]&lt;/small&gt;&lt;hr&gt;Metadata-Driven&lt;br&gt;Application Platform" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#3730A3;fontColor=#FFFFFF;gradientColor=#6366F1;shadow=1" parent="1" vertex="1">
-                    <mxGeometry x="420" y="370" width="320" height="220" as="geometry"/>
-                </mxCell>
-                <mxCell id="c4" value="&lt;b&gt;PostgreSQL&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#94A3B8;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
-                    <mxGeometry x="880" y="280" width="190" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="c5" value="&lt;b&gt;S3 Storage&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#94A3B8;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
-                    <mxGeometry x="880" y="390" width="190" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="c6" value="&lt;b&gt;SMTP / Email&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#94A3B8;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
-                    <mxGeometry x="880" y="500" width="190" height="70" as="geometry"/>
-                </mxCell>
                 <mxCell id="c7" value="&lt;b&gt;Nexa System Boundary&lt;/b&gt;" style="dashed=1;fillColor=none;strokeColor=#888888;strokeWidth=2;html=1;whiteSpace=wrap;rounded=1" parent="1" vertex="1">
                     <mxGeometry x="390" y="330" width="380" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1" value="👤 &lt;b&gt;System Admin&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Person]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#475569;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                    <mxGeometry x="60" y="330" width="180" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2" value="👤 &lt;b&gt;End User&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Person]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#475569;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                    <mxGeometry x="60" y="530" width="180" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="c3" value="&lt;b&gt;&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;Nexa Platform&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;small&gt;&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;[Software System]&lt;/font&gt;&lt;/small&gt;&lt;hr&gt;Metadata-Driven&lt;br&gt;Application Platform" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#3730A3;fontColor=#FFFFFF;gradientColor=none;shadow=1" parent="1" vertex="1">
+                    <mxGeometry x="420" y="370" width="320" height="220" as="geometry"/>
+                </mxCell>
+                <mxCell id="c4" value="&lt;b&gt;PostgreSQL&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                    <mxGeometry x="880" y="280" width="190" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="c5" value="&lt;b&gt;S3 Storage&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                    <mxGeometry x="880" y="390" width="190" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="c6" value="&lt;b&gt;SMTP / Email&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                    <mxGeometry x="880" y="500" width="190" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="c8" value="Designs systems" style="endArrow=block;html=1;rounded=1;strokeWidth=2" parent="1" source="c1" target="c3" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
@@ -48,10 +48,10 @@
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="c1" value="👤 &lt;b&gt;Admin&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#64748B;strokeColor=#475569;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                <mxCell id="c1" value="👤 &lt;b&gt;Admin&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#475569;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="40" y="330" width="150" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="c2" value="👤 &lt;b&gt;End User&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#64748B;strokeColor=#475569;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                <mxCell id="c2" value="👤 &lt;b&gt;End User&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#475569;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="40" y="520" width="150" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="c3" value="&lt;b&gt;Platform (Builder)&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Web App]&lt;/small&gt;&lt;hr&gt;Nuxt 4 + Vue 3&lt;br&gt;Design Modules, Entities,&lt;br&gt;Fields, Workflows" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0D9488;strokeColor=#0F766E;fontColor=#FFFFFF;gradientColor=#2DD4BF;shadow=1" parent="1" vertex="1">
@@ -88,7 +88,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="3 - Platform Builder (C4 L3)" id="3---platform-builder-(c4-l3)">
-        <mxGraphModel dx="1551" dy="596" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1086" dy="417" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -203,7 +203,7 @@
                 <mxCell id="c39" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2" parent="1" source="c23" target="c7" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="Dsx1Np-GOpABN6Q_kXH_-1" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2" edge="1" parent="1" source="c8" target="c9">
+                <mxCell id="Dsx1Np-GOpABN6Q_kXH_-1" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2" parent="1" source="c8" target="c9" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="218" y="250" as="sourcePoint"/>
                         <mxPoint x="516" y="480" as="targetPoint"/>
@@ -212,7 +212,7 @@
                 <mxCell id="c9" value="&lt;b&gt;Entity Manager&lt;/b&gt;&lt;hr&gt;Define entities and&lt;br&gt;their properties" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="265" y="290" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="Dsx1Np-GOpABN6Q_kXH_-2" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2" edge="1" parent="1" source="c12" target="c14">
+                <mxCell id="Dsx1Np-GOpABN6Q_kXH_-2" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2" parent="1" source="c12" target="c14" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="544" y="250" as="sourcePoint"/>
                         <mxPoint x="588" y="480" as="targetPoint"/>
@@ -225,7 +225,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="4 - Runtime Engine (C4 L3)" id="4---runtime-engine-(c4-l3)">
-        <mxGraphModel dx="1810" dy="695" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1086" dy="417" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -382,7 +382,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="6 - Data Model (ERD)" id="6---data-model-(erd)">
-        <mxGraphModel dx="749" dy="288" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1086" dy="417" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -816,7 +816,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="8 - Relation Model" id="8---relation-model">
-        <mxGraphModel dx="2172" dy="834" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1278" dy="491" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
