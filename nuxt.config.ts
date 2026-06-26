@@ -4,7 +4,8 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@vueuse/nuxt',
-    '@nuxthub/core'
+    '@nuxthub/core',
+    '@nuxt/test-utils/module'
   ],
 
   devtools: {

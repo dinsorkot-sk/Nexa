@@ -8,7 +8,11 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "test": "vitest",
+    "test:unit": "vitest --project unit",
+    "test:e2e": "vitest --project e2e",
+    "test:nuxt": "vitest --project nuxt"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",
@@ -31,10 +35,16 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260625.1",
+    "@libsql/client": "^0.17.4",
     "@nuxt/eslint": "^1.16.0",
+    "@nuxt/test-utils": "^4.0.3",
+    "@vue/test-utils": "^2.4.11",
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.5.0",
+    "happy-dom": "^20.10.6",
+    "playwright-core": "^1.61.1",
     "typescript": "^6.0.3",
+    "vitest": "^4.1.9",
     "vue-tsc": "^3.3.5"
   },
   "packageManager": "pnpm@11.8.0"
