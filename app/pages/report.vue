@@ -1,27 +1,11 @@
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
-
 const { isNotificationsSlideoverOpen } = useDashboard()
-
-const items = [[{
-  label: 'New entity',
-  icon: 'i-lucide-database-plus',
-  to: '/metadata'
-}, {
-  label: 'New module',
-  icon: 'i-lucide-puzzle-plus',
-  to: '/module'
-}, {
-  label: 'New report',
-  icon: 'i-lucide-chart-bar',
-  to: '/report'
-}]] satisfies DropdownMenuItem[][]
 </script>
 
 <template>
-  <UDashboardPanel id="home">
+  <UDashboardPanel id="report">
     <template #header>
-      <UDashboardNavbar title="Dashboard" :ui="{ right: 'gap-3' }">
+      <UDashboardNavbar title="Report">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
@@ -34,18 +18,13 @@ const items = [[{
               </UChip>
             </UButton>
           </UTooltip>
-          <UDropdownMenu :items="items">
-            <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
-          </UDropdownMenu>
         </template>
       </UDashboardNavbar>
     </template>
     <template #body>
-      <Overview />
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 sm:px-6 pb-8">
-        <Entities />
-        <Activity />
-      </div>
+      <UContainer class="py-8">
+        <Placeholder class="h-48" label="Reports & analytics" />
+      </UContainer>
     </template>
   </UDashboardPanel>
 </template>
