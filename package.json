@@ -22,6 +22,7 @@
     "@vueuse/core": "^14.3.0",
     "@vueuse/nuxt": "^14.3.0",
     "date-fns": "^4.4.0",
+    "drizzle-orm": "^0.45.2",
     "nuxt": "^4.4.8",
     "scule": "^1.3.0",
     "tailwindcss": "^4.3.1",
@@ -29,7 +30,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260625.1",
     "@nuxt/eslint": "^1.16.0",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^10.5.0",
     "typescript": "^6.0.3",
     "vue-tsc": "^3.3.5"
