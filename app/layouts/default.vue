@@ -19,6 +19,11 @@ const links = [[{
   to: '/authorization',
   onSelect: () => { open.value = false }
 }, {
+  label: 'Members',
+  icon: 'i-lucide-users',
+  to: '/members',
+  onSelect: () => { open.value = false }
+}, {
   label: 'Metadata',
   icon: 'i-lucide-database',
   to: '/metadata',
@@ -48,10 +53,6 @@ const links = [[{
     label: 'General',
     to: '/settings',
     exact: true,
-    onSelect: () => { open.value = false }
-  }, {
-    label: 'Members',
-    to: '/settings/members',
     onSelect: () => { open.value = false }
   }, {
     label: 'Notifications',
