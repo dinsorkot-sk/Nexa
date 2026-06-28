@@ -215,10 +215,10 @@ function entityIcon(entity: any): string {
 }
 
 function fieldTypeBadgeColor(type: string) {
-  const map: Record<string, string> = {
+  const map = {
     number: 'info', boolean: 'warning', uuid: 'success', text: 'neutral', date: 'secondary'
-  }
-  return map[type] || 'neutral'
+  } as const
+  return map[type as keyof typeof map] ?? 'neutral'
 }
 </script>
 
