@@ -1,34 +1,681 @@
 <script setup lang="ts">
+import type { Field } from '~/types/metadata'
+
 const { isNotificationsSlideoverOpen } = useDashboard()
+const meta = useMetadata()
+
+const activeTab = ref('entities')
+const showAddEntityModal = ref(false)
+const showDeleteEntityConfirm = ref(false)
+const showDeleteFieldConfirm = ref(false)
+const showAddRelationModal = ref(false)
+const editingRelation = ref<Record<string, any> | null>(null)
+const showDeleteRelationConfirm = ref(false)
+
+const entityForm = reactive({ name: '', slug: '', tableName: '', description: '' })
+const fieldForm = reactive({
+  name: '', slug: '', fieldType: 'text',
+  isRequired: false, isUnique: false, defaultValue: '', options: ''
+})
+const relationForm = reactive({
+  name: '', slug: '', relationType: '1:N', entityId: 0, relatedEntityId: 0,
+  foreignKey: '', pivotTable: '', isRequired: false, onDelete: 'SET NULL'
+})
+
+const toast = useToast()
+
+const tabs = [
+  { label: 'Metadata', icon: 'i-lucide-database', value: 'entities' },
+  { label: 'Relations', icon: 'i-lucide-share-2', value: 'relations' },
+  { label: 'Diagrams', icon: 'i-lucide-panel-right-dashed', value: 'diagrams' }
+]
+
+onMounted(() => {
+  meta.loadEntities()
+  meta.loadRelations()
+})
+
+const stats = computed(() => {
+  const f = meta.selectedEntity.value?.fields || []
+  return {
+    total: f.length,
+    nullable: f.filter(fi => !fi.isRequired).length,
+    required: f.filter(fi => fi.isRequired).length,
+    uniqued: f.filter(fi => fi.isUnique).length
+  }
+})
+
+// ── Entity methods ─────────────────────────────────────────────────────
+function openAddEntity() {
+  Object.assign(entityForm, { name: '', slug: '', tableName: '', description: '' })
+  showAddEntityModal.value = true
+}
+
+async function saveEntity() {
+  if (!entityForm.name || !entityForm.slug || !entityForm.tableName) {
+    toast.add({ title: 'Missing fields', description: 'Name, slug, and table name are required', color: 'error' })
+    return
+  }
+  await meta.createEntity({ ...entityForm })
+  showAddEntityModal.value = false
+  toast.add({ title: 'Entity created', color: 'success' })
+}
+
+async function confirmDeleteEntity() {
+  if (!meta.selectedEntity.value) return
+  await meta.deleteEntity(meta.selectedEntity.value.id)
+  showDeleteEntityConfirm.value = false
+  toast.add({ title: 'Entity deleted', color: 'success' })
+}
+
+// ── Field methods ──────────────────────────────────────────────────────
+function selectField(field: Field) {
+  meta.selectedField.value = field
+  Object.assign(fieldForm, {
+    name: field.name,
+    slug: field.slug,
+    fieldType: field.fieldType,
+    isRequired: !!field.isRequired,
+    isUnique: !!field.isUnique,
+    defaultValue: field.defaultValue || '',
+    options: field.options || ''
+  })
+}
+
+function addNewField() {
+  if (!meta.selectedEntity.value) return
+  const slug = `field_${Date.now()}`
+  meta.createField(meta.selectedEntity.value.id, {
+    name: 'New Field', slug, fieldType: 'text',
+    sortOrder: meta.selectedEntity.value.fields.length + 1
+  }).then(field => {
+    selectField(field)
+    toast.add({ title: 'Field added', color: 'success' })
+  })
+}
+
+async function saveField() {
+  if (!meta.selectedField.value) return
+  await meta.updateField(meta.selectedField.value.id, { ...fieldForm })
+  toast.add({ title: 'Field updated', color: 'success' })
+}
+
+async function confirmDeleteField() {
+  if (!meta.selectedField.value) return
+  const id = meta.selectedField.value.id
+  meta.selectedField.value = null
+  await meta.deleteField(id)
+  showDeleteFieldConfirm.value = false
+  toast.add({ title: 'Field deleted', color: 'success' })
+}
+
+async function onFieldBlur() {
+  if (meta.selectedField.value) await saveField()
+}
+
+const fieldFormWatcher = watch(
+  () => [fieldForm.name, fieldForm.slug, fieldForm.fieldType, fieldForm.isRequired, fieldForm.isUnique, fieldForm.defaultValue],
+  () => { if (meta.selectedField.value) debouncedSaveField() }
+)
+
+const debouncedSaveField = useDebounceFn(async () => {
+  if (!meta.selectedField.value) return
+  await meta.updateField(meta.selectedField.value.id, {
+    name: fieldForm.name, slug: fieldForm.slug, fieldType: fieldForm.fieldType,
+    isRequired: fieldForm.isRequired, isUnique: fieldForm.isUnique,
+    defaultValue: fieldForm.defaultValue || null, options: fieldForm.options || null
+  })
+}, 800)
+
+onUnmounted(() => fieldFormWatcher())
+
+// ── Sync / Deploy ──────────────────────────────────────────────────────
+async function syncCurrentEntity() {
+  if (!meta.selectedEntity.value) return
+  await meta.syncSchema(meta.selectedEntity.value.slug)
+  toast.add({ title: 'Schema synced', color: 'success' })
+}
+
+async function deployAll() {
+  toast.add({ title: 'Deploying...', color: 'info' })
+  for (const entity of meta.entities.value) {
+    await meta.syncSchema(entity.slug)
+  }
+  toast.add({ title: 'Deployment complete', color: 'success' })
+}
+
+// ── Relation methods ────────────────────────────────────────────────────
+function openAddRelation() {
+  Object.assign(relationForm, {
+    name: '', slug: '', relationType: '1:N',
+    entityId: meta.selectedEntity.value?.id || 0, relatedEntityId: 0,
+    foreignKey: '', pivotTable: '', isRequired: false, onDelete: 'SET NULL'
+  })
+  editingRelation.value = null
+  showAddRelationModal.value = true
+}
+
+function editRelation(rel: any) {
+  editingRelation.value = { ...rel }
+  Object.assign(relationForm, {
+    name: rel.name, slug: rel.slug, relationType: rel.relationType,
+    entityId: rel.entityId, relatedEntityId: rel.relatedEntityId,
+    foreignKey: rel.foreignKey || '', pivotTable: rel.pivotTable || '',
+    isRequired: !!rel.isRequired, onDelete: rel.onDelete || 'SET NULL'
+  })
+  showAddRelationModal.value = true
+}
+
+async function saveRelation() {
+  if (!relationForm.name || !relationForm.slug || !relationForm.relationType) return
+  const payload = {
+    name: relationForm.name, slug: relationForm.slug,
+    relationType: relationForm.relationType as '1:1' | '1:N' | 'N:N' | 'self',
+    entityId: relationForm.entityId, relatedEntityId: relationForm.relatedEntityId,
+    foreignKey: relationForm.foreignKey || null, pivotTable: relationForm.pivotTable || null,
+    isRequired: relationForm.isRequired, onDelete: relationForm.onDelete
+  }
+  if (editingRelation.value) {
+    await meta.updateRelation(editingRelation.value.id, payload)
+    toast.add({ title: 'Relation updated', color: 'success' })
+  } else {
+    await meta.createRelation(payload)
+    toast.add({ title: 'Relation created', color: 'success' })
+  }
+  showAddRelationModal.value = false
+  editingRelation.value = null
+  if (meta.selectedEntity.value) meta.loadEntity(meta.selectedEntity.value.id)
+}
+
+async function confirmDeleteRelation(id: number) {
+  await meta.deleteRelation(id)
+  showDeleteRelationConfirm.value = false
+  toast.add({ title: 'Relation deleted', color: 'success' })
+  if (meta.selectedEntity.value) meta.loadEntity(meta.selectedEntity.value.id)
+}
+
+// ── Slug auto-generation ────────────────────────────────────────────────
+function generateSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+}
+
+watch(() => entityForm.name, (val) => {
+  if (val && !entityForm.slug) entityForm.slug = generateSlug(val)
+  if (val && !entityForm.tableName) entityForm.tableName = `_${generateSlug(val)}`
+})
+watch(() => fieldForm.name, (val) => {
+  if (val && !fieldForm.slug) fieldForm.slug = generateSlug(val)
+})
+watch(() => relationForm.name, (val) => {
+  if (val && !relationForm.slug) relationForm.slug = generateSlug(val)
+})
+
+function entityIcon(entity: any): string {
+  return entity.icon || 'i-lucide-table-2'
+}
+
+function fieldTypeBadgeColor(type: string) {
+  const map: Record<string, string> = {
+    number: 'info', boolean: 'warning', uuid: 'success', text: 'neutral', date: 'secondary'
+  }
+  return map[type] || 'neutral'
+}
 </script>
 
 <template>
-  <UDashboardPanel id="metadata">
+  <UDashboardPanel id="metadata" :ui="{ body: 'p-0 sm:p-0' }">
+    <!-- ── Header ── -->
     <template #header>
-      <UDashboardNavbar title="Metadata">
+      <UDashboardNavbar
+        :title="activeTab === 'entities' ? 'Metadata' : activeTab === 'relations' ? 'Relations' : 'Diagrams'">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
+        <template #center>
+          <UTabs v-model="activeTab" :items="tabs" color="neutral" variant="link" />
+        </template>
         <template #right>
-          <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              @click="isNotificationsSlideoverOpen = true"
-            >
-              <UChip color="error" inset>
-                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
-              </UChip>
-            </UButton>
-          </UTooltip>
+          <div class="flex items-center gap-2">
+            <template v-if="activeTab === 'entities'">
+              <UButton v-if="meta.selectedEntity.value" color="neutral" variant="outline" icon="i-lucide-refresh-cw"
+                :loading="meta.saving.value" @click="syncCurrentEntity">
+                Sync Metadata
+              </UButton>
+              <UButton color="primary" icon="i-lucide-cloud-upload" :loading="meta.saving.value" @click="deployAll">
+                Deploy Schema
+              </UButton>
+            </template>
+            <template v-else-if="activeTab === 'relations'">
+              <UButton color="primary" icon="i-lucide-plus" @click="openAddRelation">
+                Add Relation
+              </UButton>
+            </template>
+            <UTooltip text="Notifications" :shortcuts="['N']">
+              <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
+                <UChip color="error" inset>
+                  <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
+                </UChip>
+              </UButton>
+            </UTooltip>
+          </div>
         </template>
       </UDashboardNavbar>
     </template>
+
+    <!-- ── Body ── -->
     <template #body>
-      <UContainer class="py-8">
-        <Placeholder class="h-48" label="Entities & Fields management" />
-      </UContainer>
+
+      <!-- ─── ENTITIES TAB ─── -->
+      <div v-if="activeTab === 'entities'" class="flex h-full overflow-hidden">
+
+        <!-- Left: Entity List -->
+        <div class="w-64 shrink-0 border-r border-(--ui-border) flex flex-col">
+          <!-- Panel header -->
+          <div class="px-4 py-3 border-b border-(--ui-border) flex items-center justify-between">
+            <div class="flex items-center gap-2 text-sm font-semibold">
+              <UIcon name="i-lucide-database" class="size-4 text-(--ui-text-muted)" />
+              Entites
+            </div>
+            <UButton color="primary" variant="ghost" size="xs" icon="i-lucide-plus" square @click="openAddEntity" />
+          </div>
+          <!-- Search -->
+          <div class="px-3 py-2 border-b border-(--ui-border)">
+            <UInput placeholder="Filter..." size="sm" icon="i-lucide-search" class="w-full" />
+          </div>
+          <!-- Entity list -->
+          <div class="flex-1 overflow-y-auto divide-y divide-(--ui-border)">
+            <button v-for="entity in meta.entities.value" :key="entity.id"
+              class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left transition-colors hover:bg-(--ui-bg-elevated)"
+              :class="meta.selectedEntity.value?.id === entity.id
+                ? 'text-(--ui-primary) font-medium bg-(--ui-primary)/8'
+                : 'text-(--ui-text)'" @click="meta.selectEntity(entity)">
+              <UIcon :name="entityIcon(entity)" class="size-4 shrink-0"
+                :class="meta.selectedEntity.value?.id === entity.id ? 'text-(--ui-primary)' : 'text-(--ui-text-muted)'" />
+              <span class="truncate">{{ entity.name }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Center: Entity Details -->
+        <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+          <template v-if="meta.selectedEntity.value">
+            <!-- Entity header bar -->
+            <div class="px-6 py-3 border-b border-(--ui-border) shrink-0 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <UIcon :name="entityIcon(meta.selectedEntity.value)" class="size-5 text-(--ui-primary)" />
+                <h2 class="text-base font-semibold">{{ meta.selectedEntity.value.name }}</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <UButton color="neutral" variant="outline" size="sm" icon="i-lucide-download"
+                  @click="syncCurrentEntity">
+                  Export Metadata
+                </UButton>
+                <UButton color="error" variant="ghost" size="sm" icon="i-lucide-trash-2" square
+                  @click="showDeleteEntityConfirm = true" />
+              </div>
+            </div>
+
+            <!-- Scrollable content -->
+            <div class="flex-1 overflow-y-auto">
+              <!-- Stats -->
+              <div class="grid grid-cols-4 gap-3 px-6 pt-5 pb-3">
+                <div
+                  v-for="(val, key) in { 'Total Field': stats.total, 'Nullable': stats.nullable, 'Required': stats.required, 'Uniqued': stats.uniqued }"
+                  :key="key" class="rounded-xl border border-(--ui-border) bg-(--ui-bg-elevated)/40 px-4 py-3">
+                  <div class="text-2xl font-bold">{{ val }}</div>
+                  <div class="text-xs text-(--ui-text-muted) mt-0.5">{{ key }}</div>
+                </div>
+              </div>
+
+              <!-- Fields section -->
+              <div class="px-6 pb-6">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-sm font-semibold">Fields</h3>
+                  <UButton color="primary" size="xs" icon="i-lucide-plus" @click="addNewField">
+                    Add Field
+                  </UButton>
+                </div>
+
+                <div class="rounded-xl border border-(--ui-border) overflow-hidden">
+                  <table class="min-w-full">
+                    <thead>
+                      <tr class="border-b border-(--ui-border) bg-(--ui-bg-elevated)/60">
+                        <th
+                          class="px-4 py-2.5 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider w-12">
+                          PK</th>
+                        <th
+                          class="px-4 py-2.5 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">
+                          Name</th>
+                        <th
+                          class="px-4 py-2.5 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">
+                          Type</th>
+                        <th
+                          class="px-4 py-2.5 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">
+                          Nullable</th>
+                        <th
+                          class="px-4 py-2.5 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">
+                          Default</th>
+                        <th class="px-4 py-2.5 w-10" />
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-(--ui-border)">
+                      <tr v-for="field in meta.selectedEntity.value.fields || []" :key="field.id"
+                        class="cursor-pointer transition-colors hover:bg-(--ui-bg-elevated)/60"
+                        :class="meta.selectedField.value?.id === field.id ? 'bg-(--ui-primary)/8' : ''"
+                        @click="selectField(field)">
+                        <td class="px-4 py-3 text-center">
+                          <UIcon v-if="field.slug === 'id'" name="i-lucide-key-round" class="size-4 text-yellow-400" />
+                        </td>
+                        <td class="px-4 py-3 text-sm font-medium">{{ field.name }}</td>
+                        <td class="px-4 py-3">
+                          <UBadge variant="subtle" :color="fieldTypeBadgeColor(field.fieldType)" size="xs"
+                            class="uppercase">
+                            {{ field.fieldType }}
+                          </UBadge>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                          <UIcon :name="field.isRequired ? 'i-lucide-x' : 'i-lucide-check'"
+                            :class="field.isRequired ? 'size-4 text-(--ui-text-muted)' : 'size-4 text-green-500'" />
+                        </td>
+                        <td class="px-4 py-3 text-sm text-(--ui-text-muted) font-mono max-w-40 truncate">
+                          {{ field.defaultValue || 'null' }}
+                        </td>
+                        <td class="px-4 py-3">
+                          <UDropdownMenu :items="[[
+                            { label: 'Edit', icon: 'i-lucide-pencil', onSelect: () => selectField(field) },
+                            { label: 'Delete', icon: 'i-lucide-trash-2', color: 'error', onSelect: () => { meta.selectedField.value = field; showDeleteFieldConfirm = true } }
+                          ]]">
+                            <UButton icon="i-lucide-ellipsis-vertical" variant="ghost" size="xs" square
+                              color="neutral" />
+                          </UDropdownMenu>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div v-if="!meta.selectedEntity.value.fields?.length"
+                    class="py-10 text-center text-sm text-(--ui-text-muted)">
+                    No fields yet. Click "+ Add Field" to get started.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Empty state -->
+          <div v-else class="flex-1 flex items-center justify-center">
+            <div class="text-center">
+              <UIcon name="i-lucide-database" class="size-12 mx-auto mb-4 text-(--ui-text-muted)" />
+              <h3 class="text-base font-semibold mb-1">Select an Entity</h3>
+              <p class="text-sm text-(--ui-text-muted) mb-4">Choose from the left panel or create a new one</p>
+              <UButton color="primary" icon="i-lucide-plus" @click="openAddEntity">
+                Create Entity
+              </UButton>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Field Properties -->
+        <Transition name="slide-right">
+          <div v-if="meta.selectedField.value"
+            class="w-72 shrink-0 border-l border-(--ui-border) flex flex-col overflow-hidden">
+            <!-- Panel header -->
+            <div class="px-4 py-3 border-b border-(--ui-border) shrink-0 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-settings-2" class="size-4 text-(--ui-text-muted)" />
+                <span class="text-sm font-semibold">Field Properties</span>
+              </div>
+              <UBadge variant="subtle" color="neutral" size="xs" class="font-mono">
+                {{ meta.selectedField.value.slug?.toUpperCase() }}
+              </UBadge>
+            </div>
+
+            <!-- Scrollable form -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+              <UFormField label="Field Name">
+                <UInput v-model="fieldForm.name" class="w-full" @blur="onFieldBlur" />
+              </UFormField>
+
+              <UFormField label="Data Type">
+                <USelect v-model="fieldForm.fieldType" :items="meta.fieldTypeOptions" class="w-full"
+                  @change="onFieldBlur" />
+              </UFormField>
+
+              <USeparator />
+
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Primary Key</span>
+                  <USwitch :model-value="meta.selectedField.value.slug === 'id'" :disabled="true" color="primary" />
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Is Nullable</span>
+                  <USwitch :model-value="!fieldForm.isRequired" color="primary"
+                    @update:model-value="(v) => { fieldForm.isRequired = !v; onFieldBlur() }" />
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Is Unique</span>
+                  <USwitch v-model="fieldForm.isUnique" color="primary" @change="onFieldBlur" />
+                </div>
+              </div>
+
+              <USeparator />
+
+              <UFormField label="Default Value">
+                <USelect v-model="fieldForm.defaultValue"
+                  :items="['null', 'now()', 'gen_random_uuid()', 'true', 'false', '0', '']" class="w-full"
+                  @change="onFieldBlur" />
+              </UFormField>
+
+              <UFormField label="Description (Optional)">
+                <UTextarea v-model="fieldForm.options" placeholder="Enter description for API docs..." class="w-full"
+                  :rows="3" @blur="onFieldBlur" />
+              </UFormField>
+            </div>
+
+            <!-- Footer action -->
+            <div class="p-4 border-t border-(--ui-border) shrink-0">
+              <UButton color="error" variant="soft" class="w-full" icon="i-lucide-trash-2"
+                @click="showDeleteFieldConfirm = true">
+                Delete Field
+              </UButton>
+            </div>
+          </div>
+        </Transition>
+      </div>
+
+      <!-- ─── RELATIONS TAB ─── -->
+      <div v-else-if="activeTab === 'relations'" class="p-6">
+        <div class="rounded-xl border border-(--ui-border) overflow-hidden">
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b border-(--ui-border) bg-(--ui-bg-elevated)/60">
+                <th class="px-4 py-3 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">
+                  Name
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">
+                  From
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">To
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">
+                  Type
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wider">FK
+                  /
+                  Pivot</th>
+                <th class="px-4 py-3 w-20" />
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-(--ui-border)">
+              <tr v-for="rel in meta.relations.value" :key="rel.id"
+                class="hover:bg-(--ui-bg-elevated)/40 transition-colors">
+                <td class="px-4 py-3 text-sm font-medium">{{ rel.name }}</td>
+                <td class="px-4 py-3 text-sm">{{ rel.entityName || `Entity #${rel.entityId}` }}</td>
+                <td class="px-4 py-3 text-sm">{{ rel.relatedEntityName || `Entity #${rel.relatedEntityId}` }}</td>
+                <td class="px-4 py-3">
+                  <UBadge variant="subtle" color="info" size="xs">{{ rel.relationType }}</UBadge>
+                </td>
+                <td class="px-4 py-3 text-sm text-(--ui-text-muted) font-mono">
+                  {{ rel.foreignKey || rel.pivotTable || '—' }}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-1">
+                    <UButton icon="i-lucide-pencil" variant="ghost" size="xs" square color="neutral"
+                      @click="editRelation(rel)" />
+                    <UButton icon="i-lucide-trash-2" variant="ghost" size="xs" square color="error"
+                      @click="() => { editingRelation = rel; showDeleteRelationConfirm = true }" />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-if="!meta.relations.value.length" class="py-10 text-center text-sm text-(--ui-text-muted)">
+            No relations defined yet. Click "+ Add Relation" to create one.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── DIAGRAMS TAB ─── -->
+      <div v-else-if="activeTab === 'diagrams'" class="flex-1 flex items-center justify-center h-full">
+        <div class="text-center">
+          <UIcon name="i-lucide-git-branch" class="size-12 mx-auto mb-4 text-(--ui-text-muted)" />
+          <h3 class="text-base font-semibold mb-1">Entity Relationship Diagram</h3>
+          <p class="text-sm text-(--ui-text-muted)">Visual diagram coming soon</p>
+        </div>
+      </div>
+
     </template>
   </UDashboardPanel>
+
+  <!-- ─── Add Entity Modal ─── -->
+  <UModal v-model:open="showAddEntityModal" title="Create New Entity">
+    <template #body>
+      <div class="space-y-4">
+        <UFormField label="Name">
+          <UInput v-model="entityForm.name" class="w-full" placeholder="e.g. Customer" autofocus />
+        </UFormField>
+        <UFormField label="Slug">
+          <UInput v-model="entityForm.slug" class="w-full" placeholder="e.g. customer" />
+        </UFormField>
+        <UFormField label="Table Name">
+          <UInput v-model="entityForm.tableName" class="w-full" placeholder="e.g. _customers" />
+        </UFormField>
+        <UFormField label="Description (Optional)">
+          <UTextarea v-model="entityForm.description" class="w-full" placeholder="Brief description of this entity" />
+        </UFormField>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton color="neutral" variant="ghost" @click="showAddEntityModal = false">Cancel</UButton>
+        <UButton color="primary" :loading="meta.saving.value" @click="saveEntity">Create</UButton>
+      </div>
+    </template>
+  </UModal>
+
+  <!-- ─── Delete Entity Confirm ─── -->
+  <UModal v-model:open="showDeleteEntityConfirm" title="Delete Entity">
+    <template #body>
+      <p class="text-sm text-(--ui-text-muted)">
+        Are you sure you want to delete <strong class="text-(--ui-text)">{{ meta.selectedEntity.value?.name }}</strong>?
+        This will drop the table and remove all associated fields and relations. This action cannot be undone.
+      </p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton color="neutral" variant="ghost" @click="showDeleteEntityConfirm = false">Cancel</UButton>
+        <UButton color="error" :loading="meta.saving.value" @click="confirmDeleteEntity">Delete</UButton>
+      </div>
+    </template>
+  </UModal>
+
+  <!-- ─── Delete Field Confirm ─── -->
+  <UModal v-model:open="showDeleteFieldConfirm" title="Delete Field">
+    <template #body>
+      <p class="text-sm text-(--ui-text-muted)">
+        Are you sure you want to delete <strong class="text-(--ui-text)">{{ meta.selectedField.value?.name }}</strong>?
+        This will remove the column from the database table.
+      </p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton color="neutral" variant="ghost" @click="showDeleteFieldConfirm = false">Cancel</UButton>
+        <UButton color="error" :loading="meta.saving.value" @click="confirmDeleteField">Delete</UButton>
+      </div>
+    </template>
+  </UModal>
+
+  <!-- ─── Add / Edit Relation Modal ─── -->
+  <UModal v-model:open="showAddRelationModal" :title="editingRelation ? 'Edit Relation' : 'Add Relation'">
+    <template #body>
+      <div class="space-y-4">
+        <UFormField label="Name">
+          <UInput v-model="relationForm.name" class="w-full" placeholder="e.g. Order Items" autofocus />
+        </UFormField>
+        <UFormField label="Slug">
+          <UInput v-model="relationForm.slug" class="w-full" placeholder="e.g. order_items" />
+        </UFormField>
+        <UFormField label="Relation Type">
+          <USelect v-model="relationForm.relationType" :items="meta.relationTypeOptions" class="w-full" />
+        </UFormField>
+        <div class="grid grid-cols-2 gap-3">
+          <UFormField label="Source Entity">
+            <USelect v-model="relationForm.entityId"
+              :items="meta.entities.value.map(e => ({ label: e.name, value: e.id }))" class="w-full" />
+          </UFormField>
+          <UFormField label="Target Entity">
+            <USelect v-model="relationForm.relatedEntityId"
+              :items="meta.entities.value.map(e => ({ label: e.name, value: e.id }))" class="w-full" />
+          </UFormField>
+        </div>
+        <UFormField label="Foreign Key (optional)">
+          <UInput v-model="relationForm.foreignKey" class="w-full" placeholder="e.g. order_id" />
+        </UFormField>
+        <UFormField label="Pivot Table (for N:N)">
+          <UInput v-model="relationForm.pivotTable" class="w-full" placeholder="e.g. orders_products" />
+        </UFormField>
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium">Is Required</span>
+          <USwitch v-model="relationForm.isRequired" color="primary" />
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton color="neutral" variant="ghost" @click="showAddRelationModal = false; editingRelation = null">Cancel
+        </UButton>
+        <UButton color="primary" :loading="meta.saving.value" @click="saveRelation">
+          {{ editingRelation ? 'Update' : 'Create' }}
+        </UButton>
+      </div>
+    </template>
+  </UModal>
+
+  <!-- ─── Delete Relation Confirm ─── -->
+  <UModal v-model:open="showDeleteRelationConfirm" title="Delete Relation">
+    <template #body>
+      <p class="text-sm text-(--ui-text-muted)">
+        Are you sure you want to delete <strong class="text-(--ui-text)">{{ editingRelation?.name }}</strong>?
+      </p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton color="neutral" variant="ghost" @click="showDeleteRelationConfirm = false">Cancel</UButton>
+        <UButton color="error" @click="confirmDeleteRelation(editingRelation?.id)">Delete</UButton>
+      </div>
+    </template>
+  </UModal>
 </template>
+
+<style scoped>
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.2s ease;
+}
+
+.slide-right-enter-from,
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(16px);
+}
+</style>
