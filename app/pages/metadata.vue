@@ -415,9 +415,8 @@ function fieldTypeBadgeColor(type: string) {
         </div>
 
         <!-- Right: Field Properties -->
-        <Transition name="slide-right">
-          <div v-if="meta.selectedField.value"
-            class="w-72 shrink-0 border-l border-(--ui-border) flex flex-col overflow-hidden">
+        <div v-if="meta.selectedField.value" :key="meta.selectedField.value.id"
+          class="w-72 shrink-0 border-l border-(--ui-border) flex flex-col overflow-hidden">
             <!-- Panel header -->
             <div class="px-4 py-3 border-b border-(--ui-border) shrink-0 flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -480,7 +479,6 @@ function fieldTypeBadgeColor(type: string) {
               </UButton>
             </div>
           </div>
-        </Transition>
       </div>
 
       <!-- ─── RELATIONS TAB ─── -->

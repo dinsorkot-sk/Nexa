@@ -35,6 +35,9 @@ export function useMetadata() {
   // ── Select an entity ───────────────────────────────────────────────────
   function selectEntity(entity: Entity) {
     selectedField.value = null
+    if (selectedEntity.value && selectedEntity.value.id !== entity.id) {
+      selectedEntity.value = null as unknown as EntityWithFields
+    }
     loadEntity(entity.id)
   }
 
