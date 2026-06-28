@@ -13,7 +13,7 @@ const { data: activities } = await useAsyncData('platform-activity', () => Promi
   { icon: 'i-lucide-link', label: 'Relation Added', description: '1:N relation between Posts and Categories', time: '1 hour ago', color: 'info' },
   { icon: 'i-lucide-trash-2', label: 'Entity Deleted', description: 'Tags entity was removed', time: '3 hours ago', color: 'error' },
   { icon: 'i-lucide-refresh-cw', label: 'Migration Applied', description: 'Schema migration v2 applied successfully', time: '5 hours ago', color: 'warning' },
-  { icon: 'i-lucide-user-plus', label: 'Module Installed', description: 'Forum module v1.2.0 installed', time: '1 day ago', color: 'success' },
+  { icon: 'i-lucide-user-plus', label: 'Module Installed', description: 'Forum module v1.2.0 installed', time: '1 day ago', color: 'success' }
 ] as ActivityItem[]), { default: () => [] })
 </script>
 
@@ -35,8 +35,12 @@ const { data: activities } = await useAsyncData('platform-activity', () => Promi
           <UIcon :name="item.icon" class="size-3.5" />
         </UBadge>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium text-highlighted truncate">{{ item.label }}</p>
-          <p class="text-xs text-muted truncate">{{ item.description }}</p>
+          <p class="text-sm font-medium text-highlighted truncate">
+            {{ item.label }}
+          </p>
+          <p class="text-xs text-muted truncate">
+            {{ item.description }}
+          </p>
         </div>
         <span class="text-xs text-muted shrink-0 mt-0.5">{{ item.time }}</span>
       </div>

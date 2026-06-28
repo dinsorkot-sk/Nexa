@@ -70,8 +70,6 @@ const groups = computed(() => [{
   label: 'Go to',
   items: links.flat()
 }])
-
-
 </script>
 
 <template>

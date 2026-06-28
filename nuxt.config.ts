@@ -20,11 +20,11 @@ export default defineNuxtConfig({
     }
   },
 
+  compatibilityDate: '2024-07-11',
+
   hub: {
     db: 'sqlite'
   },
-
-  compatibilityDate: '2024-07-11',
 
   eslint: {
     config: {

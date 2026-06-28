@@ -11,7 +11,7 @@ interface QueryOptions {
 }
 
 let _rels: RelationDef[] | null = null
-let _relMap: Map<string, RelationDef> = new Map()
+const _relMap: Map<string, RelationDef> = new Map()
 
 async function loadRelations(drizzle: any) {
   if (_rels) return
@@ -32,7 +32,7 @@ async function loadRelations(drizzle: any) {
   for (const r of rels) _relMap.set(r.slug, r)
 }
 
-function raw(db: any): { all<T>(q: string): Promise<T[]>; get<T>(q: string): Promise<T | undefined>; run(q: string): Promise<any> } {
+function raw(db: any): { all<T>(q: string): Promise<T[]>, get<T>(q: string): Promise<T | undefined>, run(q: string): Promise<any> } {
   return db
 }
 
@@ -41,7 +41,7 @@ export async function findMany(
   tableName: string,
   entitySlug: string,
   options: QueryOptions
-): Promise<{ data: any[]; total: number }> {
+): Promise<{ data: any[], total: number }> {
   await loadRelations(db)
 
   const includes = options.include || []
@@ -87,7 +87,7 @@ export async function findMany(
     const clauses = filterKeys.map((k) => {
       const val = filter[k]
       if (val === undefined) return ''
-      return `${tableName}.${k} = '${val.replace(/'/g, "''")}'`
+      return `${tableName}.${k} = '${val.replace(/'/g, '\'\'')}'`
     }).filter(Boolean)
     wherePart = ' WHERE ' + clauses.join(' AND ')
   }
@@ -129,13 +129,13 @@ export async function createOne(
   tableName: string,
   data: Record<string, any>
 ): Promise<any> {
-  const keys = Object.keys(data).filter((k) => k !== 'include')
+  const keys = Object.keys(data).filter(k => k !== 'include')
   const cols = keys.join(', ')
   const vals = keys.map((k) => {
     const v = data[k]
     if (v === undefined || v === null) return 'NULL'
-    if (typeof v === 'object') return `'${JSON.stringify(v).replace(/'/g, "''")}'`
-    return `'${String(v).replace(/'/g, "''")}'`
+    if (typeof v === 'object') return `'${JSON.stringify(v).replace(/'/g, '\'\'')}'`
+    return `'${String(v).replace(/'/g, '\'\'')}'`
   }).join(', ')
 
   const sql = `INSERT INTO ${tableName} (${cols}) VALUES (${vals}) RETURNING *`
@@ -149,12 +149,12 @@ export async function updateOne(
   data: Record<string, any>
 ): Promise<any> {
   const sets = Object.keys(data)
-    .filter((k) => k !== 'id' && k !== 'include')
+    .filter(k => k !== 'id' && k !== 'include')
     .map((k) => {
       const v = data[k]
       if (v === undefined || v === null) return `${k} = NULL`
-      if (typeof v === 'object') return `${k} = '${JSON.stringify(v).replace(/'/g, "''")}'`
-      return `${k} = '${String(v).replace(/'/g, "''")}'`
+      if (typeof v === 'object') return `${k} = '${JSON.stringify(v).replace(/'/g, '\'\'')}'`
+      return `${k} = '${String(v).replace(/'/g, '\'\'')}'`
     })
     .join(', ')
 
@@ -169,7 +169,7 @@ export async function deleteOne(
 ): Promise<boolean> {
   await loadRelations(db)
   const fkRels = (_rels || []).filter(
-    (r) => (r.relationType === '1:N' || r.relationType === '1:1') && r.foreignKey
+    r => (r.relationType === '1:N' || r.relationType === '1:1') && r.foreignKey
   )
   for (const rel of fkRels) {
     const fk = rel.foreignKey || rel.slug + '_id'

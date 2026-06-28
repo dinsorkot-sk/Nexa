@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   const limit = Math.min(parseInt(query.limit as string) || 20, 100)
 
   const opts = {
-    include: include.map((i) => i.relation),
+    include: include.map(i => i.relation),
     filter,
     sort,
     page,

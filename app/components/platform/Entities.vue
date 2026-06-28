@@ -19,7 +19,7 @@ const { data } = await useAsyncData('platform-entities', () => Promise.resolve([
   { name: 'Permissions', slug: 'permissions', module: 'Authorization', fields: 5, relations: 2, status: 'active' },
   { name: 'Posts', slug: 'posts', module: 'Content', fields: 9, relations: 5, status: 'active' },
   { name: 'Categories', slug: 'categories', module: 'Content', fields: 4, relations: 2, status: 'draft' },
-  { name: 'Reports', slug: 'reports', module: 'Report', fields: 8, relations: 3, status: 'draft' },
+  { name: 'Reports', slug: 'reports', module: 'Report', fields: 8, relations: 3, status: 'draft' }
 ] as EntityRow[]), { default: () => [] })
 
 const columns: TableColumn<EntityRow>[] = [
@@ -41,12 +41,16 @@ const columns: TableColumn<EntityRow>[] = [
 
 <template>
   <UCard :ui="{ body: 'p-0!' }">
-    <UTable :data="data" :columns="columns" :ui="{
-      base: 'table-fixed border-separate border-spacing-0',
-      thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-      tbody: '[&>tr]:last:[&>td]:border-b-0',
-      th: 'first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-      td: 'border-b border-default'
-    }" />
+    <UTable
+      :data="data"
+      :columns="columns"
+      :ui="{
+        base: 'table-fixed border-separate border-spacing-0',
+        thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+        tbody: '[&>tr]:last:[&>td]:border-b-0',
+        th: 'first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+        td: 'border-b border-default'
+      }"
+    />
   </UCard>
 </template>

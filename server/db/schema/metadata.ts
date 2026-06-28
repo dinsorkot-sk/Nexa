@@ -7,8 +7,8 @@ export const modules = sqliteTable('_modules', {
   description: text('description'),
   icon: text('icon'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  createdAt: text('created_at').default("datetime('now')"),
-  updatedAt: text('updated_at').default("datetime('now')")
+  createdAt: text('created_at').default('datetime(\'now\')'),
+  updatedAt: text('updated_at').default('datetime(\'now\')')
 })
 
 export const entities = sqliteTable('_entities', {
@@ -20,8 +20,8 @@ export const entities = sqliteTable('_entities', {
   icon: text('icon'),
   description: text('description'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  createdAt: text('created_at').default("datetime('now')"),
-  updatedAt: text('updated_at').default("datetime('now')")
+  createdAt: text('created_at').default('datetime(\'now\')'),
+  updatedAt: text('updated_at').default('datetime(\'now\')')
 })
 
 export const fields = sqliteTable('_fields', {

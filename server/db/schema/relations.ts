@@ -12,5 +12,5 @@ export const relations = sqliteTable('_relations', {
   foreignKey: text('foreign_key'),
   isRequired: integer('is_required', { mode: 'boolean' }).default(false),
   onDelete: text('on_delete').default('SET NULL'),
-  createdAt: text('created_at').default("datetime('now')")
+  createdAt: text('created_at').default('datetime(\'now\')')
 })
