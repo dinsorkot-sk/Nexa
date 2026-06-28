@@ -2,7 +2,7 @@ import { relations as relationsTable } from '../db/schema/relations'
 import { entities } from '../db/schema/metadata'
 import type { RelationDef } from './sync'
 
-interface QueryOptions {
+export interface QueryOptions {
   include?: string[]
   filter?: Record<string, string>
   sort?: string
@@ -10,38 +10,53 @@ interface QueryOptions {
   limit?: number
 }
 
+interface DrizzleDb {
+  select(): {
+    from(table: unknown): {
+      where(condition: unknown): {
+        all(): Promise<Record<string, unknown>[]>
+        get(): Promise<Record<string, unknown> | undefined>
+      }
+      all(): Promise<Record<string, unknown>[]>
+    }
+  }
+  run(sql: string): Promise<{ rows?: unknown[], lastInsertRowid?: bigint }>
+  all<T = Record<string, unknown>>(sql: string): Promise<T[]>
+  get<T = Record<string, unknown>>(sql: string): Promise<T | undefined>
+}
+
 let _rels: RelationDef[] | null = null
 const _relMap: Map<string, RelationDef> = new Map()
 
-async function loadRelations(drizzle: any) {
+async function loadRelations(drizzle: DrizzleDb) {
   if (_rels) return
 
-  const rows: any[] = await drizzle.select().from(relationsTable).all()
-  const ents: any[] = await drizzle.select().from(entities).all()
-  const entMap = new Map(ents.map((e: any) => [e.id, e]))
+  const rows: Record<string, unknown>[] = await drizzle.select().from(relationsTable).all()
+  const ents: Record<string, unknown>[] = await drizzle.select().from(entities).all()
+  const entMap = new Map(ents.map((e: Record<string, unknown>) => [e.id, e]))
 
-  const rels: RelationDef[] = rows.map((r: any) => ({
-    slug: r.slug,
+  const rels: RelationDef[] = rows.map((r: Record<string, unknown>) => ({
+    slug: r.slug as string,
     relationType: r.relationType as RelationDef['relationType'],
-    foreignKey: r.foreignKey,
-    pivotTable: r.pivotTable,
-    relatedTable: entMap.get(r.relatedEntityId)?.tableName ?? '',
-    entitySlug: entMap.get(r.entityId)?.slug ?? ''
+    foreignKey: r.foreignKey as string | null,
+    pivotTable: r.pivotTable as string | null,
+    relatedTable: (entMap.get(r.relatedEntityId as number) as Record<string, unknown>)?.tableName as string ?? '',
+    entitySlug: (entMap.get(r.entityId as number) as Record<string, unknown>)?.slug as string ?? ''
   }))
   _rels = rels
   for (const r of rels) _relMap.set(r.slug, r)
 }
 
-function raw(db: any): { all<T>(q: string): Promise<T[]>, get<T>(q: string): Promise<T | undefined>, run(q: string): Promise<any> } {
+function raw(db: DrizzleDb): { all<T>(q: string): Promise<T[]>, get<T>(q: string): Promise<T | undefined>, run(q: string): Promise<{ rows?: unknown[], lastInsertRowid?: bigint }> } {
   return db
 }
 
 export async function findMany(
-  db: any,
+  db: DrizzleDb,
   tableName: string,
   entitySlug: string,
   options: QueryOptions
-): Promise<{ data: any[], total: number }> {
+): Promise<{ data: Record<string, unknown>[], total: number }> {
   await loadRelations(db)
 
   const includes = options.include || []
@@ -96,7 +111,7 @@ export async function findMany(
   const dataSql = `SELECT ${selectFields} FROM ${tableName}${joinPart}${wherePart} ORDER BY ${tableName}.${sortCol} ${orderDir} LIMIT ${limit} OFFSET ${offset}`
 
   const countResult = await raw(db).all<{ total: number }>(countSql)
-  const dataResult = await raw(db).all<any>(dataSql)
+  const dataResult = await raw(db).all<Record<string, unknown>>(dataSql)
 
   const total = countResult.length > 0 ? Number(countResult[0]?.total ?? 0) : 0
   let data = dataResult || []
@@ -109,12 +124,12 @@ export async function findMany(
 }
 
 export async function findOne(
-  db: any,
+  db: DrizzleDb,
   tableName: string,
   entitySlug: string,
   id: number,
   options: QueryOptions
-): Promise<any> {
+): Promise<Record<string, unknown> | null> {
   const result = await findMany(db, tableName, entitySlug, {
     ...options,
     filter: { ...options.filter, id: String(id) },
@@ -125,10 +140,10 @@ export async function findOne(
 }
 
 export async function createOne(
-  db: any,
+  db: DrizzleDb,
   tableName: string,
-  data: Record<string, any>
-): Promise<any> {
+  data: Record<string, unknown>
+): Promise<Record<string, unknown> | undefined> {
   const keys = Object.keys(data).filter(k => k !== 'include')
   const cols = keys.join(', ')
   const vals = keys.map((k) => {
@@ -139,15 +154,15 @@ export async function createOne(
   }).join(', ')
 
   const sql = `INSERT INTO ${tableName} (${cols}) VALUES (${vals}) RETURNING *`
-  return raw(db).get<any>(sql)
+  return raw(db).get<Record<string, unknown>>(sql)
 }
 
 export async function updateOne(
-  db: any,
+  db: DrizzleDb,
   tableName: string,
   id: number,
-  data: Record<string, any>
-): Promise<any> {
+  data: Record<string, unknown>
+): Promise<Record<string, unknown> | undefined> {
   const sets = Object.keys(data)
     .filter(k => k !== 'id' && k !== 'include')
     .map((k) => {
@@ -159,11 +174,11 @@ export async function updateOne(
     .join(', ')
 
   const sql = `UPDATE ${tableName} SET ${sets}, updated_at = datetime('now') WHERE id = ${id} RETURNING *`
-  return raw(db).get<any>(sql)
+  return raw(db).get<Record<string, unknown>>(sql)
 }
 
 export async function deleteOne(
-  db: any,
+  db: DrizzleDb,
   tableName: string,
   id: number
 ): Promise<boolean> {
@@ -179,10 +194,10 @@ export async function deleteOne(
   return true
 }
 
-function nestRelations(rows: any[], tableName: string, includes: string[]): any[] {
-  const grouped: Record<number, any> = {}
+function nestRelations(rows: Record<string, unknown>[], tableName: string, includes: string[]): Record<string, unknown>[] {
+  const grouped: Record<number, Record<string, unknown>> = {}
   for (const row of rows) {
-    const id = row.id
+    const id = row.id as number
     if (!grouped[id]) {
       grouped[id] = { ...row }
       for (const inc of includes) {
@@ -194,7 +209,7 @@ function nestRelations(rows: any[], tableName: string, includes: string[]): any[
     for (const inc of includes) {
       const rel = _relMap.get(inc)
       if (!rel) continue
-      const relRow: Record<string, any> = {}
+      const relRow: Record<string, unknown> = {}
       let hasData = false
       for (const key of Object.keys(row)) {
         if (key.startsWith(`_rel_${inc}_`)) {
@@ -204,8 +219,9 @@ function nestRelations(rows: any[], tableName: string, includes: string[]): any[
         }
       }
       if (hasData && rel.relationType === '1:N') {
-        if (!grouped[id][inc].some((r: any) => r.id === relRow.id)) {
-          grouped[id][inc].push(relRow)
+        const arr = grouped[id][inc] as Record<string, unknown>[]
+        if (!arr.some((r: Record<string, unknown>) => r.id === relRow.id)) {
+          grouped[id][inc] = [...arr, relRow]
         }
       } else if (hasData) {
         grouped[id][inc] = relRow

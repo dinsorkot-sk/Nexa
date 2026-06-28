@@ -2,6 +2,11 @@ import { eq } from 'drizzle-orm'
 import { db, schema } from '@nuxthub/db'
 import { findMany, findOne, createOne, updateOne, deleteOne } from '../../engine/query'
 import { parseInclude } from '../../engine/include'
+import type { QueryOptions } from '../../engine/query'
+import type { InferSelectModel } from 'drizzle-orm'
+import type { H3Event } from 'h3'
+
+type EntityRow = InferSelectModel<typeof schema.entities>
 
 export default defineEventHandler(async (event) => {
   const method = event.method
@@ -42,11 +47,11 @@ export default defineEventHandler(async (event) => {
 })
 
 async function handleById(
-  event: any,
-  _db: any,
-  entity: any,
+  event: H3Event,
+  _db: typeof db,
+  entity: EntityRow,
   id: number,
-  opts: any
+  opts: QueryOptions
 ) {
   const method = event.method
   switch (method) {

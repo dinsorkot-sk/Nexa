@@ -25,7 +25,7 @@ afterAll(() => {
 
 describe('generic refs CRUD', () => {
   it('creates a ref', async () => {
-    const r1 = await db.run(
+    const _r1 = await db.run(
       `INSERT INTO _generic_references (source_entity, source_id, ref_type) VALUES ('user', 42, 'avatar')`
     )
     const row = (await db.run(`SELECT * FROM _generic_references WHERE id = last_insert_rowid()`)).rows[0]

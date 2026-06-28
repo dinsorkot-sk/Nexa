@@ -4,6 +4,12 @@ import { drizzle } from 'drizzle-orm/libsql'
 import { syncEntity, syncField, dropEntity } from '../../server/engine/sync'
 import { createOne, findMany, findOne, updateOne, deleteOne } from '../../server/engine/query'
 
+interface ArticleRow {
+  id: number
+  title: string
+  views: number
+}
+
 let client: ReturnType<typeof createClient>
 let db: ReturnType<typeof drizzle>
 
@@ -69,11 +75,11 @@ describe('engine CRUD', () => {
   let createdId: number
 
   it('createOne inserts and returns the row', async () => {
-    const row = await createOne(db as never, TABLE, { title: 'Hello', views: 10 })
-    expect(row.title).toBe('Hello')
-    expect(row.views).toBe(10)
-    expect(row.id).toBeGreaterThan(0)
-    createdId = row.id
+    const row = await createOne(db as never, TABLE, { title: 'Hello', views: 10 }) as ArticleRow | undefined
+    expect(row!.title).toBe('Hello')
+    expect(row!.views).toBe(10)
+    expect(row!.id).toBeGreaterThan(0)
+    createdId = row!.id
   })
 
   it('findMany returns with filter', async () => {
@@ -81,7 +87,7 @@ describe('engine CRUD', () => {
       filter: { title: 'Hello' }
     })
     expect(total).toBe(1)
-    expect(data[0].title).toBe('Hello')
+    expect((data[0] as unknown as ArticleRow).title).toBe('Hello')
   })
 
   it('findMany returns with pagination', async () => {
@@ -94,16 +100,16 @@ describe('engine CRUD', () => {
   })
 
   it('findOne returns a single row', async () => {
-    const row = await findOne(db as never, TABLE, ENTITY_SLUG, createdId, {})
+    const row = await findOne(db as never, TABLE, ENTITY_SLUG, createdId, {}) as ArticleRow | null
     expect(row).not.toBeNull()
-    expect(row.title).toBe('Hello')
+    expect(row!.title).toBe('Hello')
   })
 
   it('updateOne modifies and returns the updated row', async () => {
-    const updated = await updateOne(db as never, TABLE, createdId, { title: 'World' })
-    expect(updated.title).toBe('World')
-    const row = await findOne(db as never, TABLE, ENTITY_SLUG, createdId, {})
-    expect(row.title).toBe('World')
+    const updated = await updateOne(db as never, TABLE, createdId, { title: 'World' }) as ArticleRow | undefined
+    expect(updated!.title).toBe('World')
+    const row = await findOne(db as never, TABLE, ENTITY_SLUG, createdId, {}) as ArticleRow | null
+    expect(row!.title).toBe('World')
   })
 
   it('deleteOne removes the row', async () => {
@@ -121,7 +127,7 @@ describe('engine CRUD', () => {
       sort: '-views',
       limit: 2
     })
-    expect(data[0].title).toBe('C')
-    expect(data[1].title).toBe('B')
+    expect((data[0] as unknown as ArticleRow).title).toBe('C')
+    expect((data[1] as unknown as ArticleRow).title).toBe('B')
   })
 })

@@ -31,7 +31,7 @@ const typeMap: Record<string, string> = {
   json: 'TEXT'
 }
 
-export async function syncEntity(db: { run: (sql: string) => Promise<any> }, entity: EntityDef) {
+export async function syncEntity(db: { run: (sql: string) => Promise<unknown> }, entity: EntityDef) {
   await db.run(`
     CREATE TABLE IF NOT EXISTS ${entity.tableName} (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +41,7 @@ export async function syncEntity(db: { run: (sql: string) => Promise<any> }, ent
   `)
 }
 
-export async function syncField(db: { run: (sql: string) => Promise<any> }, entity: EntityDef, field: FieldDef) {
+export async function syncField(db: { run: (sql: string) => Promise<unknown> }, entity: EntityDef, field: FieldDef) {
   const sqlType = typeMap[field.fieldType] || 'TEXT'
   const nullable = field.isRequired ? 'NOT NULL' : ''
   const unique = field.isUnique ? 'UNIQUE' : ''
@@ -50,7 +50,7 @@ export async function syncField(db: { run: (sql: string) => Promise<any> }, enti
   )
 }
 
-export async function syncRelation(db: { run: (sql: string) => Promise<any> }, entity: EntityDef, rel: RelationDef) {
+export async function syncRelation(db: { run: (sql: string) => Promise<unknown> }, entity: EntityDef, rel: RelationDef) {
   switch (rel.relationType) {
     case '1:1':
       await db.run(
@@ -79,6 +79,6 @@ export async function syncRelation(db: { run: (sql: string) => Promise<any> }, e
   }
 }
 
-export async function dropEntity(db: { run: (sql: string) => Promise<any> }, entity: EntityDef) {
+export async function dropEntity(db: { run: (sql: string) => Promise<unknown> }, entity: EntityDef) {
   await db.run(`DROP TABLE IF EXISTS ${entity.tableName}`)
 }

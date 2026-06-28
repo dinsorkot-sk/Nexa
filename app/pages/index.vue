@@ -46,7 +46,7 @@ const items = [[{
     </template>
     <template #body>
       <PlatformOverview />
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 sm:px-6 pb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <PlatformEntities />
         <PlatformActivity />
       </div>
