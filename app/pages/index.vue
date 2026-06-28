@@ -45,10 +45,10 @@ const items = [[{
       </UDashboardNavbar>
     </template>
     <template #body>
-      <Overview />
+      <PlatformOverview />
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 sm:px-6 pb-8">
-        <Entities />
-        <Activity />
+        <PlatformEntities />
+        <PlatformActivity />
       </div>
     </template>
   </UDashboardPanel>
