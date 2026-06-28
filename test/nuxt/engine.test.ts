@@ -2,12 +2,13 @@ import { describe, expect, it, beforeAll, afterAll } from 'vitest'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import { syncEntity, syncField, dropEntity } from '../../server/engine/sync'
-import { createOne, findMany, findOne, updateOne, deleteOne } from '../../server/engine/query'
+import { createOne, findMany, findOne, updateOne, deleteOne, forceDelete, restoreOne } from '../../server/engine/query'
 
 interface ArticleRow {
   id: number
   title: string
   views: number
+  deleted_at: string | null
 }
 
 let client: ReturnType<typeof createClient>
@@ -112,22 +113,79 @@ describe('engine CRUD', () => {
     expect(row!.title).toBe('World')
   })
 
-  it('deleteOne removes the row', async () => {
+  it('deleteOne soft-deletes the row', async () => {
     const ok = await deleteOne(db as never, TABLE, createdId)
     expect(ok).toBe(true)
+    // findOne excludes soft-deleted by default
     const row = await findOne(db as never, TABLE, ENTITY_SLUG, createdId, {})
     expect(row).toBeNull()
   })
 
+  it('soft-deleted rows are excluded from findMany by default', async () => {
+    const { data, total } = await findMany(db as never, TABLE, ENTITY_SLUG, {
+      filter: { title: 'World' }
+    })
+    expect(total).toBe(0)
+    expect(data.length).toBe(0)
+  })
+
+  it('trash:true includes soft-deleted rows', async () => {
+    const { data, total } = await findMany(db as never, TABLE, ENTITY_SLUG, {
+      filter: { title: 'World' },
+      trash: true
+    })
+    expect(total).toBeGreaterThanOrEqual(1)
+    expect(data.length).toBeGreaterThanOrEqual(1)
+    expect((data[0] as unknown as ArticleRow).title).toBe('World')
+  })
+
+  it('restoreOne brings back a soft-deleted row', async () => {
+    const restored = await restoreOne(db as never, TABLE, createdId) as ArticleRow | undefined
+    expect(restored).not.toBeNull()
+    expect(restored!.title).toBe('World')
+    expect(restored!.deleted_at).toBeNull()
+
+    // Now visible in normal queries
+    const row = await findOne(db as never, TABLE, ENTITY_SLUG, createdId, {}) as ArticleRow | null
+    expect(row).not.toBeNull()
+  })
+
+  it('forceDelete permanently removes the row', async () => {
+    // Create a record to hard-delete
+    const toDelete = await createOne(db as never, TABLE, { title: 'Temporary', views: 0 }) as ArticleRow | undefined
+    const delId = toDelete!.id
+
+    const ok = await forceDelete(db as never, TABLE, delId)
+    expect(ok).toBe(true)
+
+    // Not found even with trash:true (hard deleted)
+    const row = await findOne(db as never, TABLE, ENTITY_SLUG, delId, { trash: true })
+    expect(row).toBeNull()
+  })
+
   it('findMany with sorting', async () => {
-    await createOne(db as never, TABLE, { title: 'A', views: 1 })
-    await createOne(db as never, TABLE, { title: 'B', views: 2 })
-    await createOne(db as never, TABLE, { title: 'C', views: 3 })
+    // Use views > 10 so the pre-existing row from restore-test (views=10) doesn't pollute the top-2
+    await createOne(db as never, TABLE, { title: 'A', views: 10 })
+    await createOne(db as never, TABLE, { title: 'B', views: 20 })
+    await createOne(db as never, TABLE, { title: 'C', views: 30 })
     const { data } = await findMany(db as never, TABLE, ENTITY_SLUG, {
       sort: '-views',
       limit: 2
     })
     expect((data[0] as unknown as ArticleRow).title).toBe('C')
     expect((data[1] as unknown as ArticleRow).title).toBe('B')
+  })
+
+  it('createOne with empty data uses DEFAULT VALUES', async () => {
+    const row = await createOne(db as never, TABLE, {}) as Record<string, unknown> | undefined
+    expect(row).not.toBeNull()
+    expect(row!.id).toBeGreaterThan(0)
+  })
+
+  it('safeId rejects invalid identifiers', async () => {
+    const { safeId } = await import('../../server/engine/query')
+    expect(() => safeId('DROP TABLE users')).toThrow('Invalid SQL identifier')
+    expect(() => safeId("'; DELETE FROM users; --")).toThrow('Invalid SQL identifier')
+    expect(() => safeId('normal_name_123')).not.toThrow()
   })
 })
