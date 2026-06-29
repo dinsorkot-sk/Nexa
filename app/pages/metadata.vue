@@ -232,14 +232,12 @@ function fieldTypeBadgeColor(type: string) {
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
-        <template #center>
           <UTabs
             v-model="activeTab"
             :items="tabs"
             color="neutral"
-            variant="link"
+            size="sm"
           />
-        </template>
         <template #right>
           <div class="flex items-center gap-2">
             <template v-if="activeTab === 'entities'">
@@ -846,7 +844,7 @@ function fieldTypeBadgeColor(type: string) {
         <UButton color="neutral" variant="ghost" @click="showDeleteRelationConfirm = false">
           Cancel
         </UButton>
-        <UButton color="error" @click="confirmDeleteRelation(editingRelation?.id)">
+        <UButton color="error" @click="confirmDeleteRelation(editingRelation!.id)">
           Delete
         </UButton>
       </div>
