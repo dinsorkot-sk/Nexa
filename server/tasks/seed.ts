@@ -1,18 +1,61 @@
 import { db, schema } from '@nuxthub/db'
+import { hashPassword } from '~~/server/utils/auth'
 
 export default defineTask({
   meta: {
     name: 'db:seed',
-    description: 'Seed database with initial metadata entities, fields, and relations'
+    description: 'Seed database with initial metadata entities, fields, relations, roles, and admin user'
   },
   async run() {
     console.log('🌱 Seeding Nexa database...')
 
-    // Reset metadata so the seed stays repeatable.
+    // ── Seed roles first ──────────────────────────────────────────────
+    await db.delete(schema.userRoles).run()
+    await db.delete(schema.invites).run()
+    await db.delete(schema.sessions).run()
+    await db.delete(schema.users).run()
+    await db.delete(schema.roles).run()
+
+    // ── Clean existing metadata ───────────────────────────────────────
     await db.delete(schema.relations).run()
     await db.delete(schema.fields).run()
     await db.delete(schema.entities).run()
     await db.delete(schema.modules).run()
+
+    const [adminRole] = await db.insert(schema.roles).values({
+      name: 'Admin',
+      slug: 'admin',
+      description: 'Full access to all features',
+      isSystem: true
+    }).returning().all()
+
+    const [memberRole] = await db.insert(schema.roles).values({
+      name: 'Member',
+      slug: 'member',
+      description: 'Standard user with basic access',
+      isSystem: true
+    }).returning().all()
+
+    console.log(`  ✓ Roles: ${adminRole!.name}, ${memberRole!.name}`)
+
+    // ── Seed admin user ──────────────────────────────────────────────
+    const passwordHash = hashPassword('admin123')
+    const [adminUser] = await db.insert(schema.users).values({
+      name: 'Admin',
+      email: 'admin@nexa.dev',
+      passwordHash,
+      isActive: true
+    }).returning().all()
+
+    // Assign admin role
+    await db.insert(schema.userRoles).values({
+      userId: adminUser!.id,
+      roleId: adminRole!.id
+    })
+
+    console.log(`  ✓ Admin user: ${adminUser!.email} (password: admin123)`)
+
+    // ── Reset metadata (existing seed logic) ─────────────────────────
 
     // ── Modules ────────────────────────────────────────────────────
     const [cmsModule] = await db.insert(schema.modules).values({

@@ -1,17 +1,69 @@
 <script setup lang="ts">
 import type { Member } from '~/types'
+import type { DropdownMenuItem } from '@nuxt/ui'
 
 const { isNotificationsSlideoverOpen } = useDashboard()
-
-const { data: members } = await useFetch<Member[]>('/api/members', { default: () => [] })
+const {
+  members, roles, selectedMember,
+  showInviteModal, showSlideover,
+  selectMember, closeSlideover,
+  inviteMember, updateMemberRoles, toggleMemberStatus
+} = useMembers()
 
 const q = ref('')
 
 const filteredMembers = computed(() => {
-  return members.value.filter((member) => {
-    return member.name.search(new RegExp(q.value, 'i')) !== -1 || member.username.search(new RegExp(q.value, 'i')) !== -1
-  })
+  if (!q.value) return members.value
+  const needle = q.value.toLowerCase()
+  return members.value.filter(m =>
+    m.name.toLowerCase().includes(needle)
+    || m.email.toLowerCase().includes(needle)
+  )
 })
+
+function getInitials(name: string) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+}
+
+function getRoleColor(slug: string) {
+  switch (slug) {
+    case 'admin': return 'warning' as const
+    case 'member': return 'primary' as const
+    default: return 'neutral' as const
+  }
+}
+
+function getDropdownActions(member: Member): DropdownMenuItem[] {
+  return [
+    {
+      label: 'Edit member',
+      icon: 'i-lucide-pencil',
+      onSelect: () => selectMember(member)
+    },
+    {
+      label: member.isActive ? 'Deactivate' : 'Activate',
+      icon: member.isActive ? 'i-lucide-pause-circle' : 'i-lucide-play-circle',
+      onSelect: () => toggleMemberStatus(member.id, !member.isActive)
+    }
+  ]
+}
+
+async function handleInvite(email: string, roleSlug?: string) {
+  await inviteMember(email, roleSlug)
+  showInviteModal.value = false
+}
+
+function handleCloseSlideover() {
+  closeSlideover()
+}
+
+function handleUpdateRoles(memberId: number, roleIds: number[]) {
+  updateMemberRoles(memberId, roleIds)
+}
+
+function handleToggleStatus(memberId: number, isActive: boolean) {
+  toggleMemberStatus(memberId, isActive)
+}
 </script>
 
 <template>
@@ -37,6 +89,7 @@ const filteredMembers = computed(() => {
         </template>
       </UDashboardNavbar>
     </template>
+
     <template #body>
       <UContainer class="py-8">
         <UPageCard
@@ -50,6 +103,7 @@ const filteredMembers = computed(() => {
             label="Invite people"
             color="neutral"
             class="w-fit lg:ms-auto"
+            @click="showInviteModal = true"
           />
         </UPageCard>
 
@@ -64,9 +118,90 @@ const filteredMembers = computed(() => {
             />
           </template>
 
-          <SettingsMembersList :members="filteredMembers" />
+          <ul v-if="filteredMembers.length > 0" role="list" class="divide-y divide-default">
+            <li
+              v-for="member in filteredMembers"
+              :key="member.id"
+              class="flex items-center justify-between gap-3 py-3 px-4 sm:px-6 cursor-pointer hover:bg-(--ui-bg-elevated) transition-colors"
+              @click="selectMember(member)"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <UAvatar
+                  :src="member.avatarUrl || undefined"
+                  :text="getInitials(member.name)"
+                  size="md"
+                />
+
+                <div class="text-sm min-w-0">
+                  <p class="text-highlighted font-medium truncate flex items-center gap-2">
+                    {{ member.name }}
+                    <UBadge
+                      v-if="!member.isActive"
+                      variant="subtle"
+                      color="neutral"
+                      size="xs"
+                    >
+                      Inactive
+                    </UBadge>
+                  </p>
+                  <p class="text-muted truncate">
+                    {{ member.email }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0" @click.stop>
+                <div class="flex items-center gap-1">
+                  <UBadge
+                    v-for="role in member.roles"
+                    :key="role.id"
+                    :color="getRoleColor(role.slug)"
+                    size="xs"
+                    variant="subtle"
+                  >
+                    {{ role.name }}
+                  </UBadge>
+                </div>
+
+                <UDropdownMenu :items="[getDropdownActions(member)]" :content="{ align: 'end' }">
+                  <UButton
+                    icon="i-lucide-ellipsis-vertical"
+                    color="neutral"
+                    variant="ghost"
+                    size="sm"
+                    square
+                  />
+                </UDropdownMenu>
+              </div>
+            </li>
+          </ul>
+
+          <div v-else class="py-10 text-center">
+            <UIcon name="i-lucide-users" class="size-10 mx-auto mb-3 text-(--ui-text-muted)" />
+            <p class="text-sm text-(--ui-text-muted)">
+              {{ q ? 'No members match your search.' : 'No members yet. Invite someone to get started.' }}
+            </p>
+          </div>
         </UPageCard>
       </UContainer>
     </template>
   </UDashboardPanel>
+
+  <!-- Invite Modal -->
+  <InviteModal
+    v-if="showInviteModal"
+    :roles="roles"
+    @invite="handleInvite"
+    @close="showInviteModal = false"
+  />
+
+  <!-- Member Slideover -->
+  <MemberSlideover
+    v-if="showSlideover && selectedMember"
+    :member="selectedMember"
+    :roles="roles"
+    @close="handleCloseSlideover"
+    @update-roles="handleUpdateRoles"
+    @toggle-status="handleToggleStatus"
+  />
 </template>

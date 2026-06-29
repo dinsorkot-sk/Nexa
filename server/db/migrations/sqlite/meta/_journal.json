@@ -8,6 +8,27 @@
       "when": 1782465378218,
       "tag": "0000_tense_wallflower",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1782741895648,
+      "tag": "0001_gorgeous_silver_centurion",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782743473833,
+      "tag": "0002_sour_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1782744819385,
+      "tag": "0003_powerful_patch",
+      "breakpoints": true
     }
   ]
 }

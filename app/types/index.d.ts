@@ -22,9 +22,14 @@ export interface Mail {
 }
 
 export interface Member {
+  id: number
   name: string
+  email: string
   username: string
-  role: 'member' | 'owner'
+  avatarUrl: string | null
+  isActive: boolean
+  roles: Array<{ id: number, name: string, slug: string }>
+  createdAt: string
   avatar: AvatarProps
 }
 
