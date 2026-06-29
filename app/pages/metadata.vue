@@ -232,12 +232,12 @@ function fieldTypeBadgeColor(type: string) {
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
-          <UTabs
-            v-model="activeTab"
-            :items="tabs"
-            color="neutral"
-            size="sm"
-          />
+        <UTabs
+          v-model="activeTab"
+          :items="tabs"
+          color="neutral"
+          size="sm"
+        />
         <template #right>
           <div class="flex items-center gap-2">
             <template v-if="activeTab === 'entities'">
@@ -685,16 +685,15 @@ function fieldTypeBadgeColor(type: string) {
       </div>
 
       <!-- ─── DIAGRAMS TAB ─── -->
-      <div v-else-if="activeTab === 'diagrams'" class="flex-1 flex items-center justify-center h-full">
-        <div class="text-center">
-          <UIcon name="i-lucide-git-branch" class="size-12 mx-auto mb-4 text-(--ui-text-muted)" />
-          <h3 class="text-base font-semibold mb-1">
-            Entity Relationship Diagram
-          </h3>
-          <p class="text-sm text-(--ui-text-muted)">
-            Visual diagram coming soon
-          </p>
-        </div>
+      <div v-else-if="activeTab === 'diagrams'" class="h-[70vh] min-h-[32rem]">
+        <ClientOnly>
+          <MetadataDiagram :entities="meta.entities.value" :relations="meta.relations.value" />
+          <template #fallback>
+            <div class="flex h-full items-center justify-center">
+              <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin text-(--ui-text-muted)" />
+            </div>
+          </template>
+        </ClientOnly>
       </div>
     </template>
   </UDashboardPanel>
