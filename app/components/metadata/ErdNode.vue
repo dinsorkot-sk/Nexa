@@ -18,28 +18,28 @@ const props = defineProps<NodeProps<ErdNodeData>>()
 
 <template>
   <div class="erd-node" :class="{ 'erd-node--selected': props.selected }">
-    <Handle type="target" :position="Position.Top" />
-
     <div class="erd-node__head">
       {{ props.data.label }}
     </div>
 
     <div class="erd-node__body">
-      <div v-for="field in props.data.fields" :key="field.name" class="erd-node__field">
+      <div v-for="(field, index) in props.data.fields" :key="field.name" class="erd-node__field">
+        <Handle :id="`field-${index}-in`" type="target" :position="Position.Left" />
+
         <div class="erd-node__field-name">
           <span>{{ field.name }}</span>
           <span v-if="field.isRequired" class="erd-node__pill">req</span>
           <span v-if="field.isUnique" class="erd-node__pill">uniq</span>
         </div>
         <span class="erd-node__type">{{ field.fieldType }}</span>
+
+        <Handle :id="`field-${index}-out`" type="source" :position="Position.Right" />
       </div>
 
       <div v-if="!props.data.fields.length" class="erd-node__empty">
         No fields
       </div>
     </div>
-
-    <Handle type="source" :position="Position.Bottom" />
   </div>
 </template>
 
@@ -73,6 +73,7 @@ const props = defineProps<NodeProps<ErdNodeData>>()
 }
 
 .erd-node__field {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -80,6 +81,13 @@ const props = defineProps<NodeProps<ErdNodeData>>()
   padding: 8px 14px;
   border-top: 1px solid var(--ui-border);
   font-size: 12px;
+}
+
+.erd-node__field :deep(.vue-flow__handle) {
+  width: 8px;
+  height: 8px;
+  border-width: 1px;
+  background: var(--ui-primary);
 }
 
 .erd-node__field-name {

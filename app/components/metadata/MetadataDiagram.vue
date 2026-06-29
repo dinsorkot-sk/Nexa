@@ -92,21 +92,17 @@ async function loadDiagram() {
       }
     })
 
-    const diagramEdges: DiagramEdge[] = props.relations.map((relation) => {
-      const isSelf = relation.entityId === relation.relatedEntityId
-
-      return {
-        id: `relation-${relation.id}`,
-        source: String(relation.entityId),
-        target: String(relation.relatedEntityId),
-        type: 'smoothstep',
-        label: `${relation.name} (${relation.relationType})`,
-        animated: !isSelf,
-        style: {
-          stroke: 'var(--ui-border-dimmed)'
-        }
+    const diagramEdges: DiagramEdge[] = props.relations.map(relation => ({
+      id: `relation-${relation.id}`,
+      source: String(relation.entityId),
+      target: String(relation.relatedEntityId),
+      type: 'smoothstep',
+      label: relation.relationType,
+      animated: true,
+      style: {
+        stroke: 'var(--ui-primary)'
       }
-    })
+    }))
 
     const graph = new dagre.graphlib.Graph()
     graph.setDefaultEdgeLabel(() => ({}))
@@ -155,7 +151,7 @@ watch(
 </script>
 
 <template>
-  <div class="h-full min-h-[32rem] rounded-xl border border-default bg-elevated/60">
+  <div class="h-full min-h-[32rem] bg-elevated/60">
     <div v-if="loading" class="flex h-full items-center justify-center">
       <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin text-(--ui-text-muted)" />
     </div>

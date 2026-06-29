@@ -685,7 +685,7 @@ function fieldTypeBadgeColor(type: string) {
       </div>
 
       <!-- ─── DIAGRAMS TAB ─── -->
-      <div v-else-if="activeTab === 'diagrams'" class="h-[70vh] min-h-[32rem]">
+      <div v-else-if="activeTab === 'diagrams'" class="h-full min-h-[32rem]">
         <ClientOnly>
           <MetadataDiagram :entities="meta.entities.value" :relations="meta.relations.value" />
           <template #fallback>
