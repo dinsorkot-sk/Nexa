@@ -62,3 +62,23 @@ test/         Vitest projects: unit/, nuxt/, e2e/
 - Icons: `i-lucide-*` (Lucide) and `i-simple-icons-*` (Simple Icons)
 - Keyboard shortcuts via `defineShortcuts()` from `@vueuse/core`
 - Husky hooks auto-enabled via `"prepare": "husky"` in package.json
+
+## Installed Skills (skills.sh)
+
+```bash
+# Design & UI
+npx skills add -y anthropics/skills          # frontend-design, theme-factory, brand-guidelines +15 more
+npx skills add -y pbakaus/impeccable         # UI review & polish
+
+# Agent Workflows & Planning
+npx skills add -y obra/superpowers           # writing-plans, subagent-driven-development,
+                                             # systematic-debugging, executing-plans,
+                                             # test-driven-development +9 more
+
+# Design System & Tailwind
+npx skills add -y wshobson/agents              # tailwind-design-system, typescript-advanced-types +3 more
+npx skills add -y arvindrk/extract-design-system # extract tokens from existing codebase
+
+# NOTE: mattpocock/skills skills (improve-codebase-architecture, tdd)
+# are NOT compatible with current skills CLI (1.5.13) - skip until fixed
+```
