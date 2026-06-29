@@ -8,6 +8,12 @@ export default defineTask({
   async run() {
     console.log('🌱 Seeding Nexa database...')
 
+    // Reset metadata so the seed stays repeatable.
+    await db.delete(schema.relations).run()
+    await db.delete(schema.fields).run()
+    await db.delete(schema.entities).run()
+    await db.delete(schema.modules).run()
+
     // ── Modules ────────────────────────────────────────────────────
     const [cmsModule] = await db.insert(schema.modules).values({
       name: 'Content Management',
@@ -132,7 +138,8 @@ export default defineTask({
       { entityId: postsEntity!.id, name: 'Content', slug: 'content', fieldType: 'text', isRequired: true, sortOrder: 3 },
       { entityId: postsEntity!.id, name: 'Status', slug: 'status', fieldType: 'text', isRequired: true, defaultValue: 'draft', sortOrder: 4 },
       { entityId: postsEntity!.id, name: 'Published At', slug: 'published_at', fieldType: 'date', sortOrder: 5 },
-      { entityId: postsEntity!.id, name: 'Featured Image', slug: 'featured_image', fieldType: 'text', sortOrder: 6 }
+      { entityId: postsEntity!.id, name: 'Featured Image', slug: 'featured_image', fieldType: 'text', sortOrder: 6 },
+      { entityId: postsEntity!.id, name: 'Category ID', slug: 'category_id', fieldType: 'number', sortOrder: 7 }
     ]).returning().all()
 
     // Categories fields
@@ -175,11 +182,11 @@ export default defineTask({
     // ── Relations ────────────────────────────────────────────────────
     await db.insert(schema.relations).values([
       {
-        entityId: postsEntity!.id,
-        relatedEntityId: categoriesEntity!.id,
-        name: 'Category',
-        slug: 'category',
-        relationType: 'manyToOne',
+        entityId: categoriesEntity!.id,
+        relatedEntityId: postsEntity!.id,
+        name: 'Posts',
+        slug: 'posts',
+        relationType: '1:N',
         foreignKey: 'category_id',
         isRequired: false
       },
@@ -188,28 +195,17 @@ export default defineTask({
         relatedEntityId: tagsEntity!.id,
         name: 'Tags',
         slug: 'tags',
-        relationType: 'manyToMany',
+        relationType: 'N:N',
         pivotTable: 'blog_post_tags',
-        foreignKey: 'post_id',
         isRequired: false
       },
       {
-        entityId: productsEntity!.id,
-        relatedEntityId: ordersEntity!.id,
-        name: 'Order Items',
-        slug: 'order_items',
-        relationType: 'manyToMany',
+        entityId: ordersEntity!.id,
+        relatedEntityId: productsEntity!.id,
+        name: 'Products',
+        slug: 'products',
+        relationType: 'N:N',
         pivotTable: 'ecom_order_items',
-        foreignKey: 'product_id',
-        isRequired: false
-      },
-      {
-        entityId: categoriesEntity!.id,
-        relatedEntityId: postsEntity!.id,
-        name: 'Posts',
-        slug: 'posts',
-        relationType: 'oneToMany',
-        foreignKey: 'category_id',
         isRequired: false
       }
     ]).returning().all()

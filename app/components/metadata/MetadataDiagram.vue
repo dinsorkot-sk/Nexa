@@ -12,38 +12,45 @@ import '@vue-flow/core/dist/theme-default.css'
 import type { Entity, EntityWithFields, Relation } from '~/types/metadata'
 import ErdNode from './ErdNode.vue'
 
-const props = defineProps<{
-  entities: Entity[]
-  relations: Relation[]
-}>()
-
-const loading = ref(true)
-type ErdField = {
+type DiagramField = {
+  slug: string
   name: string
   fieldType: string
   isRequired: boolean
   isUnique: boolean
+  isVirtual?: boolean
+}
+
+type DiagramNodeData = {
+  label: string
+  fields: DiagramField[]
 }
 
 type DiagramNode = {
   id: string
   type: 'entity'
   position: { x: number, y: number }
-  data: {
-    label: string
-    fields: ErdField[]
-  }
+  data: DiagramNodeData
 }
 
 type DiagramEdge = {
   id: string
   source: string
   target: string
+  sourceHandle: string
+  targetHandle: string
   type: 'smoothstep'
   label: string
-  animated: boolean
+  animated: true
   style: { stroke: string }
 }
+
+const props = defineProps<{
+  entities: Entity[]
+  relations: Relation[]
+}>()
+
+const loading = ref(true)
 
 const nodes = ref<DiagramNode[]>([])
 const edges = ref<DiagramEdge[]>([])
@@ -73,34 +80,179 @@ async function loadDiagram() {
       .filter((result): result is PromiseFulfilledResult<EntityWithFields> => result.status === 'fulfilled')
       .map(result => result.value)
 
-    const diagramNodes: DiagramNode[] = entitiesWithFields.map((entity) => {
-      const fields = [...entity.fields].sort((a, b) => a.sortOrder - b.sortOrder).map(field => ({
-        name: field.name,
-        fieldType: field.fieldType,
-        isRequired: !!field.isRequired,
-        isUnique: !!field.isUnique
-      }))
+    const nodeMap = new Map<string, { id: string, slug: string, label: string, fields: DiagramField[] }>()
 
-      return {
-        id: String(entity.id),
-        type: 'entity',
-        position: { x: 0, y: 0 },
-        data: {
-          label: entity.name,
-          fields
-        }
+    function fieldLabel(slug: string) {
+      return slug
+        .split('_')
+        .map(part => (part.toLowerCase() === 'id' ? 'ID' : part.charAt(0).toUpperCase() + part.slice(1)))
+        .join(' ')
+    }
+
+    function ensureField(nodeId: string, field: DiagramField) {
+      const node = nodeMap.get(nodeId)
+      if (!node) return
+      if (!node.fields.some(existing => existing.slug === field.slug)) {
+        node.fields.push(field)
       }
-    })
+    }
 
-    const diagramEdges: DiagramEdge[] = props.relations.map(relation => ({
-      id: `relation-${relation.id}`,
-      source: String(relation.entityId),
-      target: String(relation.relatedEntityId),
-      type: 'smoothstep',
-      label: relation.relationType,
-      animated: true,
-      style: {
-        stroke: 'var(--ui-primary)'
+    for (const entity of entitiesWithFields) {
+      const fields: DiagramField[] = [{
+        slug: 'id',
+        name: 'ID',
+        fieldType: 'id',
+        isRequired: true,
+        isUnique: true,
+        isVirtual: true
+      }]
+
+      for (const field of [...entity.fields].sort((a, b) => a.sortOrder - b.sortOrder)) {
+        fields.push({
+          slug: field.slug,
+          name: field.name,
+          fieldType: field.fieldType,
+          isRequired: !!field.isRequired,
+          isUnique: !!field.isUnique
+        })
+      }
+
+      nodeMap.set(String(entity.id), {
+        id: String(entity.id),
+        slug: entity.slug,
+        label: entity.name,
+        fields
+      })
+    }
+
+    const diagramEdges: DiagramEdge[] = []
+
+    for (const relation of props.relations) {
+      const source = nodeMap.get(String(relation.entityId))
+      const target = nodeMap.get(String(relation.relatedEntityId))
+      if (!source || !target) {
+        continue
+      }
+
+      if (relation.relationType === 'N:N') {
+        const pivotId = `pivot-${relation.id}`
+        const sourcePivotSlug = `${source.slug}_id`
+        const targetPivotSlug = `${target.slug}_id`
+
+        nodeMap.set(pivotId, {
+          id: pivotId,
+          slug: relation.pivotTable || `${source.slug}_${relation.slug}`,
+          label: relation.pivotTable || `${source.slug}_${relation.slug}`,
+          fields: [
+            {
+              slug: sourcePivotSlug,
+              name: fieldLabel(sourcePivotSlug),
+              fieldType: 'number',
+              isRequired: false,
+              isUnique: false,
+              isVirtual: true
+            },
+            {
+              slug: targetPivotSlug,
+              name: fieldLabel(targetPivotSlug),
+              fieldType: 'number',
+              isRequired: false,
+              isUnique: false,
+              isVirtual: true
+            }
+          ]
+        })
+
+        diagramEdges.push({
+          id: `relation-${relation.id}-a`,
+          source: source.id,
+          target: pivotId,
+          sourceHandle: 'id:out',
+          targetHandle: `${sourcePivotSlug}:in`,
+          type: 'smoothstep',
+          label: relation.relationType,
+          animated: true,
+          style: {
+            stroke: 'var(--ui-primary)'
+          }
+        })
+
+        diagramEdges.push({
+          id: `relation-${relation.id}-b`,
+          source: pivotId,
+          target: target.id,
+          sourceHandle: `${targetPivotSlug}:out`,
+          targetHandle: 'id:in',
+          type: 'smoothstep',
+          label: relation.relationType,
+          animated: true,
+          style: {
+            stroke: 'var(--ui-primary)'
+          }
+        })
+
+        continue
+      }
+
+      if (relation.relationType === '1:N') {
+        const targetFieldSlug = relation.foreignKey || `${source.slug}_id`
+        ensureField(String(relation.relatedEntityId), {
+          slug: targetFieldSlug,
+          name: fieldLabel(targetFieldSlug),
+          fieldType: 'number',
+          isRequired: !!relation.isRequired,
+          isUnique: false,
+          isVirtual: true
+        })
+
+        diagramEdges.push({
+          id: `relation-${relation.id}`,
+          source: source.id,
+          target: target.id,
+          sourceHandle: 'id:out',
+          targetHandle: `${targetFieldSlug}:in`,
+          type: 'smoothstep',
+          label: relation.relationType,
+          animated: true,
+          style: {
+            stroke: 'var(--ui-primary)'
+          }
+        })
+        continue
+      }
+
+      const sourceFieldSlug = relation.foreignKey || `${relation.slug}_id`
+      ensureField(String(relation.entityId), {
+        slug: sourceFieldSlug,
+        name: fieldLabel(sourceFieldSlug),
+        fieldType: 'number',
+        isRequired: !!relation.isRequired,
+        isUnique: false,
+        isVirtual: true
+      })
+
+      diagramEdges.push({
+        id: `relation-${relation.id}`,
+        source: source.id,
+        target: target.id,
+        sourceHandle: `${sourceFieldSlug}:out`,
+        targetHandle: 'id:in',
+        type: 'smoothstep',
+        label: relation.relationType,
+        animated: true,
+        style: {
+          stroke: 'var(--ui-primary)'
+        }
+      })
+    }
+
+    const diagramNodes: DiagramNode[] = [...nodeMap.values()].map(node => ({
+      id: node.id,
+      type: 'entity',
+      position: { x: 0, y: 0 },
+      data: {
+        label: node.label,
+        fields: node.fields
       }
     }))
 

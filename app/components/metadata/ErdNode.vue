@@ -2,10 +2,12 @@
 import { Handle, Position, type NodeProps } from '@vue-flow/core'
 
 export type ErdField = {
+  slug: string
   name: string
   fieldType: string
   isRequired: boolean
   isUnique: boolean
+  isVirtual?: boolean
 }
 
 type ErdNodeData = {
@@ -23,17 +25,23 @@ const props = defineProps<NodeProps<ErdNodeData>>()
     </div>
 
     <div class="erd-node__body">
-      <div v-for="(field, index) in props.data.fields" :key="field.name" class="erd-node__field">
-        <Handle :id="`field-${index}-in`" type="target" :position="Position.Left" />
+      <div
+        v-for="field in props.data.fields"
+        :key="field.slug"
+        class="erd-node__field"
+        :class="{ 'erd-node__field--virtual': field.isVirtual }"
+      >
+        <Handle :id="`${field.slug}:in`" type="target" :position="Position.Left" />
 
         <div class="erd-node__field-name">
           <span>{{ field.name }}</span>
+          <span v-if="field.isVirtual" class="erd-node__pill">sys</span>
           <span v-if="field.isRequired" class="erd-node__pill">req</span>
           <span v-if="field.isUnique" class="erd-node__pill">uniq</span>
         </div>
         <span class="erd-node__type">{{ field.fieldType }}</span>
 
-        <Handle :id="`field-${index}-out`" type="source" :position="Position.Right" />
+        <Handle :id="`${field.slug}:out`" type="source" :position="Position.Right" />
       </div>
 
       <div v-if="!props.data.fields.length" class="erd-node__empty">
@@ -81,6 +89,11 @@ const props = defineProps<NodeProps<ErdNodeData>>()
   padding: 8px 14px;
   border-top: 1px solid var(--ui-border);
   font-size: 12px;
+}
+
+.erd-node__field--virtual {
+  color: var(--ui-text-dimmed);
+  background: color-mix(in srgb, var(--ui-bg) 84%, var(--ui-border));
 }
 
 .erd-node__field :deep(.vue-flow__handle) {
