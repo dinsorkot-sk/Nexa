@@ -19,11 +19,10 @@ export interface RelationDef {
   entitySlug: string
 }
 
-interface DrizzleDb {
+export interface DrizzleDb {
   run(sql: string, params?: unknown[]): Promise<{ rows?: unknown[], lastInsertRowid?: bigint }>
   all<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>
   get<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T | undefined>
-  execute(sql: string, params?: unknown[]): Promise<{ rows: unknown[], columns?: string[], lastInsertRowid?: bigint, rowsAffected: number }>
 }
 
 // ── Safe identifier validation ──────────────────────────────────────────

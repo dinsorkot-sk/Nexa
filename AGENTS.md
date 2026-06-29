@@ -37,7 +37,7 @@ server/
     notifications.ts      Mock
   engine/     Dynamic CMS engine — sync.ts (schema sync), query.ts (CRUD), include.ts
   db/schema/  Drizzle ORM — metadata.ts (_modules, _entities, _fields), relations.ts, generic-refs.ts
-  tasks/      Nuxt tasks — seed.ts (db:seed, initial data population)
+  tasks/      Nuxt tasks — seed.ts (db:seed, canonical metadata bootstrap)
   utils/      Zod validation — validate.ts (buildEntitySchema, filterKnownFields, coerceFieldTypes)
 test/         Vitest projects: unit/, nuxt/, e2e/
 ```
@@ -45,11 +45,13 @@ test/         Vitest projects: unit/, nuxt/, e2e/
 - Settings uses nested routing: `pages/settings.vue` + `pages/settings/*.vue`
 - 4 mock endpoints (notifications, members, mails, customers) return hardcoded arrays.
 - Diagram: `nexa-architecture.drawio` contains C4 architecture diagrams (6 pages).
+- Metadata ERD uses Vue Flow, field-level handles, and virtual pivot nodes for `N:N` relations.
 
 ## Database
 
 - SQLite via `@nuxthub/core` (`nuxt.config.ts hub.db: 'sqlite'`)
-- Drizzle ORM for system tables. Dynamic entity tables created at runtime by `syncEntity()` / `syncField()`.
+- Drizzle ORM for system tables. Dynamic entity tables created at runtime by `syncEntity()` / `syncField()` / `syncRelation()`.
+- Seeded relations follow engine types only: `1:1`, `1:N`, `N:N`, `self`.
 - Tests use in-memory SQLite — no external DB required.
 
 ## Framework quirks

@@ -1,6 +1,6 @@
 import { db, schema } from '@nuxthub/db'
 import { eq } from 'drizzle-orm'
-import type { DrizzleDb } from '~/engine/sync'
+import type { DrizzleDb } from '../../../../engine/sync'
 
 /** POST /api/metadata/entities/:id/fields — create a new field */
 export default defineEventHandler(async (event) => {

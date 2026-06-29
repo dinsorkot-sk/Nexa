@@ -1,6 +1,6 @@
 import { db, schema } from '@nuxthub/db'
 import { eq } from 'drizzle-orm'
-import type { DrizzleDb, RelationDef } from '~/engine/sync'
+import type { DrizzleDb, RelationDef } from '../../../engine/sync'
 
 /** POST /api/metadata/sync/:slug — sync entity schema to actual SQL table */
 export default defineEventHandler(async (event) => {
