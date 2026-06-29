@@ -16,13 +16,13 @@
                 <mxCell id="c3" value="&lt;b&gt;&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;Nexa Platform&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;small&gt;&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;[Software System]&lt;/font&gt;&lt;/small&gt;&lt;hr&gt;Metadata-Driven&lt;br&gt;Application Platform" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#3730A3;fontColor=#FFFFFF;gradientColor=none;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="420" y="370" width="320" height="220" as="geometry"/>
                 </mxCell>
-                <mxCell id="c4" value="&lt;b&gt;PostgreSQL&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                <mxCell id="c4" value="&lt;b&gt;SQLite&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Internal DB]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="880" y="280" width="190" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="c5" value="&lt;b&gt;S3 Storage&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                <mxCell id="c5" value="&lt;b&gt;S3 Storage&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="880" y="390" width="190" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="c6" value="&lt;b&gt;SMTP / Email&lt;/b&gt;&lt;br&gt;&lt;small&gt;[External]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                <mxCell id="c6" value="&lt;b&gt;SMTP / Email&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="880" y="500" width="190" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="c8" value="Designs systems" style="endArrow=block;html=1;rounded=1;strokeWidth=2" parent="1" source="c1" target="c3" edge="1">
@@ -60,10 +60,10 @@
                 <mxCell id="c4" value="&lt;b&gt;Runtime Application&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Web App]&lt;/small&gt;&lt;hr&gt;Nuxt 4 + Vue 3&lt;br&gt;Dynamic CRUD, Forms,&lt;br&gt;Tables, Detail Pages" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0D9488;strokeColor=#0F766E;fontColor=#FFFFFF;gradientColor=#2DD4BF;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="320" y="470" width="290" height="150" as="geometry"/>
                 </mxCell>
-                <mxCell id="c5" value="&lt;b&gt;Metadata Store&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Database: PostgreSQL]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F766E;strokeColor=#115E59;fontColor=#FFFFFF;gradientColor=#2DD4BF;shadow=1;shape=cylinder3" parent="1" vertex="1">
+                <mxCell id="c5" value="&lt;b&gt;Metadata Store&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Database: SQLite]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F766E;strokeColor=#115E59;fontColor=#FFFFFF;gradientColor=#2DD4BF;shadow=1;shape=cylinder3" parent="1" vertex="1">
                     <mxGeometry x="780" y="250" width="200" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c6" value="&lt;b&gt;File Store&lt;/b&gt;&lt;br&gt;&lt;small&gt;[S3 Compatible]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#94A3B8;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
+                <mxCell id="c6" value="&lt;b&gt;File Store&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned: S3 Compatible]&lt;/small&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#94A3B8;strokeColor=#64748B;fontColor=#FFFFFF;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="780" y="480" width="200" height="90" as="geometry"/>
                 </mxCell>
                 <mxCell id="c7" value="&lt;b&gt;Nexa System&lt;/b&gt;" style="dashed=1;fillColor=none;strokeColor=#888888;strokeWidth=2;html=1;whiteSpace=wrap;rounded=1" parent="1" vertex="1">
@@ -122,37 +122,37 @@
                 <mxCell id="c11" value="&lt;b&gt;Relation Manager&lt;/b&gt;&lt;hr&gt;Define entity&lt;br&gt;relationships" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="270" y="160" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c12" value="&lt;b&gt;Form Builder&lt;/b&gt;&lt;hr&gt;Design dynamic forms&lt;br&gt;with drag &amp;amp; drop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c12" value="&lt;b&gt;Form Builder&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Design dynamic forms&lt;br&gt;with drag &amp;amp; drop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="445" y="160" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c13" value="&lt;b&gt;View Builder&lt;/b&gt;&lt;hr&gt;Configure list views,&lt;br&gt;grids, kanban" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c13" value="&lt;b&gt;View Builder&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Configure list views,&lt;br&gt;grids, kanban" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="605" y="290" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c15" value="&lt;b&gt;Workflow Designer&lt;/b&gt;&lt;hr&gt;Visual workflow&lt;br&gt;editor (nodes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c15" value="&lt;b&gt;Workflow Designer&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Visual workflow&lt;br&gt;editor (nodes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="605" y="160" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c16" value="&lt;b&gt;RBAC Manager&lt;/b&gt;&lt;hr&gt;Roles, permissions,&lt;br&gt;field-level security" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c16" value="&lt;b&gt;RBAC Manager&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Roles, permissions,&lt;br&gt;field-level security" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="820" y="160" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c17" value="&lt;b&gt;API Manager&lt;/b&gt;&lt;hr&gt;Configure auto REST&lt;br&gt;API endpoints" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c17" value="&lt;b&gt;API Manager&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Configure auto REST&lt;br&gt;API endpoints" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="1020" y="280" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c18" value="&lt;b&gt;Audit Manager&lt;/b&gt;&lt;hr&gt;Activity logs &amp;amp;&lt;br&gt;change tracking" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c18" value="&lt;b&gt;Audit Manager&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Activity logs &amp;amp;&lt;br&gt;change tracking" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="820" y="280" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c19" value="&lt;b&gt;Plugin Manager&lt;/b&gt;&lt;hr&gt;Extend with custom&lt;br&gt;modules &amp;amp; nodes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c19" value="&lt;b&gt;Plugin Manager&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Extend with custom&lt;br&gt;modules &amp;amp; nodes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="1020" y="160" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c20" value="&lt;b&gt;Report Builder&lt;/b&gt;&lt;hr&gt;Create custom reports&lt;br&gt;and exports" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c20" value="&lt;b&gt;Report Builder&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Create custom reports&lt;br&gt;and exports" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="70" y="670" width="220" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="c21" value="&lt;b&gt;Automation&lt;/b&gt;&lt;hr&gt;Schedules, webhooks,&lt;br&gt;triggers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c21" value="&lt;b&gt;Automation&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Schedules, webhooks,&lt;br&gt;triggers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="330" y="670" width="220" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="c22" value="&lt;b&gt;API Docs&lt;/b&gt;&lt;hr&gt;Auto-generated API&lt;br&gt;documentation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c22" value="&lt;b&gt;API Docs&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Auto-generated API&lt;br&gt;documentation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="590" y="670" width="220" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="c23" value="&lt;b&gt;System Monitor&lt;/b&gt;&lt;hr&gt;Health checks &amp;amp;&lt;br&gt;performance metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c23" value="&lt;b&gt;System Monitor&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Health checks &amp;amp;&lt;br&gt;performance metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="850" y="670" width="220" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="c24" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2" parent="1" source="c9" target="c7" edge="1">
@@ -218,7 +218,7 @@
                         <mxPoint x="588" y="480" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="c14" value="&lt;b&gt;Dashboard Builder&lt;/b&gt;&lt;hr&gt;Create dashboards&lt;br&gt;with widgets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c14" value="&lt;b&gt;Dashboard Builder&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Create dashboards&lt;br&gt;with widgets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="445" y="290" width="180" height="90" as="geometry"/>
                 </mxCell>
             </root>
@@ -262,31 +262,31 @@
                 <mxCell id="c11" value="&lt;b&gt;REST API Engine&lt;/b&gt;&lt;hr&gt;Auto CRUD, filter, sort,&lt;br&gt;paginate, include" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
                     <mxGeometry x="445" y="160" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c12" value="&lt;b&gt;Permission Enforcer&lt;/b&gt;&lt;hr&gt;RBAC — entity, field,&lt;br&gt;record-level checks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c12" value="&lt;b&gt;Permission Enforcer&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;RBAC — entity, field,&lt;br&gt;record-level checks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="610" y="280" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c13" value="&lt;b&gt;Validation Engine&lt;/b&gt;&lt;hr&gt;Field validations and&lt;br&gt;business rules" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c13" value="&lt;b&gt;Validation Engine&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Field validations and&lt;br&gt;business rules" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="445" y="280" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c14" value="&lt;b&gt;Workflow Executor&lt;/b&gt;&lt;hr&gt;Runs trigger → condition&lt;br&gt;→ action chains" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c14" value="&lt;b&gt;Workflow Executor&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Runs trigger → condition&lt;br&gt;→ action chains" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="820" y="160" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c15" value="&lt;b&gt;Notification Svc&lt;/b&gt;&lt;hr&gt;In-app, email, webhook&lt;br&gt;notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c15" value="&lt;b&gt;Notification Svc&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;In-app, email, webhook&lt;br&gt;notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="1010" y="280" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c16" value="&lt;b&gt;Search Engine&lt;/b&gt;&lt;hr&gt;Full-text search across&lt;br&gt;all entities" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c16" value="&lt;b&gt;Search Engine&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Full-text search across&lt;br&gt;all entities" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="820" y="280" width="180" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="c17" value="&lt;b&gt;Report Renderer&lt;/b&gt;&lt;hr&gt;Dynamic reports &amp;amp; exports" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c17" value="&lt;b&gt;Report Renderer&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Dynamic reports &amp;amp; exports" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="70" y="690" width="220" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="c18" value="&lt;b&gt;File Handler&lt;/b&gt;&lt;hr&gt;S3 upload / download / preview" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c18" value="&lt;b&gt;File Handler&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;S3 upload / download / preview" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="330" y="690" width="220" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="c19" value="&lt;b&gt;Audit Recorder&lt;/b&gt;&lt;hr&gt;Log all read/write operations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c19" value="&lt;b&gt;Audit Recorder&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;Log all read/write operations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="590" y="690" width="220" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="c20" value="&lt;b&gt;Cache Layer&lt;/b&gt;&lt;hr&gt;In-memory query cache" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;shadow=1" parent="1" vertex="1">
+                <mxCell id="c20" value="&lt;b&gt;Cache Layer&lt;/b&gt;&lt;br&gt;&lt;small&gt;[Planned]&lt;/small&gt;&lt;hr&gt;In-memory query cache" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;fontColor=#1E1B4B;dashed=1" parent="1" vertex="1">
                     <mxGeometry x="850" y="690" width="220" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="c21" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2" parent="1" source="c8" target="c7" edge="1">
@@ -446,7 +446,7 @@
                 <mxCell id="c20" value="pivot_table" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
                     <mxGeometry x="30" y="276" width="220" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="c21" value="&lt;b&gt;forms&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                <mxCell id="c21" value="&lt;b&gt;forms (planned)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
                     <mxGeometry x="300" y="190" width="200" height="26" as="geometry"/>
                 </mxCell>
                 <mxCell id="c22" value="id (PK), entity_id (FK)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
@@ -458,7 +458,7 @@
                 <mxCell id="c24" value="is_default, is_active" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
                     <mxGeometry x="300" y="256" width="200" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="c25" value="&lt;b&gt;views&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                <mxCell id="c25" value="&lt;b&gt;views (planned)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
                     <mxGeometry x="560" y="190" width="200" height="26" as="geometry"/>
                 </mxCell>
                 <mxCell id="c26" value="id (PK), entity_id (FK)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
@@ -470,7 +470,7 @@
                 <mxCell id="c28" value="config (JSON), is_default" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
                     <mxGeometry x="560" y="256" width="200" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="c29" value="&lt;b&gt;workflows&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                <mxCell id="c29" value="&lt;b&gt;workflows (planned)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
                     <mxGeometry x="30" y="350" width="220" height="26" as="geometry"/>
                 </mxCell>
                 <mxCell id="c30" value="id (PK), entity_id (FK)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
@@ -485,7 +485,7 @@
                 <mxCell id="c33" value="node_tree (JSON)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
                     <mxGeometry x="30" y="436" width="220" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="c34" value="&lt;b&gt;roles&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                <mxCell id="c34" value="&lt;b&gt;roles (planned)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
                     <mxGeometry x="300" y="350" width="200" height="26" as="geometry"/>
                 </mxCell>
                 <mxCell id="c35" value="id (PK), name, slug" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
@@ -494,7 +494,7 @@
                 <mxCell id="c36" value="description, is_system" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">
                     <mxGeometry x="300" y="396" width="200" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="c37" value="&lt;b&gt;permissions&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                <mxCell id="c37" value="&lt;b&gt;permissions (planned)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4338CA;strokeColor=#4338CA;fontColor=#FFFFFF;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
                     <mxGeometry x="560" y="350" width="220" height="26" as="geometry"/>
                 </mxCell>
                 <mxCell id="c38" value="id (PK), role_id (FK)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#A5B4FC;strokeWidth=2;fontSize=11;verticalAlign=top;align=left;spacingLeft=6" parent="1" vertex="1">

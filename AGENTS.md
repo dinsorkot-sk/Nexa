@@ -5,6 +5,7 @@
 - **pnpm** (v11.8.0) — never use npm. Install deps: `pnpm install`
 - Postinstall auto-runs `nuxt prepare`, generating `.nuxt/`. Required for lint, typecheck, dev.
 - **Native binary**: `@libsql/win32-x64-msvc` must compile. If you see `ERR_DLOPEN_FAILED`, run `pnpm rebuild` or `pnpm install --force`.
+- **Pre-commit**: Husky runs `pnpm lint && pnpm typecheck`. Both must pass to commit.
 
 ## Commands (run in order)
 
@@ -26,15 +27,24 @@ pnpm build / pnpm preview  # production
 ```
 app/          Nuxt pages, layouts, components, composables, types, utils
 server/
-  api/        Route handlers — _refs.ts (CRUD), v1/[entity].ts (dynamic CRUD),
-              plus mock endpoints (notifications, members, mails, customers)
+  api/        Route handlers
+    _refs.ts              CRUD for generic_references table (real DB)
+    v1/[entity].ts        Dynamic CRUD engine (real DB)
+    metadata/             Metadata CRUD: entities, fields, relations, sync
+    members.ts            Mock (hardcoded array)
+    mails.ts              Mock
+    customers.ts          Mock
+    notifications.ts      Mock
   engine/     Dynamic CMS engine — sync.ts (schema sync), query.ts (CRUD), include.ts
-  db/schema/  Drizzle ORM schema — _modules, _entities, _fields, _relations, _generic_references
+  db/schema/  Drizzle ORM — metadata.ts (_modules, _entities, _fields), relations.ts, generic-refs.ts
+  tasks/      Nuxt tasks — seed.ts (db:seed, initial data population)
+  utils/      Zod validation — validate.ts (buildEntitySchema, filterKnownFields, coerceFieldTypes)
 test/         Vitest projects: unit/, nuxt/, e2e/
 ```
 
 - Settings uses nested routing: `pages/settings.vue` + `pages/settings/*.vue`
-- Several API endpoints return hardcoded mock arrays (not DB). Only `_refs.ts` and `[entity].ts` use the real DB.
+- 4 mock endpoints (notifications, members, mails, customers) return hardcoded arrays.
+- Diagram: `nexa-architecture.drawio` contains C4 architecture diagrams (6 pages).
 
 ## Database
 
@@ -47,6 +57,8 @@ test/         Vitest projects: unit/, nuxt/, e2e/
 - **Nuxt 4** + `@nuxt/ui` v4 + Tailwind CSS v4
 - `tsconfig.json` references generated files in `.nuxt/` — do not edit directly
 - ESLint config extends auto-generated `.nuxt/eslint.config.mjs` (must run `nuxt prepare`)
+- `nuxt.config.ts` sets `@stylistic` rules: `commaDangle: 'never'`, `braceStyle: '1tbs'`
 - `@nuxt/test-utils` version pinned to `4.0.3` in `.nuxtrc`
 - Icons: `i-lucide-*` (Lucide) and `i-simple-icons-*` (Simple Icons)
 - Keyboard shortcuts via `defineShortcuts()` from `@vueuse/core`
+- Husky hooks auto-enabled via `"prepare": "husky"` in package.json
