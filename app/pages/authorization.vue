@@ -15,11 +15,13 @@ const newRoleDesc = ref('')
 
 const roleIcons: Record<string, string> = {
   admin: 'i-lucide-shield',
-  super_admin: 'i-lucide-shield-check',
-  manager: 'i-lucide-user-cog',
+  super_admin: 'i-lucide-shield',
+  organization_admin: 'i-lucide-building',
+  org_admin: 'i-lucide-building',
+  manager: 'i-lucide-user',
   member: 'i-lucide-user',
   employee: 'i-lucide-id-card',
-  guest: 'i-lucide-user-round'
+  guest: 'i-lucide-user'
 }
 
 function getRoleIcon(slug: string) {
@@ -64,7 +66,6 @@ function canDelete(role: Role) {
           <div class="flex items-center gap-2">
             <UButton
               color="primary"
-              :loading="false"
               :disabled="!hasChanges"
               @click="savePermissions"
             >
@@ -89,205 +90,187 @@ function canDelete(role: Role) {
     </template>
 
     <template #body>
-      <UContainer class="py-8">
-        <div class="max-w-6xl">
-          <!-- Page header -->
-          <div class="mb-8">
-            <h1 class="text-3xl font-bold text-(--ui-text-highlighted)">
-              Role-Based Access Control
-            </h1>
-            <p class="mt-1 text-sm text-(--ui-text-muted)">
-              Manage organizational roles and map granular permissions to resources.
-            </p>
+      <div class="p-6">
+        <!-- Page Header -->
+        <div class="mb-8">
+          <div class="flex items-center gap-1.5 text-sm text-(--ui-text-muted) mb-1">
+            <UIcon name="i-lucide-lock" class="size-3.5" />
+            <span>Authorization</span>
+          </div>
+          <h1 class="text-3xl font-bold text-(--ui-text-highlighted)">
+            Role-Based Access Control
+          </h1>
+          <p class="mt-1 text-sm text-(--ui-text-muted)">
+            Manage organizational roles and map granular permissions to resources.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-[280px_1fr] gap-6">
+          <!-- Left: System Roles -->
+          <div class="bg-(--ui-bg) rounded-xl border border-(--ui-border) overflow-hidden h-fit">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-(--ui-border)">
+              <span class="text-sm font-semibold">System Roles</span>
+              <UButton
+                color="primary"
+                variant="ghost"
+                size="xs"
+                square
+                icon="i-lucide-plus"
+                @click="showCreateDialog = true"
+              />
+            </div>
+            <div class="py-1">
+              <div
+                v-for="role in roles"
+                :key="role.id"
+                class="flex items-center justify-between px-3 py-2.5 mx-1.5 rounded-lg cursor-pointer transition-colors"
+                :class="selectedRoleId === role.id
+                  ? 'bg-green-500 text-white'
+                  : 'hover:bg-(--ui-bg-elevated)'"
+                @click="selectRole(role.id)"
+              >
+                <div class="flex items-center gap-3 min-w-0">
+                  <div
+                    class="size-8 rounded-lg flex items-center justify-center shrink-0"
+                    :class="selectedRoleId === role.id ? 'bg-white/20' : 'bg-(--ui-bg-elevated)'"
+                  >
+                    <UIcon
+                      :name="getRoleIcon(role.slug)"
+                      class="size-4"
+                    />
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium truncate">
+                      {{ role.name }}
+                    </p>
+                    <p v-if="role.isSystem" class="text-xs" :class="selectedRoleId === role.id ? 'text-white/70' : 'text-(--ui-text-muted)'">
+                      System
+                    </p>
+                  </div>
+                </div>
+                <UButton
+                  v-if="canDelete(role)"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  square
+                  icon="i-lucide-trash-2"
+                  :class="selectedRoleId === role.id ? 'text-white hover:text-white hover:bg-white/20 opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'"
+                  @click.stop="handleDeleteRole(role)"
+                />
+              </div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-[280px_1fr] gap-6">
-            <!-- Left: System Roles -->
-            <UPageCard title="System Roles" variant="subtle" class="h-fit">
-              <template #header>
-                <div class="flex items-center justify-between w-full">
-                  <span>System Roles</span>
-                  <UButton
-                    color="primary"
-                    variant="ghost"
-                    size="xs"
-                    square
-                    icon="i-lucide-plus"
-                    @click="showCreateDialog = true"
-                  />
-                </div>
-              </template>
-              <div class="space-y-1">
-                <div
-                  v-for="role in roles"
-                  :key="role.id"
-                  class="flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors"
-                  :class="selectedRoleId === role.id
-                    ? 'bg-[var(--ui-primary)]/10 text-[var(--ui-primary)] ring-1 ring-[var(--ui-primary)]/20'
-                    : 'hover:bg-(--ui-bg-elevated)'"
-                  @click="selectRole(role.id)"
+          <!-- Right: Permissions Matrix -->
+          <div class="bg-(--ui-bg) rounded-xl border border-(--ui-border) overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-(--ui-border)">
+              <UInput
+                placeholder="Filters..."
+                size="sm"
+                class="w-44"
+              />
+              <UDropdownMenu :items="[[{ label: 'Columns', icon: 'i-lucide-columns-3' }]]">
+                <UButton
+                  color="neutral"
+                  variant="outline"
+                  size="sm"
+                  trailing-icon="i-lucide-chevron-down"
                 >
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div
-                      class="size-8 rounded-lg flex items-center justify-center shrink-0"
-                      :class="selectedRoleId === role.id ? 'bg-[var(--ui-primary)]/15' : 'bg-(--ui-bg-elevated)'"
-                    >
-                      <UIcon
-                        :name="getRoleIcon(role.slug)"
-                        class="size-4"
-                      />
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-sm font-medium truncate">
-                        {{ role.name }}
-                      </p>
-                      <p v-if="role.isSystem" class="text-xs text-(--ui-text-muted)">
-                        System
-                      </p>
-                    </div>
-                  </div>
-                  <UButton
-                    v-if="canDelete(role)"
-                    color="neutral"
-                    variant="ghost"
-                    size="xs"
-                    square
-                    icon="i-lucide-trash-2"
-                    class="opacity-0 group-hover:opacity-100"
-                    @click.stop="handleDeleteRole(role)"
-                  />
-                </div>
-              </div>
-            </UPageCard>
+                  Columns
+                </UButton>
+              </UDropdownMenu>
+            </div>
 
-            <!-- Right: Permissions Matrix -->
-            <UPageCard title="Permissions" variant="subtle">
-              <template #header>
-                <div class="flex items-center justify-between w-full">
-                  <div class="flex items-center gap-2">
-                    <UInput
-                      placeholder="Filters..."
-                      size="sm"
-                      class="w-40"
-                    />
-                  </div>
-                  <UDropdownMenu :items="[[{ label: 'Columns', icon: 'i-lucide-columns-3' }]]">
-                    <UButton
-                      color="neutral"
-                      variant="ghost"
-                      size="sm"
-                      label="Columns"
-                      trailing-icon="i-lucide-chevron-down"
-                    />
-                  </UDropdownMenu>
-                </div>
-              </template>
-
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-(--ui-border)">
-                  <thead>
-                    <tr class="bg-(--ui-bg-elevated)">
-                      <th class="px-4 py-3 text-left text-xs font-medium text-(--ui-text-muted) uppercase tracking-wider w-48">
-                        Resource
-                      </th>
-                      <th
-                        v-for="action in ['Create', 'Read', 'Update', 'Delete', 'Approve', 'Export']"
-                        :key="action"
-                        class="px-3 py-3 text-center text-xs font-medium text-(--ui-text-muted) uppercase tracking-wider w-20"
-                      >
-                        {{ action }}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-(--ui-border)">
-                    <tr
-                      v-for="perm in permissions"
-                      :key="perm.resource"
-                      class="hover:bg-(--ui-bg-elevated)/50 transition-colors"
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-(--ui-border)">
+                <thead>
+                  <tr class="bg-(--ui-bg-elevated)">
+                    <th class="px-4 py-3 text-left text-xs font-medium text-(--ui-text-muted) uppercase tracking-wider w-48">
+                      Resource
+                    </th>
+                    <th
+                      v-for="action in ['Create', 'Read', 'Update', 'Delete', 'Approve', 'Export']"
+                      :key="action"
+                      class="px-3 py-3 text-center text-xs font-medium text-(--ui-text-muted) uppercase tracking-wider w-20"
                     >
-                      <td class="px-4 py-3 whitespace-nowrap">
-                        <div class="flex items-center gap-3">
-                          <div class="size-8 rounded-lg bg-(--ui-bg-elevated) flex items-center justify-center">
-                            <UIcon :name="perm.icon" class="size-4 text-(--ui-text-muted)" />
-                          </div>
-                          <span class="text-sm font-medium">{{ perm.resource }}</span>
+                      {{ action }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-(--ui-border)">
+                  <tr
+                    v-for="perm in permissions"
+                    :key="perm.resource"
+                    class="hover:bg-(--ui-bg-elevated)/50 transition-colors"
+                  >
+                    <td class="px-4 py-3 whitespace-nowrap">
+                      <div class="flex items-center gap-3">
+                        <div class="size-8 rounded-lg bg-(--ui-bg-elevated) flex items-center justify-center">
+                          <UIcon :name="perm.icon" class="size-4 text-(--ui-text-muted)" />
                         </div>
-                      </td>
-                      <td
-                        v-for="action in ['create', 'read', 'update', 'delete', 'approve', 'export'] as const"
-                        :key="action"
-                        class="px-3 py-3 text-center"
-                      >
-                        <UCheckbox
-                          :checked="perm[action]"
-                          @click="togglePermission(perm.resource, action)"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </UPageCard>
+                        <span class="text-sm font-medium">{{ perm.resource }}</span>
+                      </div>
+                    </td>
+                    <td
+                      v-for="action in ['create', 'read', 'update', 'delete', 'approve', 'export'] as const"
+                      :key="action"
+                      class="px-3 py-3 text-center"
+                    >
+                      <UCheckbox
+                        :checked="perm[action]"
+                        @click="togglePermission(perm.resource, action)"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </UContainer>
+      </div>
     </template>
-
-    <!-- Create Role Dialog -->
-    <UModal v-model:open="showCreateDialog">
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold">
-              Create Role
-            </h3>
-            <UButton
-              color="neutral"
-              variant="ghost"
-              size="sm"
-              square
-              icon="i-lucide-x"
-              @click="showCreateDialog = false"
-            />
-          </div>
-        </template>
-        <div class="space-y-4">
-          <UFormField label="Role Name" required>
-            <UInput
-              v-model="newRoleName"
-              placeholder="e.g. Editor"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField label="Slug" required>
-            <UInput
-              v-model="newRoleSlug"
-              placeholder="e.g. editor"
-              class="w-full"
-            />
-            <template #description>
-              Lowercase alphanumeric with dashes.
-            </template>
-          </UFormField>
-          <UFormField label="Description">
-            <UTextarea
-              v-model="newRoleDesc"
-              placeholder="Describe this role's purpose..."
-              class="w-full"
-            />
-          </UFormField>
-        </div>
-        <template #footer>
-          <div class="flex items-center justify-end gap-3">
-            <UButton color="neutral" variant="ghost" @click="showCreateDialog = false">
-              Cancel
-            </UButton>
-            <UButton color="primary" :disabled="!newRoleName || !newRoleSlug" @click="handleCreateRole">
-              Create Role
-            </UButton>
-          </div>
-        </template>
-      </UCard>
-    </UModal>
   </UDashboardPanel>
+
+  <!-- Create Role Dialog -->
+  <UModal v-model:open="showCreateDialog" title="Create Role">
+    <template #body>
+      <div class="space-y-4">
+        <UFormField label="Role Name" required>
+          <UInput
+            v-model="newRoleName"
+            placeholder="e.g. Editor"
+            class="w-full"
+          />
+        </UFormField>
+        <UFormField label="Slug" required>
+          <UInput
+            v-model="newRoleSlug"
+            placeholder="e.g. editor"
+            class="w-full"
+          />
+          <template #description>
+            Lowercase alphanumeric with dashes.
+          </template>
+        </UFormField>
+        <UFormField label="Description">
+          <UTextarea
+            v-model="newRoleDesc"
+            placeholder="Describe this role's purpose..."
+            class="w-full"
+          />
+        </UFormField>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex items-center justify-end gap-3">
+        <UButton color="neutral" variant="ghost" @click="showCreateDialog = false">
+          Cancel
+        </UButton>
+        <UButton color="primary" :disabled="!newRoleName || !newRoleSlug" @click="handleCreateRole">
+          Create Role
+        </UButton>
+      </div>
+    </template>
+  </UModal>
 </template>
