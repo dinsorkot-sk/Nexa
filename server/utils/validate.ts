@@ -18,13 +18,17 @@ interface FieldMeta {
 
 function parseJson<T = Record<string, unknown>>(val: string | null | undefined): T | null {
   if (!val) return null
-  try { return JSON.parse(val) as T } catch { return null }
+  try {
+    return JSON.parse(val) as T
+  } catch {
+    return null
+  }
 }
 
 /**
  * Build a Zod object schema from field metadata.
  */
-export function buildEntitySchema(fields: FieldMeta[]): z.ZodObject<any> {
+export function buildEntitySchema(fields: FieldMeta[]): z.ZodObject {
   const shape: Record<string, z.ZodTypeAny> = {}
 
   for (const field of fields) {
@@ -42,7 +46,7 @@ export function buildEntitySchema(fields: FieldMeta[]): z.ZodObject<any> {
     // Default value
     if (field.defaultValue != null) {
       try {
-        schema = (schema as any).default(coerceDefault(field.fieldType, field.defaultValue))
+        schema = schema.default(coerceDefault(field.fieldType, field.defaultValue))
       } catch { /* ignore bad default */ }
     }
 
@@ -76,15 +80,15 @@ function fieldTypeToZod(
       if (fieldType === 'email') schema = z.string().email()
       if (fieldType === 'url') schema = z.string().url()
       // Validation rules: minLength, maxLength, pattern
-      if (rules?.minLength) schema = (schema as any).min(Number(rules.minLength))
-      if (rules?.maxLength) schema = (schema as any).max(Number(rules.maxLength))
-      if (rules?.pattern) schema = (schema as any).regex(new RegExp(rules.pattern as string))
+      if (rules?.minLength) schema = (schema as z.ZodString).min(Number(rules.minLength))
+      if (rules?.maxLength) schema = (schema as z.ZodString).max(Number(rules.maxLength))
+      if (rules?.pattern) schema = (schema as z.ZodString).regex(new RegExp(rules.pattern as string))
       break
 
     case 'number':
       schema = z.coerce.number()
-      if (rules?.min !== undefined) schema = (schema as any).min(Number(rules.min))
-      if (rules?.max !== undefined) schema = (schema as any).max(Number(rules.max))
+      if (rules?.min !== undefined) schema = (schema as z.ZodNumber).min(Number(rules.min))
+      if (rules?.max !== undefined) schema = (schema as z.ZodNumber).max(Number(rules.max))
       break
 
     case 'boolean':
@@ -97,8 +101,11 @@ function fieldTypeToZod(
 
     case 'select':
       if (config?.options && Array.isArray(config.options)) {
-        const values = config.options.map((o: any) => o.value ?? o)
-        schema = z.enum(values as [string, ...string[]])
+        const items = config.options as Array<Record<string, unknown> | string>
+        const values = items.map(o =>
+          typeof o === 'object' && o !== null ? String((o as Record<string, unknown>).value ?? o) : String(o)
+        ) as [string, ...string[]]
+        schema = z.enum(values)
       } else {
         schema = z.string()
       }
@@ -164,7 +171,11 @@ export function coerceFieldTypes(
         result[key] = str === 'true' || str === '1' || str === 'yes'
         break
       case 'json':
-        try { result[key] = JSON.parse(str) } catch { result[key] = str }
+        try {
+          result[key] = JSON.parse(str)
+        } catch {
+          result[key] = str
+        }
         break
     }
   }

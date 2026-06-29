@@ -1,5 +1,6 @@
 import { db, schema } from '@nuxthub/db'
 import { eq } from 'drizzle-orm'
+import type { DrizzleDb, RelationDef } from '~/engine/sync'
 
 /** POST /api/metadata/sync/:slug — sync entity schema to actual SQL table */
 export default defineEventHandler(async (event) => {
@@ -28,7 +29,7 @@ export default defineEventHandler(async (event) => {
 
   const relationDefs = relations.map(r => ({
     slug: r.slug,
-    relationType: r.relationType as any,
+    relationType: r.relationType as RelationDef['relationType'],
     foreignKey: r.foreignKey,
     pivotTable: r.pivotTable,
     relatedTable: (relatedMap.get(r.relatedEntityId) as Record<string, unknown> | undefined)?.tableName as string ?? '',
@@ -42,7 +43,7 @@ export default defineEventHandler(async (event) => {
     isUnique: !!f.isUnique
   }))
 
-  await syncEntityAtomic(db as any,
+  await syncEntityAtomic(db as DrizzleDb,
     { tableName: entity.tableName, slug: entity.slug },
     fieldDefs,
     relationDefs

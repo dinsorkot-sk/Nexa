@@ -20,10 +20,10 @@ export interface RelationDef {
 }
 
 interface DrizzleDb {
-  run(sql: string, params?: any[]): Promise<{ rows?: unknown[], lastInsertRowid?: bigint }>
-  all<T = Record<string, unknown>>(sql: string, params?: any[]): Promise<T[]>
-  get<T = Record<string, unknown>>(sql: string, params?: any[]): Promise<T | undefined>
-  execute(sql: string, params?: any[]): Promise<{ rows: any[], columns?: string[], lastInsertRowid?: bigint, rowsAffected: number }>
+  run(sql: string, params?: unknown[]): Promise<{ rows?: unknown[], lastInsertRowid?: bigint }>
+  all<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>
+  get<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T | undefined>
+  execute(sql: string, params?: unknown[]): Promise<{ rows: unknown[], columns?: string[], lastInsertRowid?: bigint, rowsAffected: number }>
 }
 
 // ── Safe identifier validation ──────────────────────────────────────────
@@ -77,7 +77,7 @@ async function ensureColumn(
 
 // ── Sync entity ─────────────────────────────────────────────────────────
 export async function syncEntity(
-  db: { run: (sql: string, params?: any[]) => Promise<unknown> },
+  db: { run: (sql: string, params?: unknown[]) => Promise<unknown> },
   entity: EntityDef
 ) {
   const tbl = safeId(entity.tableName)
@@ -106,7 +106,7 @@ export async function syncAuditColumns(
 
 // ── Sync field ──────────────────────────────────────────────────────────
 export async function syncField(
-  db: { run: (sql: string, params?: any[]) => Promise<unknown> },
+  db: { run: (sql: string, params?: unknown[]) => Promise<unknown> },
   entity: EntityDef,
   field: FieldDef
 ) {
@@ -123,7 +123,7 @@ export async function syncField(
 
 // ── Sync relation ───────────────────────────────────────────────────────
 export async function syncRelation(
-  db: { run: (sql: string, params?: any[]) => Promise<unknown> },
+  db: { run: (sql: string, params?: unknown[]) => Promise<unknown> },
   entity: EntityDef,
   rel: RelationDef
 ) {
@@ -166,7 +166,7 @@ export async function syncRelation(
 
 // ── Drop entity ─────────────────────────────────────────────────────────
 export async function dropEntity(
-  db: { run: (sql: string, params?: any[]) => Promise<unknown> },
+  db: { run: (sql: string, params?: unknown[]) => Promise<unknown> },
   entity: EntityDef
 ) {
   await db.run(`DROP TABLE IF EXISTS ${safeId(entity.tableName)}`)
@@ -183,16 +183,16 @@ export async function syncEntityAtomic(
   relations?: RelationDef[]
 ): Promise<void> {
   await withTransaction(db, async (txDb) => {
-    await syncEntity(txDb as any, entity)
+    await syncEntity(txDb, entity)
     await syncAuditColumns(txDb, entity)
     if (fields) {
       for (const field of fields) {
-        await syncField(txDb as any, entity, field)
+        await syncField(txDb, entity, field)
       }
     }
     if (relations) {
       for (const rel of relations) {
-        await syncRelation(txDb as any, entity, rel)
+        await syncRelation(txDb, entity, rel)
       }
     }
   })

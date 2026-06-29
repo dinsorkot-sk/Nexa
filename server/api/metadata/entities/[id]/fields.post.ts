@@ -1,5 +1,6 @@
 import { db, schema } from '@nuxthub/db'
 import { eq } from 'drizzle-orm'
+import type { DrizzleDb } from '~/engine/sync'
 
 /** POST /api/metadata/entities/:id/fields — create a new field */
 export default defineEventHandler(async (event) => {
@@ -33,7 +34,7 @@ export default defineEventHandler(async (event) => {
   if (result) {
     try {
       const { syncField } = await import('../../../../engine/sync')
-      await syncField(db as any, { tableName: entity.tableName, slug: entity.slug }, {
+      await syncField(db as DrizzleDb, { tableName: entity.tableName, slug: entity.slug }, {
         slug: result.slug,
         fieldType: result.fieldType,
         isRequired: result.isRequired ?? false,

@@ -1,5 +1,4 @@
 import { db, schema } from '@nuxthub/db'
-import { eq } from 'drizzle-orm'
 
 /** GET /api/metadata/entities — list all entities */
 export default defineEventHandler(async (event) => {

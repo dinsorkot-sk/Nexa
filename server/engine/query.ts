@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 import { relations as relationsTable } from '../db/schema/relations'
 import { entities } from '../db/schema/metadata'
 import type { RelationDef } from './sync'
@@ -16,13 +16,13 @@ export interface QueryOptions {
 interface DrizzleDb {
   select(): {
     from(table: unknown): {
-      where(condition: unknown): { all(): Promise<Record<string, unknown>[]>; get(): Promise<Record<string, unknown> | undefined> }
+      where(condition: unknown): { all(): Promise<Record<string, unknown>[]>, get(): Promise<Record<string, unknown> | undefined> }
       all(): Promise<Record<string, unknown>[]>
     }
   }
-  run(query: any): Promise<{ rows?: unknown[]; lastInsertRowid?: bigint }>
-  all<T = Record<string, unknown>>(query: any): Promise<T[]>
-  get<T = Record<string, unknown>>(query: any): Promise<T | undefined>
+  run(query: SQL): Promise<{ rows?: unknown[], lastInsertRowid?: bigint }>
+  all<T = Record<string, unknown>>(query: SQL): Promise<T[]>
+  get<T = Record<string, unknown>>(query: SQL): Promise<T | undefined>
 }
 
 // ── Safe identifier validation ──────────────────────────────────────────
@@ -36,7 +36,7 @@ export function safeId(name: string): string {
 // ── Build a SQL object with parameterised values ─────────────────────────
 // Split raw SQL on `?` and interleave values using the sql`` template literal,
 // which correctly builds a `SQL` object with Param chunks.
-function makeSQL(rawStr: string, vals: any[] = []) {
+function makeSQL(rawStr: string, vals: unknown[] = []) {
   const parts = rawStr.split('?')
   let sq = sql.raw(parts[0] || '')
   for (let i = 0; i < vals.length; i++) {
@@ -79,9 +79,9 @@ function buildWhere(
   filter: Record<string, string>,
   tableName: string,
   includeTrash: boolean
-): { clause: string; params: any[] } {
+): { clause: string, params: unknown[] } {
   const conditions: string[] = []
-  const params: any[] = []
+  const params: unknown[] = []
   const tbl = safeId(tableName)
 
   if (!includeTrash) {
@@ -99,7 +99,7 @@ function buildWhere(
 }
 
 // ── Join builder ────────────────────────────────────────────────────────
-function buildJoin(tableName: string, entitySlug: string, includes: string[]): { joinPart: string; selectFields: string } {
+function buildJoin(tableName: string, entitySlug: string, includes: string[]): { joinPart: string, selectFields: string } {
   let joinPart = ''
   let selectFields = `${safeId(tableName)}.*`
   for (const inc of includes) {
@@ -134,7 +134,7 @@ export async function findMany(
   tableName: string,
   entitySlug: string,
   options: QueryOptions
-): Promise<{ data: Record<string, unknown>[]; total: number }> {
+): Promise<{ data: Record<string, unknown>[], total: number }> {
   await loadRelations(db)
 
   const tbl = safeId(tableName)
@@ -196,7 +196,7 @@ export async function createOne(
 
   const cols = keys.map(k => safeId(k)).join(', ')
   const placeholders = keys.map(() => '?').join(', ')
-  const vals = keys.map(k => {
+  const vals = keys.map((k) => {
     const v = data[k]
     if (v === undefined || v === null) return null
     if (typeof v === 'object') return JSON.stringify(v)
@@ -220,7 +220,7 @@ export async function updateOne(
   }
 
   const sets = keys.map(k => `${safeId(k)} = ?`)
-  const vals = keys.map(k => {
+  const vals = keys.map((k) => {
     const v = data[k]
     if (v === undefined || v === null) return null
     if (typeof v === 'object') return JSON.stringify(v)
@@ -297,9 +297,10 @@ function nestRelations(
       for (const inc of includes) {
         const rel = _relMap.get(inc)
         if (!rel) continue
+        const record = grouped[id] as Record<string, unknown>
         for (const key of Object.keys(row)) {
           if (key.startsWith(`_rel_${inc}_`)) {
-            delete grouped[id][key]
+            record[key] = undefined
           }
         }
         grouped[id][inc] = rel.relationType === '1:N' ? [] : null

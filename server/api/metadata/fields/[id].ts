@@ -1,5 +1,6 @@
 import { db, schema } from '@nuxthub/db'
 import { eq } from 'drizzle-orm'
+import type { DrizzleDb } from '~/engine/sync'
 
 /** PUT|DELETE /api/metadata/fields/:id */
 export default defineEventHandler(async (event) => {
@@ -36,7 +37,7 @@ export default defineEventHandler(async (event) => {
         try {
           const { syncField } = await import('../../../engine/sync')
           const { invalidateRelationCache } = await import('../../../engine/query')
-          await syncField(db as any, { tableName: entity.tableName, slug: entity.slug }, {
+          await syncField(db as DrizzleDb, { tableName: entity.tableName, slug: entity.slug }, {
             slug: field.slug,
             fieldType: field.fieldType || 'text',
             isRequired: !!field.isRequired,

@@ -12,7 +12,8 @@
     "test": "vitest",
     "test:unit": "vitest --project unit",
     "test:e2e": "vitest --project e2e",
-    "test:nuxt": "vitest --project nuxt"
+    "test:nuxt": "vitest --project nuxt",
+    "prepare": "husky"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",
@@ -42,10 +43,11 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.5.0",
     "happy-dom": "^20.10.6",
+    "husky": "^9.1.7",
     "playwright-core": "^1.61.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9",
     "vue-tsc": "^3.3.5"
   },
-  "packageManager": "pnpm@11.8.0"
+  "packageManager": "pnpm@11.9.0"
 }

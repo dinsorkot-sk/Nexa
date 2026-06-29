@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
           icon: body.icon,
           moduleId: body.moduleId,
           isActive: body.isActive,
-          updatedAt: "datetime('now')"
+          updatedAt: 'datetime(\'now\')'
         })
         .where(eq(schema.entities.id, id))
         .returning().get()

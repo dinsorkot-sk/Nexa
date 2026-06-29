@@ -185,7 +185,7 @@ describe('engine CRUD', () => {
   it('safeId rejects invalid identifiers', async () => {
     const { safeId } = await import('../../server/engine/query')
     expect(() => safeId('DROP TABLE users')).toThrow('Invalid SQL identifier')
-    expect(() => safeId("'; DELETE FROM users; --")).toThrow('Invalid SQL identifier')
+    expect(() => safeId('\'; DELETE FROM users; --')).toThrow('Invalid SQL identifier')
     expect(() => safeId('normal_name_123')).not.toThrow()
   })
 })
