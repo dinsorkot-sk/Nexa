@@ -237,7 +237,7 @@ function fieldTypeBadgeColor(type: string) {
           :items="tabs"
           color="neutral"
           size="sm"
-          :ui="{root: 'gap-0!'}"
+          :ui="{ root: 'gap-0!' }"
         />
         <template #right>
           <div class="flex items-center gap-2">
