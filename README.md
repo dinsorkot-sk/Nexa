@@ -12,7 +12,7 @@ The metadata UI also includes a Vue Flow ER diagram with field-to-field links an
 See [`nexa-architecture.drawio`](./nexa-architecture.drawio) for C4 architecture diagrams (6 pages covering system context, containers, runtime engine, and data model).
 
 ```
-app/          Nuxt pages, layouts, components, composables
+app/          Nuxt app root, pages, layouts, components, composables, types, utils, assets
 server/
   api/        REST handlers — dynamic CRUD, metadata CRUD, mock endpoints
   engine/     Schema sync, dynamic query builder, relation nesting
@@ -39,6 +39,7 @@ Postinstall auto-runs `nuxt prepare` (generates `.nuxt/` types).
 | `pnpm typecheck` | Nuxt typecheck |
 | `pnpm test:unit` | Pure function tests (no setup) |
 | `pnpm test:nuxt` | Engine integration tests (in-memory SQLite) |
+| `pnpm test` | All vitest projects (unit + nuxt + e2e) |
 | `pnpm test:e2e` | Raw SQL tests (in-memory SQLite) |
 | `pnpm build` | Production build |
 | `pnpm preview` | Preview production build |

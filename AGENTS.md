@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- **pnpm** (v11.8.0) — never use npm. Install deps: `pnpm install`
+- **pnpm** (v11.9.0) — never use npm. Install deps: `pnpm install`
 - Postinstall auto-runs `nuxt prepare`, generating `.nuxt/`. Required for lint, typecheck, dev.
 - **Native binary**: `@libsql/win32-x64-msvc` must compile. If you see `ERR_DLOPEN_FAILED`, run `pnpm rebuild` or `pnpm install --force`.
 - **Pre-commit**: Husky runs `pnpm lint && pnpm typecheck`. Both must pass to commit.
@@ -35,10 +35,12 @@ server/
     mails.ts              Mock
     customers.ts          Mock
     notifications.ts      Mock
+    auth/                 Auth routes: login, register, logout, me, roles, invite, config, events
+    seed-auth.post.ts     Seed auth data (Admin + Member roles, admin user)
   engine/     Dynamic CMS engine — sync.ts (schema sync), query.ts (CRUD), include.ts
-  db/schema/  Drizzle ORM — metadata.ts (_modules, _entities, _fields), relations.ts, generic-refs.ts
+  db/schema/  Drizzle ORM — metadata.ts (_modules, _entities, _fields), relations.ts, generic-refs.ts, auth.ts (_users, _sessions, _roles, _user_roles, _invites)
   tasks/      Nuxt tasks — seed.ts (db:seed, canonical metadata bootstrap)
-  utils/      Zod validation — validate.ts (buildEntitySchema, filterKnownFields, coerceFieldTypes)
+  utils/      Zod validation — validate.ts (buildEntitySchema, filterKnownFields, coerceFieldTypes); auth.ts (password hashing, tokens), session.ts (session management, requireAuth)
 test/         Vitest projects: unit/, nuxt/, e2e/
 ```
 
@@ -64,23 +66,15 @@ test/         Vitest projects: unit/, nuxt/, e2e/
 - Icons: `i-lucide-*` (Lucide) and `i-simple-icons-*` (Simple Icons)
 - Keyboard shortcuts via `defineShortcuts()` from `@vueuse/core`
 - Husky hooks auto-enabled via `"prepare": "husky"` in package.json
+- `routeRules`: `/api/**` has CORS enabled
+- `devtools` enabled
+- `compatibilityDate`: `2024-07-11`
+- `nitro.experimental.tasks: true` (required for `db:seed` task)
+- Global CSS: `~/assets/css/main.css`
 
-## Installed Skills (skills.sh)
+## Installed Skills
 
-```bash
-# Design & UI
-npx skills add -y anthropics/skills          # frontend-design, theme-factory, brand-guidelines +15 more
-npx skills add -y pbakaus/impeccable         # UI review & polish
+See [`skills-lock.json`](./skills-lock.json) for the full list of installed skills.
+Sources: `anthropics/skills`, `obra/superpowers`, `pbakaus/impeccable`, `arvindrk/extract-design-system`.
 
-# Agent Workflows & Planning
-npx skills add -y obra/superpowers           # writing-plans, subagent-driven-development,
-                                             # systematic-debugging, executing-plans,
-                                             # test-driven-development +9 more
-
-# Design System & Tailwind
-npx skills add -y wshobson/agents              # tailwind-design-system, typescript-advanced-types +3 more
-npx skills add -y arvindrk/extract-design-system # extract tokens from existing codebase
-
-# NOTE: mattpocock/skills skills (improve-codebase-architecture, tdd)
-# are NOT compatible with current skills CLI (1.5.13) - skip until fixed
-```
+**NOTE:** `mattpocock/skills` skills are NOT compatible with current skills CLI — skip until fixed.
