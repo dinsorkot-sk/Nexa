@@ -427,20 +427,6 @@ function getTimeAgo(dateStr: string | null): string {
                   </template>
                   <template #actions-cell>
                     <div class="flex items-center gap-1">
-                      <UButton
-                        icon="i-lucide-eye"
-                        color="neutral"
-                        variant="ghost"
-                        square
-                        size="sm"
-                      />
-                      <UButton
-                        icon="i-lucide-pencil"
-                        color="neutral"
-                        variant="ghost"
-                        square
-                        size="sm"
-                      />
                       <UDropdownMenu
                         :items="[[{ label: 'Duplicate', icon: 'i-lucide-copy' }, { label: 'Export', icon: 'i-lucide-download' }, { label: 'Delete', icon: 'i-lucide-trash-2', color: 'error' }]]"
                       >
@@ -492,7 +478,7 @@ function getTimeAgo(dateStr: string | null): string {
           <UCard
             v-if="showSidePanel && meta.selectedModule.value"
             class="h-full flex flex-col w-96"
-            :ui="{ header:'flex justify-between p-2' ,body:'sm:p-0 p-0 h-full'}"
+            :ui="{ header:'flex justify-between p-2' ,body:'sm:p-0 p-0 h-full', footer: 'flex flex-col gap-2'}"
           >
             <!-- Panel Header -->
             <template #header>
@@ -722,6 +708,7 @@ function getTimeAgo(dateStr: string | null): string {
               >
                 {{ meta.selectedModule.value.isActive ? 'Deactivate Module' : 'Activate Module' }}
               </UButton>
+              <UButton label="veiw" color="neutral" variant="outline" class="justify-center"/>
             </template>
 
           </UCard>
