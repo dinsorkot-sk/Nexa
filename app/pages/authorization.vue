@@ -90,9 +90,9 @@ function canDelete(role: Role) {
     </template>
 
     <template #body>
-      <div class="p-6">
+      <div class="p-6 flex flex-col gap-6 h-full">
         <!-- Page Header -->
-        <div class="mb-8">
+        <div>
           <div class="flex items-center gap-1.5 text-sm text-(--ui-text-muted) mb-1">
             <UIcon name="i-lucide-lock" class="size-3.5" />
             <span>Authorization</span>
@@ -170,16 +170,6 @@ function canDelete(role: Role) {
                 size="sm"
                 class="w-44"
               />
-              <UDropdownMenu :items="[[{ label: 'Columns', icon: 'i-lucide-columns-3' }]]">
-                <UButton
-                  color="neutral"
-                  variant="outline"
-                  size="sm"
-                  trailing-icon="i-lucide-chevron-down"
-                >
-                  Columns
-                </UButton>
-              </UDropdownMenu>
             </div>
 
             <div class="overflow-x-auto">
@@ -215,12 +205,14 @@ function canDelete(role: Role) {
                     <td
                       v-for="action in ['create', 'read', 'update', 'delete', 'approve', 'export'] as const"
                       :key="action"
-                      class="px-3 py-3 text-center"
+                      class="px-3 py-3"
                     >
-                      <UCheckbox
-                        :checked="perm[action]"
-                        @click="togglePermission(perm.resource, action)"
-                      />
+                      <div class="flex justify-center">
+                        <UCheckbox
+                          :checked="perm[action]"
+                          @click="togglePermission(perm.resource, action)"
+                        />
+                      </div>
                     </td>
                   </tr>
                 </tbody>
