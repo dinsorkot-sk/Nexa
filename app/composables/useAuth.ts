@@ -11,18 +11,26 @@ export interface UserSession {
 const _useAuth = () => {
   const user = ref<UserSession | null>(null)
   const loading = ref(true)
+  let fetchAttempted = false
 
   const isAuthenticated = computed(() => !!user.value)
   const isAdmin = computed(() => user.value?.roles.some(r => r.slug === 'admin') ?? false)
 
   /**
    * Fetch current user session from the API.
+   * Idempotent — subsequent calls are no-ops once attempted.
    */
   async function fetchUser() {
+    if (fetchAttempted) return
+    fetchAttempted = true
     try {
       user.value = await $fetch<UserSession>('/api/auth/me')
     } catch {
       user.value = null
+      // Session expired — redirect to login if on a protected page (not already there)
+      if (import.meta.client && window.location.pathname !== '/login') {
+        await navigateTo('/login')
+      }
     } finally {
       loading.value = false
     }
@@ -62,7 +70,7 @@ const _useAuth = () => {
   async function logout() {
     await $fetch('/api/auth/logout', { method: 'POST' })
     user.value = null
-    navigateTo('/')
+    await navigateTo('/login')
   }
 
   // Initialize on mount

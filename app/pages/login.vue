@@ -64,10 +64,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
     @submit="onSubmit"
   >
     <template #description>
-      Don't have an account? <ULink
-        to="/signup"
-        class="text-primary font-medium"
-      >Sign up</ULink>.
+      Sign in to your account.
     </template>
 
     <template #password-hint>

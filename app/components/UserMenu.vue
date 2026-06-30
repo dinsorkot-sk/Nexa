@@ -9,8 +9,6 @@ const colorMode = useColorMode()
 const appConfig = useAppConfig()
 const { user, isAuthenticated, logout } = useAuth()
 
-const showLoginModal = ref(false)
-
 const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
@@ -27,7 +25,7 @@ const items = computed<DropdownMenuItem[][]>(() => {
     return [[{
       label: 'Sign In',
       icon: 'i-lucide-log-in',
-      onSelect: () => { showLoginModal.value = true }
+      to: '/login'
     }]]
   }
 
@@ -141,11 +139,4 @@ const items = computed<DropdownMenuItem[][]>(() => {
       :ui="{ trailingIcon: 'text-dimmed' }"
     />
   </UDropdownMenu>
-
-  <!-- Login Modal -->
-  <LoginModal
-    v-if="showLoginModal"
-    @close="showLoginModal = false"
-    @logged-in="showLoginModal = false"
-  />
 </template>
