@@ -699,13 +699,13 @@ function getTimeAgo(dateStr: string | null): string {
               </div>
 
               <!-- Forms Tab -->
-              <div v-else-if="detailTab === 'forms'" class="py-8 text-center text-sm text-(--ui-text-muted)">
+              <div v-else-if="detailTab === 'forms'" class="py-8 text-center text-sm text-(--ui-text-muted) flex flex-col">
                 <UIcon name="i-lucide-file-text" class="mx-auto mb-2 size-6 opacity-50" />
                 No forms yet
               </div>
 
               <!-- Users Tab -->
-              <div v-else class="py-8 text-center text-sm text-(--ui-text-muted)">
+              <div v-else class="py-8 text-center text-sm text-(--ui-text-muted) flex flex-col">
                 <UIcon name="i-lucide-users" class="mx-auto mb-2 size-6 opacity-50" />
                 No users assigned
               </div>
