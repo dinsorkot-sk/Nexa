@@ -1,0 +1,474 @@
+# Prompt: Build Module Detail Page with Nuxt UI 4
+
+## Goal
+Build a **Module Detail** page for a SaaS admin panel using **Nuxt UI 4 components only**.
+The page is a tabbed management interface for a single module (e.g., "CRM").
+Design should feel like a native Nuxt UI 4 admin app — clean, flat, spacious.
+
+---
+
+## Tech Stack
+- **Nuxt 3** + **Nuxt UI 4** (`@nuxt/ui` v4)
+- Use only Nuxt UI 4 components — no custom CSS classes or external UI libs
+- Tailwind CSS utility classes are allowed for layout/spacing only
+- TypeScript optional but preferred
+
+---
+
+## Page Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  TOPBAR: breadcrumb + action buttons                            │
+│  TAB BAR: Overview | Entities | Forms | Workflows | APIs |      │
+│           Permissions | Settings                                 │
+├──────────────────────────────────┬──────────────────────────────┤
+│  MAIN CONTENT (tab-dependent)    │  RIGHT PANEL (300px)         │
+│                                  │  (changes per tab)           │
+└──────────────────────────────────┴──────────────────────────────┘
+```
+
+---
+
+## Nuxt UI 4 Components to Use
+
+Reference the Nuxt UI 4 docs. Key components:
+- `UBreadcrumb` — top breadcrumb
+- `UTabs` — horizontal tab bar
+- `UCard` — stat cards, content sections
+- `UButton` — all action buttons (ghost, solid, outline variants)
+- `UBadge` — status pills, type labels, category tags
+- `UTable` — data tables (Forms, Workflows, APIs, Permissions tabs)
+- `UInput`, `UTextarea`, `USelect`, `USelectMenu` — form fields (Settings tab)
+- `UToggle` — boolean toggles
+- `USeparator` — section dividers
+- `UAvatar` — user avatars in table rows
+- `UDropdownMenu` — row action menus (⋮)
+- `UIcon` — icons (uses Heroicons or Lucide via Nuxt UI 4 icon integration)
+- `UProgress` — progress bar (rate limit, health bars)
+- `UAlert` — info/success banners
+- `UCheckbox` — checkboxes in entity selection
+- `UPagination` — table pagination
+- `UFormField` (or `UFormGroup`) — wrapping form fields with label + hint
+- `UKbd` — keyboard shortcut display
+
+---
+
+## Top Bar
+
+```vue
+<div class="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-800">
+  <UBreadcrumb :links="[{ label: 'Module Management', to: '/modules' }, { label: 'CRM' }]" />
+  <div class="flex items-center gap-2">
+    <UButton icon="i-heroicons-eye" variant="ghost" color="gray">Preview Module</UButton>
+    <UButton icon="i-heroicons-cog-6-tooth" variant="ghost" color="gray">Module Settings</UButton>
+    <UButton icon="i-heroicons-plus" color="primary">Create Form</UButton>
+    <UButton icon="i-heroicons-ellipsis-vertical" variant="ghost" color="gray" />
+  </div>
+</div>
+```
+
+The right action button label changes per tab:
+- Overview → `+ Create Form`
+- Forms → `+ Create Form`
+- Workflows → `+ Create Workflow`
+- APIs → `+ Create API`
+- Permissions → `+ Create Role`
+- Settings → (no create button, show `Save Changes` at bottom)
+
+---
+
+## Tab Bar
+
+```vue
+<UTabs :items="tabs" v-model="activeTab" class="px-6" />
+```
+
+Tabs: `Overview`, `Entities`, `Forms`, `Workflows`, `APIs`, `Permissions`, `Settings`
+
+Active tab underline in primary green.
+
+---
+
+## Tab Contents
+
+### Tab 1 — Overview
+
+**Layout:** 2 columns (main content left, right panel 300px)
+
+**Stat Cards Row** (5 cards using `UCard` in a grid):
+| Stat | Value | Change |
+|---|---|---|
+| Entities | 12 | +2 from last 30 days |
+| Forms | 24 | +5 from last 30 days |
+| Menu Items | 18 | +3 from last 30 days |
+| Roles | 6 | No change |
+| Users with Access | 42 | +8 from last 30 days |
+
+Each card: colored icon (`UIcon`) + label + large number + small change text (green if positive).
+
+**Activity Overview** chart:
+- Use a simple line chart (use `vue-chartjs` or a `<canvas>` element) with 3 lines: Form Views, Form Submissions, API Calls
+- Date range selector: `USelectMenu` with "Last 7 days" default
+- Or mock the chart with a placeholder `UCard` with a placeholder SVG path
+
+**Two bottom cards (side by side):**
+- **Recent Forms** — list of 5 forms with icon, name, badge (form type), date, `UDropdownMenu` action
+- **Module Health** — list of health checks (Configuration, Permissions, Workflows, APIs, Data Integrity) each with label, description, "Healthy" `UBadge` in green + check icon
+
+**Right Panel (Overview):**
+```vue
+<!-- About This Module -->
+<UCard>
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-lg bg-primary-500 flex items-center justify-center">
+      <UIcon name="i-heroicons-users" class="text-white" />
+    </div>
+    <div>
+      <span class="font-semibold">CRM</span>
+      <UBadge color="green" variant="subtle">Active</UBadge>
+    </div>
+  </div>
+  <p class="text-sm text-gray-500 mt-2">Customer Relationship Management...</p>
+  <USeparator class="my-3" />
+  <!-- metadata rows: Module Key, Created At, Created By, Version -->
+</UCard>
+
+<!-- Quick Actions -->
+<UCard>
+  <template #header><span class="font-semibold">Quick Actions</span></template>
+  <!-- UButton ghost list: Create Entity, Create Form, Create Workflow, Manage Permissions, Export Module -->
+</UCard>
+
+<!-- Useful Links -->
+<!-- Notes (UTextarea) -->
+```
+
+---
+
+### Tab 2 — Entities
+
+**Filter tabs:** `UButton` group — All (N) | Active | Draft | Archived  
+**Search + Filter:** `UInput` search + `UButton` filter
+
+**Table** using `UTable`:
+```ts
+const columns = [
+  { key: 'select', class: 'w-4' },
+  { key: 'name', label: 'Entity Name', sortable: true },
+  { key: 'category', label: 'Category', sortable: true },
+  { key: 'fields', label: 'Fields' },
+  { key: 'forms', label: 'Forms' },
+  { key: 'status', label: 'Status' },
+  { key: 'updatedAt', label: 'Updated At', sortable: true },
+  { key: 'actions' }
+]
+```
+
+Each row: checkbox, icon + name + description, `UBadge` category, counts, `UBadge` status, date, `UDropdownMenu`
+
+**Right Panel:** About Entities info card + tips + Manage Entities button
+
+---
+
+### Tab 3 — Forms
+
+**Filter bar:** Status tabs (All 12 | Active 9 | Draft 2 | Archived 1) + search + `UButton` filter + sort `USelectMenu`
+
+**Table** using `UTable`:
+```ts
+const columns = [
+  { key: 'name', label: 'Form Name', sortable: true },
+  { key: 'entity', label: 'Entity', sortable: true },
+  { key: 'type', label: 'Type' },
+  { key: 'status', label: 'Status', sortable: true },
+  { key: 'updatedBy', label: 'Updated By', sortable: true },
+  { key: 'updatedAt', label: 'Updated At', sortable: true },
+  { key: 'actions' }
+]
+```
+
+Row data:
+- Name: icon + bold name + muted description
+- Entity: `UBadge` colored pill
+- Type: plain text (Main Form / Quick Create / Detail View / Inline Form)
+- Status: `UBadge` (green = Active, yellow = Draft, gray = Archived)
+- Updated By: `UAvatar` + name
+- Updated At: date string
+- Actions: `UDropdownMenu` with ⋮ icon
+
+Pagination: `UPagination` at bottom
+
+**Right Panel:**
+- About Forms: description paragraph
+- Form Types: 4 type cards (Main Form, Quick Create, Detail View, Inline Form) each with icon + name + description
+- Form Builder section: description + `UButton` "Open Form Builder"
+- Quick Actions list
+- Help section
+
+---
+
+### Tab 4 — Workflows
+
+**Stat cards row** (5 cards): Total Workflows (18), Active (15, 83.3%), Inactive (2, 11.1%), Draft (1, 5.6%), Executions 30d (2,486)
+
+**Filter tabs:** All 18 | Active 15 | Inactive 2 | Draft 1
+
+**Table** using `UTable`:
+```ts
+const columns = [
+  { key: 'name', label: 'Workflow Name' },
+  { key: 'trigger', label: 'Trigger', sortable: true },
+  { key: 'scope', label: 'Scope', sortable: true },
+  { key: 'status', label: 'Status', sortable: true },
+  { key: 'lastRun', label: 'Last Run', sortable: true },
+  { key: 'executions', label: 'Executions (30d)' },
+  { key: 'updatedBy', label: 'Updated By', sortable: true },
+  { key: 'actions' }
+]
+```
+
+Status badge: green dot + "Active", red dot + "Inactive", yellow "Draft"
+
+**Right Panel:**
+- About Workflows: description + 4 green checkmark bullets
+- Workflow Triggers: 5 trigger type cards (Record Created, Record Updated, Record Deleted, Scheduled, Webhook) each with icon + name + description
+- "View all triggers →" link
+- Quick Actions list
+- Help section
+
+---
+
+### Tab 5 — APIs
+
+**Stat cards row** (5 cards): Total APIs (18), Base URL (`/api/v1/crm`), Auth Type (Bearer Token / JWT), Total Requests 30d (2,486), Average Response (128ms)
+
+**Filter bar:** `UInput` search + `USelectMenu` (All Entities) + `USelectMenu` (All Methods) + `USelectMenu` (All Status) + Filter button
+
+**Table** using `UTable`:
+```ts
+const columns = [
+  { key: 'name', label: 'API' },
+  { key: 'entity', label: 'Entity' },
+  { key: 'methods', label: 'Methods' },
+  { key: 'endpoint', label: 'Base Endpoint' },
+  { key: 'requests', label: 'Requests (30d)' },
+  { key: 'status', label: 'Status' },
+  { key: 'updatedBy', label: 'Updated By' },
+  { key: 'updatedAt', label: 'Updated At' },
+  { key: 'actions' }
+]
+```
+
+Methods column: colored `UBadge` for GET (blue), POST (green), PUT (yellow/amber), DELETE (red)
+
+**Right Panel:**
+- About APIs: description + 5 green checkmark bullets + "View API Documentation" link
+- Quick Actions list
+- Rate Limit: "1,250 / 10,000 requests" with `UProgress` bar + "View Rate Limit Settings" link
+
+---
+
+### Tab 6 — Permissions
+
+**Inner tabs** (sub-navigation using `UTabs` or `UButton` group):
+Roles | Permissions Matrix | Field Permissions | Record Rules
+
+**Stat cards row** (4 cards): Total Roles (6), Total Permissions (48), Entities Protected (8/12, 66.7%), Field Restrictions (15)
+
+**Search + Filter bar**
+
+**Table** using `UTable` (Roles sub-tab):
+```ts
+const columns = [
+  { key: 'role', label: 'Role Name' },
+  { key: 'description', label: 'Description' },
+  { key: 'users', label: 'Users' },
+  { key: 'type', label: 'Type' },
+  { key: 'status', label: 'Status' },
+  { key: 'updatedAt', label: 'Updated At' },
+  { key: 'actions' }
+]
+```
+
+Role rows: Super Admin (crown icon), Admin (shield), Manager (users), Sales Representative (user), Support Agent (headset), Viewer (eye)  
+Type badge: "System" (blue) or "Custom" (purple)
+
+**Right Panel:**
+- About Permissions: description + 4 bullets
+- Permission Summary: 4 stat rows (Entities 8, Permissions 48, Field Restrictions 15, Roles 6) each with icon + count + label
+- Quick Actions list
+- Need Help? section
+
+---
+
+### Tab 7 — Settings
+
+**Layout:** 3 columns (left settings nav 200px | center form content | right panel 300px)
+
+**Left Settings Nav** (vertical `UButton` list or custom nav):
+- General (active)
+- Localization
+- Number & Format
+- Date & Time
+- Media & Storage
+- Notifications
+- Integrations
+- Webhooks
+- Advanced
+
+**Center — General Settings:**
+
+Section: **Module Information**
+```vue
+<UFormField label="Module Name">
+  <UInput v-model="form.name" />
+</UFormField>
+
+<UFormField label="Module Key" hint="Unique key used for APIs. Cannot be changed.">
+  <UInput v-model="form.key" disabled />
+</UFormField>
+
+<UFormField label="Description">
+  <UTextarea v-model="form.description" :rows="3" />
+</UFormField>
+
+<UFormField label="Status">
+  <USelectMenu v-model="form.status" :options="['Active', 'Inactive']" />
+</UFormField>
+
+<UFormField label="Icon">
+  <div class="flex items-center gap-3">
+    <div class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
+      <UIcon name="i-heroicons-users" class="text-white text-xl" />
+    </div>
+    <UButton variant="outline">Change Icon</UButton>
+  </div>
+  <p class="text-xs text-gray-400 mt-1">Recommended size: 512x512px (PNG or SVG)</p>
+</UFormField>
+
+<UFormField label="Color">
+  <div class="flex items-center gap-2">
+    <div class="w-8 h-8 rounded border" style="background: #10B981" />
+    <UInput v-model="form.color" class="w-32" />
+  </div>
+  <p class="text-xs text-gray-400 mt-1">Primary color used across the module.</p>
+</UFormField>
+```
+
+Section: **Default Settings** (2-column grid)
+```vue
+<UFormField label="Default Page">
+  <USelectMenu :options="['Dashboard', 'Entities', 'Forms']" />
+</UFormField>
+<UFormField label="Default View Mode">
+  <USelectMenu :options="['Table View', 'Card View', 'List View']" />
+</UFormField>
+<UFormField label="Items Per Page" hint="Number of items to display per page.">
+  <UInput type="number" value="20" />
+</UFormField>
+<UFormField label="Search Behavior">
+  <USelectMenu :options="['Global Search', 'Module Search']" />
+</UFormField>
+```
+
+Bottom: `UButton color="primary" icon="i-heroicons-check"` → "Save Changes"
+
+**Right Panel (Settings):**
+- Module Statistics: list of counts (Entities 12, Forms 24, Views 18, Workflows 16, APIs 18, Users with Access 42) each as a row with icon + label + count
+- System Information: Created At, Created By, Updated At, Version, Environment
+- **Danger Zone** (red `UCard`): "Delete Module" — description text + `UButton color="red" variant="outline"` "Delete Module"
+
+---
+
+## Data & State
+
+```ts
+// composables/useModuleDetail.ts
+const activeTab = ref('overview')
+
+const module = ref({
+  id: 'crm',
+  name: 'CRM',
+  fullName: 'Customer Relationship Management',
+  key: 'crm',
+  description: 'Manage customers, leads, opportunities, contacts and activities.',
+  icon: 'i-heroicons-users',
+  color: '#10B981',
+  category: 'Business',
+  status: 'Active',
+  version: '1.0.0',
+  createdAt: 'May 20, 2024',
+  createdBy: 'Administrator',
+})
+
+const stats = ref({
+  entities: 12,
+  forms: 24,
+  menuItems: 18,
+  roles: 6,
+  usersWithAccess: 42,
+})
+```
+
+---
+
+## Styling Conventions (Nuxt UI 4)
+
+- Use `color="primary"` for the main green accent (configure primary = emerald in `nuxt.config.ts`)
+- `UBadge` variants: `solid` for status pills, `subtle` for category tags
+- `UButton` variants: `solid` for primary CTAs, `ghost` for icon-only buttons, `outline` for secondary
+- Table hover states are handled by `UTable` automatically
+- Use `dark:` variants where needed — Nuxt UI 4 supports dark mode natively
+- Spacing: use Tailwind `gap-*`, `px-*`, `py-*` utilities
+- Card sections: `UCard` with `#header` and `#footer` slots where needed
+
+---
+
+## nuxt.config.ts Setup
+
+```ts
+export default defineNuxtConfig({
+  modules: ['@nuxt/ui'],
+  ui: {
+    primary: 'emerald',
+    gray: 'cool',
+  },
+})
+```
+
+---
+
+## File Structure
+
+```
+pages/
+  modules/
+    [id]/
+      index.vue          ← main page with tabs
+components/
+  module/
+    OverviewTab.vue
+    EntitiesTab.vue
+    FormsTab.vue
+    WorkflowsTab.vue
+    ApisTab.vue
+    PermissionsTab.vue
+    SettingsTab.vue
+    RightPanel.vue       ← dynamic right panel
+composables/
+  useModuleDetail.ts     ← shared state + mock data
+```
+
+---
+
+## Key Rules
+
+1. **Use only Nuxt UI 4 components** — do not use Headless UI directly, do not import from other UI libraries
+2. **No custom CSS** beyond Tailwind utility classes
+3. All icons must use the `UIcon` component with `i-heroicons-*` or `i-lucide-*` prefix
+4. The right panel is always 300px wide and changes content based on the active tab
+5. Tables must use `UTable` with typed column definitions
+6. Forms in Settings tab must use `UFormField` wrapping each input
+7. Status badges: Active = green, Inactive = red, Draft = yellow/amber, System = blue, Custom = purple
+8. Pagination on all tables: `UPagination` component
