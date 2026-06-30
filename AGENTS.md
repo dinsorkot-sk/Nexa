@@ -27,16 +27,18 @@ pnpm build / pnpm preview  # production
 ```
 app/          Nuxt pages, layouts, components, composables, types, utils
 server/
-  api/        Route handlers
-    _refs.ts              CRUD for generic_references table (real DB)
-    v1/[entity].ts        Dynamic CRUD engine (real DB)
-    metadata/             Metadata CRUD: entities, fields, relations, sync
-    members.ts            Mock (hardcoded array)
-    mails.ts              Mock
-    customers.ts          Mock
-    notifications.ts      Mock
-    auth/                 Auth routes: login, register, logout, me, roles, invite, config, events
-    seed-auth.post.ts     Seed auth data (Admin + Member roles, admin user)
+  api/        Route handlers (Nitro file-based method routing: *.get.ts, *.post.ts, etc.)
+    _refs.get|post|delete.ts     CRUD for generic_references table (real DB)
+    v1/
+      _entity-utils.ts           Shared entity lookup + validation
+      [entity].get|post|put|delete|patch.ts  Dynamic CRUD engine (real DB)
+    metadata/                    Metadata CRUD: entities, fields, relations, sync
+    members.ts                   Mock (hardcoded array)
+    mails.ts                     Mock
+    customers.ts                 Mock
+    notifications.ts             Mock
+    auth/                        Auth routes: login, register, logout, me, roles, invite, config, events
+    seed-auth.post.ts            Seed auth data (Admin + Member roles, admin user)
   engine/     Dynamic CMS engine — sync.ts (schema sync), query.ts (CRUD), include.ts
   db/schema/  Drizzle ORM — metadata.ts (_modules, _entities, _fields), relations.ts, generic-refs.ts, auth.ts (_users, _sessions, _roles, _user_roles, _invites)
   tasks/      Nuxt tasks — seed.ts (db:seed, canonical metadata bootstrap)
