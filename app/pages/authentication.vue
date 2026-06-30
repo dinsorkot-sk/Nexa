@@ -77,9 +77,9 @@ function getConcurrentLabel(val: boolean) {
     </template>
 
     <template #body>
-      <UContainer class="py-8">
+      <UContainer class="flex flex-col gap-6 h-full">
         <!-- Page Header -->
-        <div class="mb-8">
+        <div>
           <h1 class="text-3xl font-bold text-(--ui-text-highlighted)">
             Authentication Configuration
           </h1>
@@ -89,15 +89,13 @@ function getConcurrentLabel(val: boolean) {
         </div>
 
         <!-- 3 Side-by-Side Cards -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Card 1: Providers -->
-          <UPageCard variant="subtle">
+          <UCard>
             <template #header>
               <div class="flex items-center gap-2">
-                <div class="size-8 rounded-lg bg-(--ui-bg-elevated) flex items-center justify-center">
-                  <UIcon name="i-lucide-log-in" class="size-4 text-(--ui-text-dimmed)" />
-                </div>
-                <span class="text-sm font-semibold">Providers</span>
+                <UButton icon="i-lucide-log-in" color="neutral" variant="ghost"/>
+                <span class="text-lg font-semibold">Providers</span>
               </div>
             </template>
             <div class="space-y-1">
@@ -112,7 +110,7 @@ function getConcurrentLabel(val: boolean) {
                   @update:model-value="markChanged"
                 />
               </UFormField>
-              <UDivider class="my-0" />
+              <USeparator />
               <UFormField
                 label="Social Providers (OAuth2)"
                 description="Allow login via Google, GitHub, or Microsoft."
@@ -124,7 +122,7 @@ function getConcurrentLabel(val: boolean) {
                   @update:model-value="markChanged"
                 />
               </UFormField>
-              <UDivider class="my-0" />
+              <USeparator />
               <UFormField
                 label="Enterprise SSO (SAML)"
                 description="Delegated authentication for corporate identity providers."
@@ -137,15 +135,13 @@ function getConcurrentLabel(val: boolean) {
                 />
               </UFormField>
             </div>
-          </UPageCard>
+          </UCard>
 
           <!-- Card 2: Session Lifecycle -->
-          <UPageCard variant="subtle">
+          <UCard>
             <template #header>
               <div class="flex items-center gap-2">
-                <div class="size-8 rounded-lg bg-(--ui-bg-elevated) flex items-center justify-center">
-                  <UIcon name="i-lucide-clock" class="size-4 text-(--ui-text-dimmed)" />
-                </div>
+                <UButton icon="i-lucide-clock" color="neutral" variant="ghost"/>
                 <span class="text-sm font-semibold">Session Lifecycle</span>
               </div>
             </template>
@@ -193,15 +189,13 @@ function getConcurrentLabel(val: boolean) {
                 </div>
               </UFormField>
             </div>
-          </UPageCard>
+          </UCard>
 
           <!-- Card 3: Advanced Security -->
-          <UPageCard variant="subtle">
+          <UCard>
             <template #header>
               <div class="flex items-center gap-2">
-                <div class="size-8 rounded-lg bg-(--ui-bg-elevated) flex items-center justify-center">
-                  <UIcon name="i-lucide-shield" class="size-4 text-(--ui-text-dimmed)" />
-                </div>
+                <UButton icon="i-lucide-shield" color="neutral" variant="ghost"/>
                 <span class="text-sm font-semibold">Advanced Security</span>
               </div>
             </template>
@@ -220,7 +214,7 @@ function getConcurrentLabel(val: boolean) {
                   Determines if a user can be logged in from multiple browsers simultaneously.
                 </p>
               </div>
-              <UDivider class="my-0" />
+              <USeparator />
               <div>
                 <div class="flex items-center gap-2 mb-1">
                   <p class="text-sm font-medium">
@@ -244,11 +238,11 @@ function getConcurrentLabel(val: boolean) {
                 </UButton>
               </div>
             </div>
-          </UPageCard>
+          </UCard>
         </div>
 
         <!-- Data Table: Activity Log -->
-        <UPageCard variant="subtle">
+        <UCard>
           <template #header>
             <div class="flex items-center justify-between w-full">
               <UInput
@@ -300,7 +294,7 @@ function getConcurrentLabel(val: boolean) {
               </UBadge>
             </template>
           </UTable>
-        </UPageCard>
+        </UCard>
       </UContainer>
     </template>
   </UDashboardPanel>
