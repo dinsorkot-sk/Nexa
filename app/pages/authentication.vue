@@ -94,7 +94,7 @@ function getConcurrentLabel(val: boolean) {
           <UCard>
             <template #header>
               <div class="flex items-center gap-2">
-                <UButton icon="i-lucide-log-in" color="neutral" variant="ghost"/>
+                <UButton icon="i-lucide-log-in" color="neutral" variant="ghost" />
                 <span class="text-lg font-semibold">Providers</span>
               </div>
             </template>
@@ -141,7 +141,7 @@ function getConcurrentLabel(val: boolean) {
           <UCard>
             <template #header>
               <div class="flex items-center gap-2">
-                <UButton icon="i-lucide-clock" color="neutral" variant="ghost"/>
+                <UButton icon="i-lucide-clock" color="neutral" variant="ghost" />
                 <span class="text-sm font-semibold">Session Lifecycle</span>
               </div>
             </template>
@@ -195,7 +195,7 @@ function getConcurrentLabel(val: boolean) {
           <UCard>
             <template #header>
               <div class="flex items-center gap-2">
-                <UButton icon="i-lucide-shield" color="neutral" variant="ghost"/>
+                <UButton icon="i-lucide-shield" color="neutral" variant="ghost" />
                 <span class="text-sm font-semibold">Advanced Security</span>
               </div>
             </template>

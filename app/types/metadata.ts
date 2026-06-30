@@ -1,3 +1,16 @@
+export interface Module {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  icon: string | null
+  isActive: boolean
+  createdAt: string | null
+  updatedAt: string | null
+  entityCount?: number
+  formCount?: number
+}
+
 export interface Entity {
   id: number
   moduleId: number | null

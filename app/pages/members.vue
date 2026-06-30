@@ -185,23 +185,23 @@ function handleToggleStatus(memberId: number, isActive: boolean) {
         </UPageCard>
       </UContainer>
 
-        <!-- Invite Modal -->
-        <MembersInvite
-          v-if="showInviteModal"
-          :roles="roles"
-          @invite="handleInvite"
-          @close="showInviteModal = false"
-        />
-        
-        <!-- Member Details -->
-        <MembersDetails
-          v-if="showSlideover && selectedMember"
-          :member="selectedMember"
-          :roles="roles"
-          @close="handleCloseSlideover"
-          @update-roles="handleUpdateRoles"
-          @toggle-status="handleToggleStatus"
-        />
+      <!-- Invite Modal -->
+      <MembersInvite
+        v-if="showInviteModal"
+        :roles="roles"
+        @invite="handleInvite"
+        @close="showInviteModal = false"
+      />
+
+      <!-- Member Details -->
+      <MembersDetails
+        v-if="showSlideover && selectedMember"
+        :member="selectedMember"
+        :roles="roles"
+        @close="handleCloseSlideover"
+        @update-roles="handleUpdateRoles"
+        @toggle-status="handleToggleStatus"
+      />
     </template>
   </UDashboardPanel>
 </template>

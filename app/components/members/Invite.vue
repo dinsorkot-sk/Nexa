@@ -46,7 +46,12 @@ async function handleInvite() {
 </script>
 
 <template>
-  <USlideover :open="true" @update:open="(v) => !v && emit('close')" :modal="false" class="w-96">
+  <USlideover
+    :open="true"
+    :modal="false"
+    class="w-96"
+    @update:open="(v) => !v && emit('close')"
+  >
     <template #header>
       <div class="flex items-center justify-between">
         <h3 class="text-base font-semibold">
