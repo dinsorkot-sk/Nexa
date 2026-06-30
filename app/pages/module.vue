@@ -522,14 +522,14 @@ function getTimeAgo(dateStr: string | null): string {
                   </div>
                 </div>
               </div>
-              <UTabs v-model="detailTab" :items="detailTabs" size="xs"/>
+              <UTabs v-model="detailTab" :items="detailTabs" size="xs" class="gap-0"/>
             </div>
 
             <!-- Tab Content -->
             <div class="flex-1 overflow-auto h-full">
               <!-- Overview Tab -->
               <div v-if="detailTab === 'overview'">
-                <div class="p-4">
+                <div class="p-3">
                   <h4 class="mb-1 text-xs font-semibold uppercase text-(--ui-text-muted)">
                     Description
                   </h4>
@@ -708,7 +708,6 @@ function getTimeAgo(dateStr: string | null): string {
               >
                 {{ meta.selectedModule.value.isActive ? 'Deactivate Module' : 'Activate Module' }}
               </UButton>
-              <UButton label="veiw" color="neutral" variant="outline" class="justify-center"/>
             </template>
 
           </UCard>
