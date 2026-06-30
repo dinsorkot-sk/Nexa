@@ -55,6 +55,31 @@ export default defineTask({
 
     console.log(`  ✓ Admin user: ${adminUser!.email} (password: admin123)`)
 
+    // ── Seed member users ─────────────────────────────────────────────
+    const memberUsers = [
+      { name: 'Alice Johnson', email: 'alice@nexa.dev' },
+      { name: 'Bob Smith', email: 'bob@nexa.dev' },
+      { name: 'Carol Davis', email: 'carol@nexa.dev' }
+    ]
+
+    for (const u of memberUsers) {
+      const [user] = await db.insert(schema.users).values({
+        name: u.name,
+        email: u.email,
+        passwordHash: hashPassword('member123'),
+        isActive: true,
+        invitedBy: adminUser!.id
+      }).returning().all()
+
+      await db.insert(schema.userRoles).values({
+        userId: user!.id,
+        roleId: memberRole!.id,
+        assignedBy: adminUser!.id
+      })
+    }
+
+    console.log(`  ✓ Member users: ${memberUsers.map(u => u.email).join(', ')} (password: member123)`)
+
     // ── Reset metadata (existing seed logic) ─────────────────────────
 
     // ── Modules ────────────────────────────────────────────────────
