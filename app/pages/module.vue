@@ -151,6 +151,10 @@ async function handleDeactivate() {
   }
 }
 
+function handleRowSelect(_e: Event, row: { original: unknown }): void {
+  openSidePanel(m(row))
+}
+
 function m(row: { original: unknown }): Module {
   return row.original as Module
 }
@@ -174,9 +178,6 @@ function getTimeAgo(dateStr: string | null): string {
       <UDashboardNavbar title="Module Management">
         <template #leading>
           <UDashboardSidebarCollapse />
-        </template>
-        <template #default>
-          <UIcon name="i-lucide-layout-grid" class="size-5 shrink-0 text-green-600" />
         </template>
         <template #right>
           <UButton
@@ -333,6 +334,7 @@ function getTimeAgo(dateStr: string | null): string {
                   :data="paginatedModules"
                   divide
                   hover
+                  :on-select="handleRowSelect"
                 >
                   <template #header-name>
                     <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('name')">
@@ -370,7 +372,7 @@ function getTimeAgo(dateStr: string | null): string {
                   </template>
 
                   <template #name-cell="{ row }">
-                    <div class="flex items-center gap-3 cursor-pointer" @click="openSidePanel(m(row))">
+                    <div class="flex items-center gap-3">
                       <UAvatar
                         :icon="m(row).icon || 'i-lucide-puzzle'"
                         square
