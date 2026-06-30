@@ -26,10 +26,10 @@ const tabs = [
 ]
 
 const detailTabs = [
-  { label: 'Overview', icon: 'i-lucide-info', value: 'overview' },
-  { label: 'Entities', icon: 'i-lucide-database', value: 'entities' },
-  { label: 'Forms', icon: 'i-lucide-file-text', value: 'forms' },
-  { label: 'Users', icon: 'i-lucide-users', value: 'users' }
+  { label: 'Overview', value: 'overview' },
+  { label: 'Entities', value: 'entities' },
+  { label: 'Forms', value: 'forms' },
+  { label: 'Users', value: 'users' }
 ]
 
 const stats = computed(() => {
@@ -169,7 +169,7 @@ function getTimeAgo(dateStr: string | null): string {
 </script>
 
 <template>
-  <UDashboardPanel id="module">
+  <UDashboardPanel id="module" :ui="{body:'gap-4 sm:gap-4'}">
     <template #header>
       <UDashboardNavbar title="Module Management">
         <template #leading>
@@ -212,8 +212,8 @@ function getTimeAgo(dateStr: string | null): string {
     </template>
     <template #body>
       <UTabs v-model="activeTab" :items="tabs" variant="link" />
-      <div class="flex h-full">
-        <div class="flex flex-col w-full gap-4">
+      <div class="flex h-full gap-3">
+        <div class="flex flex-col w-full gap-3">
           <!-- Stats Row -->
           <div class="grid grid-cols-4 gap-4">
             <UCard>
@@ -330,7 +330,7 @@ function getTimeAgo(dateStr: string | null): string {
               <template #default>
                 <UTable
                   :columns="columns"
-                  :rows="paginatedModules"
+                  :data="paginatedModules"
                   divide
                   hover
                 >
@@ -369,13 +369,13 @@ function getTimeAgo(dateStr: string | null): string {
                     Actions
                   </template>
 
-                  <template #cell-name="{ row }">
+                  <template #name-cell="{ row }">
                     <div class="flex items-center gap-3 cursor-pointer" @click="openSidePanel(m(row))">
                       <UAvatar
                         :icon="m(row).icon || 'i-lucide-puzzle'"
                         square
                         size="md"
-                        class="bg-green-100 text-green-700"
+                        color="primary"
                       />
                       <div>
                         <div class="font-medium text-sm">
@@ -387,17 +387,17 @@ function getTimeAgo(dateStr: string | null): string {
                       </div>
                     </div>
                   </template>
-                  <template #cell-slug="{ row }">
+                  <template #slug-cell="{ row }">
                     <UBadge variant="subtle" color="neutral">
                       {{ m(row).slug }}
                     </UBadge>
                   </template>
-                  <template #cell-category>
+                  <template #category-cell>
                     <UBadge variant="subtle" color="neutral">
                       —
                     </UBadge>
                   </template>
-                  <template #cell-status="{ row }">
+                  <template #status="{ row }">
                     <UBadge :color="m(row).isActive ? 'success' : 'warning'" variant="subtle">
                       <template #leading>
                         <span class="relative flex size-2">
@@ -414,16 +414,16 @@ function getTimeAgo(dateStr: string | null): string {
                       {{ m(row).isActive ? 'Active' : 'Inactive' }}
                     </UBadge>
                   </template>
-                  <template #cell-entityCount="{ row }">
+                  <template #entityCount-cell="{ row }">
                     <span class="text-right text-sm">{{ m(row).entityCount ?? 0 }}</span>
                   </template>
-                  <template #cell-forms>
+                  <template #forms-cell>
                     <span class="text-right text-sm">0</span>
                   </template>
-                  <template #cell-updatedAt="{ row }">
+                  <template #updatedAt-cell="{ row }">
                     <span class="text-sm text-(--ui-text-muted)">{{ getTimeAgo(m(row).updatedAt) }}</span>
                   </template>
-                  <template #cell-actions>
+                  <template #actions-cell>
                     <div class="flex items-center gap-1">
                       <UButton
                         icon="i-lucide-eye"
@@ -487,28 +487,29 @@ function getTimeAgo(dateStr: string | null): string {
 
         <!-- Side Panel -->
         <Transition name="slide-panel">
-          <div
+          <UCard
             v-if="showSidePanel && meta.selectedModule.value"
-            class="w-80 shrink-0 border-l border-(--ui-border) bg-(--ui-bg) overflow-auto flex flex-col"
+            class="h-full flex flex-col w-96"
+            :ui="{ header:'flex justify-between p-2' ,body:'sm:p-0 p-0 h-full'}"
           >
             <!-- Panel Header -->
-            <div class="flex items-center justify-between border-b border-(--ui-border) px-4 py-3">
-              <h3 class="font-semibold text-sm">
-                Module Details
-              </h3>
-              <UButton
-                icon="i-lucide-x"
-                color="neutral"
-                variant="ghost"
-                square
-                size="sm"
-                @click="closeSidePanel"
-              />
-            </div>
+            <template #header>
+                <h3 class="font-semibold text-sm">
+                  Module Details
+                </h3>
+                <UButton
+                  icon="i-lucide-x"
+                  color="neutral"
+                  variant="ghost"
+                  square
+                  size="sm"
+                  @click="closeSidePanel"
+                />
+            </template>
 
             <!-- Module Hero -->
-            <div class="border-b border-(--ui-border) px-4 py-4">
-              <div class="flex items-center gap-3 mb-3">
+            <div class="border-b border-(--ui-border) flex flex-col gap-2 p-2">
+              <div class="flex items-center gap-3">
                 <UAvatar
                   :icon="meta.selectedModule.value.icon || 'i-lucide-puzzle'"
                   square
@@ -533,14 +534,14 @@ function getTimeAgo(dateStr: string | null): string {
                   </div>
                 </div>
               </div>
-              <UTabs v-model="detailTab" :items="detailTabs" />
+              <UTabs v-model="detailTab" :items="detailTabs" size="xs"/>
             </div>
 
             <!-- Tab Content -->
-            <div class="flex-1 overflow-auto px-4 py-4">
+            <div class="flex-1 overflow-auto h-full">
               <!-- Overview Tab -->
               <div v-if="detailTab === 'overview'">
-                <div class="mb-4">
+                <div class="p-4">
                   <h4 class="mb-1 text-xs font-semibold uppercase text-(--ui-text-muted)">
                     Description
                   </h4>
@@ -549,9 +550,9 @@ function getTimeAgo(dateStr: string | null): string {
                   </p>
                 </div>
 
-                <USeparator class="my-4" />
+                <USeparator/>
 
-                <div class="space-y-3">
+                <div class="p-3 space-y-3">
                   <div class="flex items-center justify-between text-sm">
                     <span class="text-(--ui-text-muted)">Category</span>
                     <span>—</span>
@@ -595,12 +596,12 @@ function getTimeAgo(dateStr: string | null): string {
                   </div>
                 </div>
 
-                <USeparator class="my-4" />
+                <USeparator />
 
-                <h4 class="mb-2 text-xs font-semibold uppercase text-(--ui-text-muted)">
+                <h4 class="p-2 text-xs font-semibold uppercase text-(--ui-text-muted)">
                   Quick Actions
                 </h4>
-                <div class="space-y-1">
+                <div class="p-1 space-y-1">
                   <UButton
                     block
                     color="neutral"
@@ -668,7 +669,7 @@ function getTimeAgo(dateStr: string | null): string {
                   <UIcon name="i-lucide-database" class="mx-auto mb-2 size-6 opacity-50" />
                   No entities in this module
                 </div>
-                <div v-else class="space-y-2">
+                <div v-else class="p-2 space-y-2">
                   <div
                     v-for="entity in meta.moduleEntities.value"
                     :key="entity.id"
@@ -709,7 +710,7 @@ function getTimeAgo(dateStr: string | null): string {
             </div>
 
             <!-- Panel Footer -->
-            <div class="border-t border-(--ui-border) p-4">
+            <template #footer>
               <UButton
                 block
                 :color="meta.selectedModule.value.isActive ? 'error' : 'success'"
@@ -719,8 +720,9 @@ function getTimeAgo(dateStr: string | null): string {
               >
                 {{ meta.selectedModule.value.isActive ? 'Deactivate Module' : 'Activate Module' }}
               </UButton>
-            </div>
-          </div>
+            </template>
+
+          </UCard>
         </Transition>
       </div>
     </template>
