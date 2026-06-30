@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import type { footer } from '#build/ui'
-
 definePageMeta({
   title: 'Module Builder'
 })
 
 const toast = useToast()
 const router = useRouter()
+const meta = useMetadata()
 
 const step = ref(1)
 const totalSteps = 5
@@ -171,8 +170,25 @@ function goToStep(n: number) {
 }
 
 async function handleCreate() {
-  toast.add({ title: 'Module created', description: `"${form.name}" has been created successfully.`, color: 'success' })
-  router.push('/module')
+  try {
+    await meta.createModule({
+      name: form.name,
+      slug: form.key,
+      description: form.description || undefined,
+      icon: form.icon,
+      color: form.color,
+      category: form.category || undefined,
+      version: form.version,
+      isActive: form.status,
+      navConfig: JSON.stringify(form.navigation),
+      permConfig: JSON.stringify(perms),
+      entityConfig: JSON.stringify(form.entities)
+    })
+    toast.add({ title: 'Module created', description: `"${form.name}" has been created successfully.`, color: 'success' })
+    router.push('/module')
+  } catch {
+    toast.add({ title: 'Error', description: 'Failed to create module', color: 'error' })
+  }
 }
 
 function cancel() {
@@ -218,10 +234,25 @@ const roleColorMap: Record<string, string> = {
           <UDashboardSidebarCollapse />
         </template>
         <template #right>
-          <UButton label="Cancel" color="neutral" variant="ghost" @click="cancel" />
-          <UButton v-if="!isLastStep" label="Save Draft" color="neutral" variant="outline" />
-          <UButton v-if="isLastStep" label="Create Module" color="primary" icon="i-lucide-check"
-            @click="handleCreate" />
+          <UButton
+            label="Cancel"
+            color="neutral"
+            variant="ghost"
+            @click="cancel"
+          />
+          <UButton
+            v-if="!isLastStep"
+            label="Save Draft"
+            color="neutral"
+            variant="outline"
+          />
+          <UButton
+            v-if="isLastStep"
+            label="Create Module"
+            color="primary"
+            icon="i-lucide-check"
+            @click="handleCreate"
+          />
         </template>
       </UDashboardNavbar>
     </template>
@@ -232,14 +263,20 @@ const roleColorMap: Record<string, string> = {
         <!-- Left: Stepper (240px) -->
         <div class="w-60 shrink-0 border-r border-(--ui-border) bg-(--ui-bg-elevated)/50 p-4">
           <nav class="space-y-1">
-            <button v-for="s in steps" :key="s.num" :disabled="s.num > step"
-              class="flex items-start gap-3 w-full text-left px-3 py-2.5 rounded-lg transition-colors" :class="[
+            <button
+              v-for="s in steps"
+              :key="s.num"
+              :disabled="s.num > step"
+              class="flex items-start gap-3 w-full text-left px-3 py-2.5 rounded-lg transition-colors"
+              :class="[
                 s.num === step
                   ? 'bg-(--ui-primary)/10 text-(--ui-primary)'
                   : s.num < step
                     ? 'text-(--ui-text) hover:bg-(--ui-bg-elevated) cursor-pointer'
                     : 'text-(--ui-text-muted) cursor-not-allowed'
-              ]" @click="goToStep(s.num)">
+              ]"
+              @click="goToStep(s.num)"
+            >
               <span
                 class="flex items-center justify-center size-7 shrink-0 rounded-full text-xs font-semibold border-2 transition-colors"
                 :class="[
@@ -248,7 +285,8 @@ const roleColorMap: Record<string, string> = {
                     : s.num < step
                       ? 'border-emerald-500 bg-emerald-500 text-white'
                       : 'border-(--ui-border) text-(--ui-text-muted)'
-                ]">
+                ]"
+              >
                 <UIcon v-if="s.num < step" name="i-lucide-check" class="size-3.5" />
                 <span v-else>{{ s.num }}</span>
               </span>
@@ -286,8 +324,12 @@ const roleColorMap: Record<string, string> = {
                 </template>
               </UFormField>
               <UFormField label="Description">
-                <UTextarea v-model="form.description" placeholder="Manage customers, leads, opportunities..." :rows="3"
-                  class="w-full" />
+                <UTextarea
+                  v-model="form.description"
+                  placeholder="Manage customers, leads, opportunities..."
+                  :rows="3"
+                  class="w-full"
+                />
               </UFormField>
               <div class="grid grid-cols-2 gap-4">
                 <UFormField label="Module Icon">
@@ -296,9 +338,12 @@ const roleColorMap: Record<string, string> = {
                 <UFormField label="Module Color">
                   <div class="flex items-center gap-2">
                     <div class="flex flex-wrap gap-1">
-                      <button v-for="c in colorOptions" :key="c.value"
+                      <button
+                        v-for="c in colorOptions"
+                        :key="c.value"
                         :class="['size-6 rounded-full border-2 transition-all', c.class, form.color === c.value ? 'border-(--ui-primary) ring-2 ring-(--ui-primary)/30 scale-110' : 'border-transparent']"
-                        @click="form.color = c.value" />
+                        @click="form.color = c.value"
+                      />
                     </div>
                     <span class="text-xs font-mono text-(--ui-text-muted) ml-1">{{ form.color }}</span>
                   </div>
@@ -306,8 +351,12 @@ const roleColorMap: Record<string, string> = {
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <UFormField label="Module Category">
-                  <USelect v-model="form.category" :items="categoryOptions" placeholder="Select category"
-                    class="w-full" />
+                  <USelect
+                    v-model="form.category"
+                    :items="categoryOptions"
+                    placeholder="Select category"
+                    class="w-full"
+                  />
                 </UFormField>
                 <UFormField label="Version">
                   <UInput v-model="form.version" placeholder="1.0.0" class="w-full" />
@@ -337,12 +386,21 @@ const roleColorMap: Record<string, string> = {
             </p>
 
             <div class="mb-4 flex items-center gap-2">
-              <UTabs v-model="entityTab" :items="[
-                { label: 'All Entities', value: 'all' },
-                { label: `Selected Entities (${selectedEntityCount})`, value: 'selected' }
-              ]" variant="link" />
+              <UTabs
+                v-model="entityTab"
+                :items="[
+                  { label: 'All Entities', value: 'all' },
+                  { label: `Selected Entities (${selectedEntityCount})`, value: 'selected' }
+                ]"
+                variant="link"
+              />
               <div class="flex-1" />
-              <UInput v-model="entitySearch" placeholder="Search entities..." icon="i-lucide-search" class="max-w-xs" />
+              <UInput
+                v-model="entitySearch"
+                placeholder="Search entities..."
+                icon="i-lucide-search"
+                class="max-w-xs"
+              />
             </div>
 
             <UCard :ui="{ body: 'p-0' }">
@@ -362,26 +420,35 @@ const roleColorMap: Record<string, string> = {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="entity in filteredEntities" :key="entity.name"
+                  <tr
+                    v-for="entity in filteredEntities"
+                    :key="entity.name"
                     class="border-b border-(--ui-border) transition-colors hover:bg-(--ui-bg-elevated) cursor-pointer"
                     :class="{ 'bg-emerald-50/50 dark:bg-emerald-950/20': form.entities.includes(entity.name) }"
-                    @click="toggleEntity(entity.name)">
+                    @click="toggleEntity(entity.name)"
+                  >
                     <td class="px-4 py-3">
-                      <UCheckbox :checked="form.entities.includes(entity.name)"
-                        :model-value="form.entities.includes(entity.name)" @click.stop
-                        @update:model-value="toggleEntity(entity.name)" />
+                      <UCheckbox
+                        :checked="form.entities.includes(entity.name)"
+                        :model-value="form.entities.includes(entity.name)"
+                        @click.stop
+                        @update:model-value="toggleEntity(entity.name)"
+                      />
                     </td>
                     <td class="px-4 py-3">
                       <div class="flex items-center gap-2">
                         <UIcon
                           :name="entity.name === 'Customer' ? 'i-lucide-users' : entity.name === 'Contact' ? 'i-lucide-phone' : entity.name === 'Lead' ? 'i-lucide-target' : entity.name === 'Product' ? 'i-lucide-package' : entity.name === 'Employee' ? 'i-lucide-user-circle' : entity.name === 'Invoice' ? 'i-lucide-file-invoice' : entity.name === 'Order' ? 'i-lucide-shopping-cart' : 'i-lucide-truck'"
-                          class="size-4 text-(--ui-text-muted)" />
+                          class="size-4 text-(--ui-text-muted)"
+                        />
                         <span class="font-medium">{{ entity.name }}</span>
                       </div>
                     </td>
                     <td class="px-4 py-3">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                        :class="getEntityCategoryColor(entity.category)">
+                      <span
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        :class="getEntityCategoryColor(entity.category)"
+                      >
                         {{ entity.category }}
                       </span>
                     </td>
@@ -410,7 +477,13 @@ const roleColorMap: Record<string, string> = {
               <template #header>
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium">Navigation Structure</span>
-                  <UButton label="+ Add Menu Item" color="primary" variant="outline" size="sm" @click="addNavItem" />
+                  <UButton
+                    label="+ Add Menu Item"
+                    color="primary"
+                    variant="outline"
+                    size="sm"
+                    @click="addNavItem"
+                  />
                 </div>
                 <p class="text-xs text-(--ui-text-muted) mt-1">
                   Add, remove, or reorder menu items for the module sidebar.
@@ -436,17 +509,27 @@ const roleColorMap: Record<string, string> = {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(item, idx) in form.navigation" :key="idx"
-                    class="border-b border-(--ui-border) hover:bg-(--ui-bg-elevated) transition-colors">
+                  <tr
+                    v-for="(item, idx) in form.navigation"
+                    :key="idx"
+                    class="border-b border-(--ui-border) hover:bg-(--ui-bg-elevated) transition-colors"
+                  >
                     <td class="px-2 py-2 text-(--ui-text-muted) cursor-grab">
                       <UIcon name="i-lucide-grip-vertical" class="size-4" />
                     </td>
                     <td class="px-3 py-2">
-                      <UInput v-model="item.label" placeholder="Menu label" class="max-w-40" size="sm" />
+                      <UInput
+                        v-model="item.label"
+                        placeholder="Menu label"
+                        class="max-w-40"
+                        size="sm"
+                      />
                     </td>
                     <td class="px-3 py-2">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                        :class="navTypeColorMap[item.type] || ''">
+                      <span
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        :class="navTypeColorMap[item.type] || ''"
+                      >
                         {{ item.type }}
                       </span>
                     </td>
@@ -457,8 +540,14 @@ const roleColorMap: Record<string, string> = {
                       <UToggle v-model="item.active" size="xs" color="primary" />
                     </td>
                     <td class="px-3 py-2">
-                      <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" square
-                        @click="removeNavItem(idx)" />
+                      <UButton
+                        icon="i-lucide-x"
+                        color="neutral"
+                        variant="ghost"
+                        size="xs"
+                        square
+                        @click="removeNavItem(idx)"
+                      />
                     </td>
                   </tr>
                 </tbody>
@@ -501,17 +590,26 @@ const roleColorMap: Record<string, string> = {
                       </div>
                     </div>
                   </div>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                    :class="roleColorMap[role.id] || ''">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                    :class="roleColorMap[role.id] || ''"
+                  >
                     {{ role.level }}
                   </span>
                 </div>
                 <div class="flex items-center gap-0 border-t border-(--ui-border) divide-x divide-(--ui-border)">
-                  <div v-for="perm in permissionsMatrix" :key="perm.action"
+                  <div
+                    v-for="perm in permissionsMatrix"
+                    :key="perm.action"
                     class="flex items-center gap-1.5 px-4 py-2.5 text-xs"
-                    :class="rolePerms(role.id)[perm.action] ? 'bg-emerald-50/50 dark:bg-emerald-950/20' : ''">
-                    <UCheckbox :checked="rolePerms(role.id)[perm.action]" :model-value="rolePerms(role.id)[perm.action]"
-                      :disabled="role.id === 'superAdmin'" @update:model-value="togglePerm(role.id, perm.action)" />
+                    :class="rolePerms(role.id)[perm.action] ? 'bg-emerald-50/50 dark:bg-emerald-950/20' : ''"
+                  >
+                    <UCheckbox
+                      :checked="rolePerms(role.id)[perm.action]"
+                      :model-value="rolePerms(role.id)[perm.action]"
+                      :disabled="role.id === 'superAdmin'"
+                      @update:model-value="togglePerm(role.id, perm.action)"
+                    />
                     <UIcon :name="perm.icon" class="size-3.5 text-(--ui-text-muted)" />
                     <span class="text-(--ui-text-muted)">{{ perm.action }}</span>
                   </div>
@@ -523,7 +621,8 @@ const roleColorMap: Record<string, string> = {
           <!-- Step 5: Review -->
           <div v-if="step === 5" class="max-w-2xl">
             <div
-              class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900">
+              class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900"
+            >
               <UIcon name="i-lucide-circle-check" class="size-5 text-emerald-600 shrink-0" />
               <p class="text-sm text-emerald-800 dark:text-emerald-200">
                 All required information is complete. You can create the module.
@@ -535,8 +634,14 @@ const roleColorMap: Record<string, string> = {
                 <template #header>
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-medium">Basic Information</span>
-                    <UButton label="Edit" icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs"
-                      @click="step = 1" />
+                    <UButton
+                      label="Edit"
+                      icon="i-lucide-pencil"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      @click="step = 1"
+                    />
                   </div>
                 </template>
                 <div class="grid grid-cols-2 gap-4 text-sm">
@@ -565,13 +670,22 @@ const roleColorMap: Record<string, string> = {
                 <template #header>
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-medium">Entities ({{ form.entities.length }})</span>
-                    <UButton label="Edit" icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs"
-                      @click="step = 2" />
+                    <UButton
+                      label="Edit"
+                      icon="i-lucide-pencil"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      @click="step = 2"
+                    />
                   </div>
                 </template>
                 <div class="flex flex-wrap gap-2">
-                  <span v-for="e in form.entities" :key="e"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-(--ui-bg-elevated)">
+                  <span
+                    v-for="e in form.entities"
+                    :key="e"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-(--ui-bg-elevated)"
+                  >
                     <span class="size-1.5 rounded-full bg-emerald-500" />
                     {{ e }}
                   </span>
@@ -582,14 +696,23 @@ const roleColorMap: Record<string, string> = {
                 <template #header>
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-medium">Navigation</span>
-                    <UButton label="Edit" icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs"
-                      @click="step = 3" />
+                    <UButton
+                      label="Edit"
+                      icon="i-lucide-pencil"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      @click="step = 3"
+                    />
                   </div>
                 </template>
                 <div class="flex flex-wrap gap-2">
                   <span class="text-xs text-(--ui-text-muted)">{{ form.navigation.length }} menu items configured</span>
-                  <span v-for="item in form.navigation" :key="item.label"
-                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-(--ui-bg-elevated)">
+                  <span
+                    v-for="item in form.navigation"
+                    :key="item.label"
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-(--ui-bg-elevated)"
+                  >
                     {{ item.label }}
                   </span>
                 </div>
@@ -599,14 +722,22 @@ const roleColorMap: Record<string, string> = {
                 <template #header>
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-medium">Permissions</span>
-                    <UButton label="Edit" icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs"
-                      @click="step = 4" />
+                    <UButton
+                      label="Edit"
+                      icon="i-lucide-pencil"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      @click="step = 4"
+                    />
                   </div>
                 </template>
                 <div class="space-y-2">
                   <div v-for="role in roles" :key="role.id" class="flex items-center gap-2 text-sm">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                      :class="roleColorMap[role.id] || ''">{{ role.label }}</span>
+                    <span
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                      :class="roleColorMap[role.id] || ''"
+                    >{{ role.label }}</span>
                     <span class="text-xs text-(--ui-text-muted)">{{ role.description }}</span>
                   </div>
                 </div>
@@ -616,8 +747,14 @@ const roleColorMap: Record<string, string> = {
                 <template #header>
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-medium">Additional Settings</span>
-                    <UButton label="Edit" icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs"
-                      @click="step = 1" />
+                    <UButton
+                      label="Edit"
+                      icon="i-lucide-pencil"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      @click="step = 1"
+                    />
                   </div>
                 </template>
                 <div class="space-y-2 text-sm">
@@ -631,8 +768,10 @@ const roleColorMap: Record<string, string> = {
                   </div>
                   <div class="flex items-center gap-2">
                     <UIcon name="i-lucide-check-circle" class="size-4 text-emerald-500" />
-                    <span>Color: <span class="inline-block size-3 rounded-full align-middle"
-                        :style="{ backgroundColor: form.color }" /></span>
+                    <span>Color: <span
+                      class="inline-block size-3 rounded-full align-middle"
+                      :style="{ backgroundColor: form.color }"
+                    /></span>
                   </div>
                 </div>
               </UCard>
@@ -653,7 +792,12 @@ const roleColorMap: Record<string, string> = {
 
             <UCard :ui="{ body: 'p-4' }">
               <div class="flex items-center gap-3 mb-3">
-                <UAvatar :icon="form.icon || 'i-lucide-puzzle'" square size="lg" color="primary"/>
+                <UAvatar
+                  :icon="form.icon || 'i-lucide-puzzle'"
+                  square
+                  size="lg"
+                  color="primary"
+                />
                 <div class="min-w-0">
                   <div class="font-semibold text-sm truncate">
                     {{ form.name || 'Module Name' }}
@@ -741,7 +885,8 @@ const roleColorMap: Record<string, string> = {
             </p>
 
             <div
-              class="p-3 rounded-lg border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 mb-4">
+              class="p-3 rounded-lg border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 mb-4"
+            >
               <div class="flex items-center gap-2 mb-2">
                 <UIcon name="i-lucide-check-circle" class="size-4 text-emerald-600" />
                 <span class="text-sm font-medium text-emerald-800 dark:text-emerald-200">Selected {{ selectedEntityCount
@@ -749,8 +894,11 @@ const roleColorMap: Record<string, string> = {
                   entities</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <span v-for="e in form.entities" :key="e"
-                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200">
+                <span
+                  v-for="e in form.entities"
+                  :key="e"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200"
+                >
                   <span class="size-1.5 rounded-full bg-emerald-500" />
                   {{ e }}
                 </span>
@@ -778,14 +926,21 @@ const roleColorMap: Record<string, string> = {
             </div>
 
             <USeparator class="my-4" />
-            <UButton label="Manage Entities" icon="i-lucide-arrow-right" color="neutral" variant="ghost" size="sm"
-              trailing />
+            <UButton
+              label="Manage Entities"
+              icon="i-lucide-arrow-right"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              trailing
+            />
           </div>
 
           <!-- Step 3 About Navigation -->
           <div v-if="step === 3">
             <div
-              class="p-3 mb-4 rounded-lg border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20">
+              class="p-3 mb-4 rounded-lg border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20"
+            >
               <h4 class="text-xs font-semibold text-emerald-800 dark:text-emerald-200 mb-2">
                 Tips
               </h4>
@@ -818,8 +973,12 @@ const roleColorMap: Record<string, string> = {
                 <span class="text-sm font-medium">{{ form.name || 'Module' }}</span>
               </div>
               <div class="space-y-1 text-xs">
-                <div v-for="(item, idx) in form.navigation" :key="idx" class="flex items-center gap-2 px-2 py-1 rounded"
-                  :class="idx === 0 ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:bg-gray-800'">
+                <div
+                  v-for="(item, idx) in form.navigation"
+                  :key="idx"
+                  class="flex items-center gap-2 px-2 py-1 rounded"
+                  :class="idx === 0 ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:bg-gray-800'"
+                >
                   <UIcon name="i-lucide-circle" class="size-3" />
                   <span>{{ item.label || 'Menu Item' }}</span>
                 </div>
@@ -862,7 +1021,8 @@ const roleColorMap: Record<string, string> = {
                 </p>
               </div>
               <div
-                class="p-3 rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/20">
+                class="p-3 rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/20"
+              >
                 <div class="flex gap-2">
                   <UIcon name="i-lucide-alert-triangle" class="size-4 text-amber-600 shrink-0 mt-0.5" />
                   <div>
@@ -916,9 +1076,12 @@ const roleColorMap: Record<string, string> = {
                   <span class="text-sm font-medium">{{ form.name || 'Module' }}</span>
                 </div>
                 <div class="space-y-1 text-xs">
-                  <div v-for="(item, idx) in form.navigation" :key="idx"
+                  <div
+                    v-for="(item, idx) in form.navigation"
+                    :key="idx"
                     class="flex items-center gap-2 px-2 py-1 rounded"
-                    :class="idx === 0 ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:bg-gray-800'">
+                    :class="idx === 0 ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:bg-gray-800'"
+                  >
                     <UIcon name="i-lucide-circle" class="size-3" />
                     <span>{{ item.label || 'Menu Item' }}</span>
                   </div>
@@ -961,12 +1124,34 @@ const roleColorMap: Record<string, string> = {
 
     <template #footer>
       <div class="flex justify-between gap-2 p-3 border-t border-(--ui-border)">
-        <UButton label="Cancel" color="neutral" variant="ghost" @click="cancel" />
+        <UButton
+          label="Cancel"
+          color="neutral"
+          variant="ghost"
+          @click="cancel"
+        />
         <div class="flex items-center gap-2">
-          <UButton v-if="!isFirstStep" label="Back" color="neutral" variant="outline" @click="prevStep" />
-          <UButton v-if="!isLastStep" label="Next →" color="primary" trailing @click="nextStep" />
-          <UButton v-if="isLastStep" label="Create Module" color="primary" icon="i-lucide-check"
-            @click="handleCreate" />
+          <UButton
+            v-if="!isFirstStep"
+            label="Back"
+            color="neutral"
+            variant="outline"
+            @click="prevStep"
+          />
+          <UButton
+            v-if="!isLastStep"
+            label="Next →"
+            color="primary"
+            trailing
+            @click="nextStep"
+          />
+          <UButton
+            v-if="isLastStep"
+            label="Create Module"
+            color="primary"
+            icon="i-lucide-check"
+            @click="handleCreate"
+          />
         </div>
       </div>
     </template>

@@ -10,6 +10,12 @@ export default defineEventHandler(async (event) => {
     slug: body.slug,
     description: body.description || null,
     icon: body.icon || null,
+    color: body.color || null,
+    category: body.category || null,
+    version: body.version || '1.0.0',
+    navConfig: body.navConfig || null,
+    permConfig: body.permConfig || null,
+    entityConfig: body.entityConfig || null,
     isActive: body.isActive !== undefined ? body.isActive : true
   }).returning().get()
 })

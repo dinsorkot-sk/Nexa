@@ -650,7 +650,7 @@ function getTimeAgo(dateStr: string | null): string {
             <div v-else-if="detailTab === 'entities'">
               <div
                 v-if="meta.moduleEntities.value.length === 0"
-                class="py-8 text-center text-sm text-(--ui-text-muted)"
+                class="py-8 text-center text-sm text-(--ui-text-muted) flex flex-col"
               >
                 <UIcon name="i-lucide-database" class="mx-auto mb-2 size-6 opacity-50" />
                 No entities in this module

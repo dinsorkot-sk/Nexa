@@ -8,6 +8,12 @@ export const modules = sqliteTable('_modules', {
   description: text('description'),
   icon: text('icon'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  color: text('color'),
+  category: text('category'),
+  version: text('version').default('1.0.0'),
+  navConfig: text('nav_config'),
+  permConfig: text('perm_config'),
+  entityConfig: text('entity_config'),
   createdAt: text('created_at').default(sql`(datetime('now'))`),
   updatedAt: text('updated_at').default(sql`(datetime('now'))`)
 })

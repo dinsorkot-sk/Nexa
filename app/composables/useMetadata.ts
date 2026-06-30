@@ -216,7 +216,7 @@ export function useMetadata() {
     }
   }
 
-  async function createModule(data: { name: string, slug: string, description?: string, icon?: string }): Promise<Module> {
+  async function createModule(data: { name: string, slug: string, description?: string, icon?: string, color?: string, category?: string, version?: string, isActive?: boolean, navConfig?: string, permConfig?: string, entityConfig?: string }): Promise<Module> {
     const result = await $fetch<Module>('/api/metadata/modules', {
       method: 'POST',
       body: data

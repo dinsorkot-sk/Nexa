@@ -4,6 +4,12 @@ export interface Module {
   slug: string
   description: string | null
   icon: string | null
+  color: string | null
+  category: string | null
+  version: string | null
+  navConfig: string | null
+  permConfig: string | null
+  entityConfig: string | null
   isActive: boolean
   createdAt: string | null
   updatedAt: string | null

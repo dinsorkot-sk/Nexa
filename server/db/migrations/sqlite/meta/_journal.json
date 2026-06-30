@@ -29,6 +29,13 @@
       "when": 1782744819385,
       "tag": "0003_powerful_patch",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1782809889439,
+      "tag": "0004_fair_randall",
+      "breakpoints": true
     }
   ]
 }
