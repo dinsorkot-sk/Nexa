@@ -76,18 +76,24 @@ const statusOptions = [
   { label: 'Inactive', value: 'inactive' }
 ]
 
+const showDeleteConfirm = ref(false)
+const moduleToDelete = ref<Module | null>(null)
+const deleting = ref(false)
+
 const columns = [
-  { id: 'name', header: 'Module Name' },
-  { id: 'slug', header: 'Key' },
-  { id: 'category', header: 'Category' },
-  { id: 'status', header: 'Status' },
-  { id: 'entityCount', header: 'Entities' },
-  { id: 'forms', header: 'Forms' },
-  { id: 'updatedAt', header: 'Last Updated' },
-  { id: 'actions', header: 'Actions' }
+  { accessorKey: 'name', header: 'Module Name' },
+  { accessorKey: 'slug', header: 'Key' },
+  { accessorKey: 'category', header: 'Category' },
+  { accessorKey: 'isActive', header: 'Status' },
+  { accessorKey: 'entityCount', header: 'Entities' },
+  { accessorKey: 'formCount', header: 'Forms' },
+  { accessorKey: 'updatedAt', header: 'Last Updated' },
+  { accessorKey: 'actions', header: 'Actions' }
 ]
 
 const pageSizeOptions = [5, 10, 20, 50]
+
+const router = useRouter()
 
 onMounted(() => {
   meta.loadModules()
@@ -143,6 +149,50 @@ async function handleDeactivate() {
     toast.add({ title: active ? 'Module activated' : 'Module deactivated', color: 'success' })
   } catch {
     toast.add({ title: 'Error', description: 'Could not update module', color: 'error' })
+  }
+}
+
+function viewDetail(mod: Module) {
+  router.push(`/module/${mod.id}`)
+}
+
+function confirmDelete(mod: Module) {
+  moduleToDelete.value = mod
+  showDeleteConfirm.value = true
+}
+
+async function handleDelete() {
+  if (!moduleToDelete.value) return
+  deleting.value = true
+  try {
+    await meta.deleteModule(moduleToDelete.value.id)
+    toast.add({ title: 'Module deleted', color: 'success' })
+    showDeleteConfirm.value = false
+    moduleToDelete.value = null
+  } catch {
+    toast.add({ title: 'Error', description: 'Could not delete module', color: 'error' })
+  } finally {
+    deleting.value = false
+  }
+}
+
+async function handleEdit(mod: Module) {
+  router.push(`/module/create?edit=${mod.id}`)
+}
+
+async function duplicate(mod: Module) {
+  try {
+    await meta.createModule({
+      name: `${mod.name} (Copy)`,
+      slug: `${mod.slug}-copy`,
+      description: mod.description || undefined,
+      icon: mod.icon || undefined,
+      version: '1.0.0',
+      isActive: false
+    })
+    toast.add({ title: 'Module duplicated', color: 'success' })
+  } catch {
+    toast.add({ title: 'Error', description: 'Could not duplicate module', color: 'error' })
   }
 }
 
@@ -329,7 +379,7 @@ function getTimeAgo(dateStr: string | null): string {
                   :data="paginatedModules"
                   divide
                   hover
-                  :on-select="handleRowSelect"
+                  @select="handleRowSelect"
                 >
                   <template #header-name>
                     <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('name')">
@@ -417,10 +467,26 @@ function getTimeAgo(dateStr: string | null): string {
                   <template #updatedAt-cell="{ row }">
                     <span class="text-sm text-(--ui-text-muted)">{{ getTimeAgo(m(row).updatedAt) }}</span>
                   </template>
-                  <template #actions-cell>
+                  <template #actions-cell="{ row }">
                     <div class="flex items-center gap-1">
+                      <UButton
+                        icon="i-lucide-external-link"
+                        color="neutral"
+                        variant="ghost"
+                        size="sm"
+                        square
+                        @click="viewDetail(m(row))"
+                      />
+                      <UButton
+                        icon="i-lucide-pencil"
+                        color="neutral"
+                        variant="ghost"
+                        size="sm"
+                        square
+                        @click="handleEdit(m(row))"
+                      />
                       <UDropdownMenu
-                        :items="[[{ label: 'Duplicate', icon: 'i-lucide-copy' }, { label: 'Export', icon: 'i-lucide-download' }, { label: 'Delete', icon: 'i-lucide-trash-2', color: 'error' }]]"
+                        :items="[[{ label: 'Duplicate', icon: 'i-lucide-copy', onSelect: () => duplicate(m(row)) }, { label: 'Export', icon: 'i-lucide-download' }, { label: 'Delete', icon: 'i-lucide-trash-2', color: 'error', onSelect: () => confirmDelete(m(row)) }]]"
                       >
                         <UButton
                           icon="i-lucide-ellipsis-vertical"
@@ -770,6 +836,32 @@ function getTimeAgo(dateStr: string | null): string {
           :label="meta.selectedModule.value && meta.selectedModule.value.isActive ? 'Deactivate' : 'Activate'"
           :color="meta.selectedModule.value && meta.selectedModule.value.isActive ? 'error' : 'success'"
           @click="handleDeactivate"
+        />
+      </div>
+    </template>
+  </UModal>
+
+  <!-- Delete Confirmation Modal -->
+  <UModal v-model:open="showDeleteConfirm" title="Delete Module">
+    <template #body>
+      <p class="text-sm text-(--ui-text-muted)">
+        Are you sure you want to delete <strong>"{{ moduleToDelete?.name }}"</strong>?
+        This action cannot be undone and will remove all associated data.
+      </p>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton
+          label="Cancel"
+          color="neutral"
+          variant="outline"
+          @click="showDeleteConfirm = false; moduleToDelete = null"
+        />
+        <UButton
+          label="Delete"
+          color="error"
+          :loading="deleting"
+          @click="handleDelete"
         />
       </div>
     </template>

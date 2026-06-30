@@ -38,6 +38,38 @@ const form = reactive({
   } as Record<string, string>
 })
 
+const formErrors = reactive<Record<string, string>>({})
+
+watch(() => form.name, (_newName) => {
+  if (!form.key || form.key === form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) {
+    form.key = form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  }
+})
+
+function validateStep(stepNum: number): boolean {
+  clearErrors()
+  if (stepNum === 1) {
+    if (!form.name.trim()) {
+      formErrors.name = 'Module name is required'
+      return false
+    }
+    if (!form.key.trim()) {
+      formErrors.key = 'Module key is required'
+      return false
+    }
+    if (!/^[a-z0-9][a-z0-9_-]*$/.test(form.key)) {
+      formErrors.key = 'Key must be lowercase alphanumeric, underscore or hyphen'
+      return false
+    }
+  }
+  return true
+}
+
+function clearErrors() {
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+  Object.keys(formErrors).forEach(k => delete formErrors[k])
+}
+
 const steps = [
   { num: 1, label: 'Basic Information', subtitle: 'Define module details', icon: 'i-lucide-info' },
   { num: 2, label: 'Entities', subtitle: 'Select entities for this module', icon: 'i-lucide-database' },
@@ -156,8 +188,11 @@ function togglePerm(roleId: string, action: string) {
 
 const isLastStep = computed(() => step.value === totalSteps)
 const isFirstStep = computed(() => step.value === 1)
+const draftSaving = ref(false)
+const draftLoaded = ref(false)
 
 function nextStep() {
+  if (!validateStep(step.value)) return
   if (step.value < totalSteps) step.value++
 }
 
@@ -170,6 +205,10 @@ function goToStep(n: number) {
 }
 
 async function handleCreate() {
+  if (!validateStep(1)) {
+    step.value = 1
+    return
+  }
   try {
     await meta.createModule({
       name: form.name,
@@ -185,15 +224,58 @@ async function handleCreate() {
       entityConfig: JSON.stringify(form.entities)
     })
     toast.add({ title: 'Module created', description: `"${form.name}" has been created successfully.`, color: 'success' })
+    clearDraft()
     router.push('/module')
   } catch {
     toast.add({ title: 'Error', description: 'Failed to create module', color: 'error' })
   }
 }
 
+const DRAFT_KEY = 'nexa_module_draft'
+
+function saveDraft() {
+  draftSaving.value = true
+  try {
+    const data = {
+      form: { ...form },
+      perms: { ...perms },
+      step: step.value
+    }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(data))
+    toast.add({ title: 'Draft saved', description: 'You can continue later.', color: 'success' })
+  } catch {
+    toast.add({ title: 'Error', description: 'Could not save draft', color: 'error' })
+  } finally {
+    draftSaving.value = false
+  }
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY)
+    if (!raw) return
+    const data = JSON.parse(raw)
+    Object.assign(form, data.form)
+    Object.assign(perms, data.perms)
+    step.value = data.step || 1
+    draftLoaded.value = true
+    toast.add({ title: 'Draft restored', color: 'info' })
+  } catch {
+    // silent fail for draft load
+  }
+}
+
+function clearDraft() {
+  localStorage.removeItem(DRAFT_KEY)
+}
+
 function cancel() {
   router.push('/module')
 }
+
+onMounted(() => {
+  loadDraft()
+})
 
 function rolePerms(roleId: string): Record<string, boolean> {
   return perms[roleId as keyof typeof perms] ?? {}
@@ -245,6 +327,8 @@ const roleColorMap: Record<string, string> = {
             label="Save Draft"
             color="neutral"
             variant="outline"
+            :loading="draftSaving"
+            @click="saveDraft"
           />
           <UButton
             v-if="isLastStep"
@@ -314,10 +398,10 @@ const roleColorMap: Record<string, string> = {
             </p>
 
             <UForm class="space-y-4">
-              <UFormField label="Module Name" required>
+              <UFormField label="Module Name" required :error="formErrors.name">
                 <UInput v-model="form.name" placeholder="Customer Relationship Management" class="w-full" />
               </UFormField>
-              <UFormField label="Module Key" required>
+              <UFormField label="Module Key" required :error="formErrors.key">
                 <UInput v-model="form.key" placeholder="crm" class="w-full" />
                 <template #hint>
                   Unique key used in system (lowercase, alphanumeric and underscore only)
@@ -367,7 +451,7 @@ const roleColorMap: Record<string, string> = {
               </div>
               <UFormField label="Module Status">
                 <div class="flex items-center gap-2">
-                  <UToggle v-model="form.status" color="primary" />
+                  <USwitch v-model="form.status" color="primary" />
                   <span class="text-sm" :class="form.status ? 'text-emerald-600' : 'text-(--ui-text-muted)'">
                     {{ form.status ? 'Active' : 'Inactive' }}
                   </span>
@@ -537,7 +621,7 @@ const roleColorMap: Record<string, string> = {
                       {{ item.linkedTo }}
                     </td>
                     <td class="px-3 py-2">
-                      <UToggle v-model="item.active" size="xs" color="primary" />
+                      <USwitch v-model="item.active" size="xs" color="primary" />
                     </td>
                     <td class="px-3 py-2">
                       <UButton
