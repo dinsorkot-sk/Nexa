@@ -107,11 +107,6 @@ function sortIcon(col: string) {
   return sortDirection.value === 'asc' ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down'
 }
 
-function openCreate() {
-  Object.assign(createForm, { name: '', slug: '', description: '', icon: 'i-lucide-puzzle' })
-  showCreateModal.value = true
-}
-
 async function handleCreate() {
   if (!createForm.name || !createForm.slug) {
     toast.add({ title: 'Missing fields', description: 'Name and slug are required', color: 'error' })
@@ -180,13 +175,29 @@ function getTimeAgo(dateStr: string | null): string {
           <UDashboardSidebarCollapse />
         </template>
         <template #right>
-          <UButton label="+ Create Module" color="primary" variant="solid" @click="openCreate" />
+          <UButton
+            label="+ Create Module"
+            color="primary"
+            variant="solid"
+            to="/module/create"
+          />
           <UDropdownMenu
-            :items="[[{ label: 'Import Modules', icon: 'i-lucide-upload' }, { label: 'Export Modules', icon: 'i-lucide-download' }]]">
-            <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" square />
+            :items="[[{ label: 'Import Modules', icon: 'i-lucide-upload' }, { label: 'Export Modules', icon: 'i-lucide-download' }]]"
+          >
+            <UButton
+              icon="i-lucide-ellipsis-vertical"
+              color="neutral"
+              variant="ghost"
+              square
+            />
           </UDropdownMenu>
           <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              square
+              @click="isNotificationsSlideoverOpen = true"
+            >
               <UChip color="error" inset>
                 <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
               </UChip>
@@ -278,13 +289,34 @@ function getTimeAgo(dateStr: string | null): string {
           <!-- Toolbar -->
           <div class="flex items-center justify-end">
             <div class="flex items-center gap-2">
-              <UInput v-model="search" placeholder="Search modules..." icon="i-lucide-search" class="w-56" />
+              <UInput
+                v-model="search"
+                placeholder="Search modules..."
+                icon="i-lucide-search"
+                class="w-56"
+              />
               <USelect v-model="statusFilter" :items="statusOptions" class="w-36" />
-              <UButton :label="'Sort by: ' + sortColumn" trailing-icon="i-lucide-chevron-down" color="neutral"
-                variant="outline" disabled class="cursor-not-allowed opacity-50" />
-              <UButton :icon="viewMode === 'list' ? 'i-lucide-list' : 'i-lucide-grid-2x2'" color="neutral"
-                variant="ghost" square @click="viewMode = viewMode === 'list' ? 'grid' : 'list'" />
-              <UButton icon="i-lucide-settings-2" color="neutral" variant="ghost" square />
+              <UButton
+                :label="'Sort by: ' + sortColumn"
+                trailing-icon="i-lucide-chevron-down"
+                color="neutral"
+                variant="outline"
+                disabled
+                class="cursor-not-allowed opacity-50"
+              />
+              <UButton
+                :icon="viewMode === 'list' ? 'i-lucide-list' : 'i-lucide-grid-2x2'"
+                color="neutral"
+                variant="ghost"
+                square
+                @click="viewMode = viewMode === 'list' ? 'grid' : 'list'"
+              />
+              <UButton
+                icon="i-lucide-settings-2"
+                color="neutral"
+                variant="ghost"
+                square
+              />
             </div>
           </div>
 
@@ -292,10 +324,53 @@ function getTimeAgo(dateStr: string | null): string {
           <div v-if="activeTab === 'modules'">
             <UCard :ui="{ body: 'sm:p-0 p-0' }">
               <template #default>
-                <UTable :columns="columns" :data="paginatedModules" divide hover :on-select="handleRowSelect">
+                <UTable
+                  :columns="columns"
+                  :data="paginatedModules"
+                  divide
+                  hover
+                  :on-select="handleRowSelect"
+                >
+                  <template #header-name>
+                    <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('name')">
+                      Module Name <UIcon :name="sortIcon('name')" class="size-3.5" />
+                    </span>
+                  </template>
+                  <template #header-slug>
+                    <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('slug')">
+                      Key <UIcon :name="sortIcon('slug')" class="size-3.5" />
+                    </span>
+                  </template>
+                  <template #header-category>
+                    Category
+                  </template>
+                  <template #header-status>
+                    <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('isActive')">
+                      Status <UIcon :name="sortIcon('isActive')" class="size-3.5" />
+                    </span>
+                  </template>
+                  <template #header-entityCount>
+                    Entities
+                  </template>
+                  <template #header-forms>
+                    Forms
+                  </template>
+                  <template #header-updatedAt>
+                    <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('updatedAt')">
+                      Last Updated <UIcon :name="sortIcon('updatedAt')" class="size-3.5" />
+                    </span>
+                  </template>
+                  <template #header-actions>
+                    Actions
+                  </template>
                   <template #name-cell="{ row }">
                     <div class="flex items-center gap-3">
-                      <UAvatar :icon="m(row).icon || 'i-lucide-puzzle'" square size="md" color="primary" />
+                      <UAvatar
+                        :icon="m(row).icon || 'i-lucide-puzzle'"
+                        square
+                        size="md"
+                        color="primary"
+                      />
                       <div>
                         <div class="font-medium text-sm">
                           {{ m(row).name }}
@@ -320,10 +395,14 @@ function getTimeAgo(dateStr: string | null): string {
                     <UBadge :color="m(row).isActive ? 'success' : 'warning'" variant="subtle">
                       <template #leading>
                         <span class="relative flex size-2">
-                          <span class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
-                            :class="m(row).isActive ? 'bg-green-400' : 'bg-orange-400'" />
-                          <span class="relative inline-flex size-2 rounded-full"
-                            :class="m(row).isActive ? 'bg-green-500' : 'bg-orange-500'" />
+                          <span
+                            class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                            :class="m(row).isActive ? 'bg-green-400' : 'bg-orange-400'"
+                          />
+                          <span
+                            class="relative inline-flex size-2 rounded-full"
+                            :class="m(row).isActive ? 'bg-green-500' : 'bg-orange-500'"
+                          />
                         </span>
                       </template>
                       {{ m(row).isActive ? 'Active' : 'Inactive' }}
@@ -341,8 +420,15 @@ function getTimeAgo(dateStr: string | null): string {
                   <template #actions-cell>
                     <div class="flex items-center gap-1">
                       <UDropdownMenu
-                        :items="[[{ label: 'Duplicate', icon: 'i-lucide-copy' }, { label: 'Export', icon: 'i-lucide-download' }, { label: 'Delete', icon: 'i-lucide-trash-2', color: 'error' }]]">
-                        <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" square size="sm" />
+                        :items="[[{ label: 'Duplicate', icon: 'i-lucide-copy' }, { label: 'Export', icon: 'i-lucide-download' }, { label: 'Delete', icon: 'i-lucide-trash-2', color: 'error' }]]"
+                      >
+                        <UButton
+                          icon="i-lucide-ellipsis-vertical"
+                          color="neutral"
+                          variant="ghost"
+                          square
+                          size="sm"
+                        />
                       </UDropdownMenu>
                     </div>
                   </template>
@@ -358,7 +444,7 @@ function getTimeAgo(dateStr: string | null): string {
                 <div v-if="meta.modules.value.length > 0" class="flex items-center justify-between">
                   <div class="text-sm text-(--ui-text-muted)">
                     Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize,
-                      filteredModules.length) }} of
+                                                                                  filteredModules.length) }} of
                     {{ filteredModules.length }} results
                   </div>
                   <UPagination v-model="currentPage" :total="filteredModules.length" :page-size="pageSize" />
@@ -381,28 +467,45 @@ function getTimeAgo(dateStr: string | null): string {
 
         <!-- Side Panel -->
         <Transition name="slide-panel">
-          <UCard v-if="showSidePanel && meta.selectedModule.value" class="h-full flex flex-col w-96"
-            :ui="{ header: 'flex justify-between p-2', body: 'sm:p-0 p-0 flex flex-col h-full', footer: 'flex flex-col gap-2' }">
+          <UCard
+            v-if="showSidePanel && meta.selectedModule.value"
+            class="h-full flex flex-col w-96"
+            :ui="{ header: 'flex justify-between p-2', body: 'sm:p-0 p-0 flex flex-col h-full', footer: 'flex flex-col gap-2' }"
+          >
             <!-- Panel Header -->
             <template #header>
               <h3 class="font-semibold text-sm">
                 Module Details
               </h3>
-              <UButton icon="i-lucide-x" color="neutral" variant="ghost" square size="sm" @click="closeSidePanel" />
+              <UButton
+                icon="i-lucide-x"
+                color="neutral"
+                variant="ghost"
+                square
+                size="sm"
+                @click="closeSidePanel"
+              />
             </template>
 
             <!-- Module Hero -->
             <div class="border-b border-(--ui-border) flex flex-col gap-2 p-2">
               <div class="flex items-center gap-3">
-                <UAvatar :icon="meta.selectedModule.value.icon || 'i-lucide-puzzle'" square size="lg"
-                  class="bg-green-100 text-green-700" />
+                <UAvatar
+                  :icon="meta.selectedModule.value.icon || 'i-lucide-puzzle'"
+                  square
+                  size="lg"
+                  color="primary"
+                />
                 <div class="min-w-0">
                   <div class="font-semibold text-sm truncate">
                     {{ meta.selectedModule.value.name }}
                   </div>
                   <div class="flex items-center gap-2 mt-1">
-                    <UBadge :color="meta.selectedModule.value.isActive ? 'success' : 'warning'" variant="subtle"
-                      size="sm">
+                    <UBadge
+                      :color="meta.selectedModule.value.isActive ? 'success' : 'warning'"
+                      variant="subtle"
+                      size="sm"
+                    >
                       {{ meta.selectedModule.value.isActive ? 'Active' : 'Inactive' }}
                     </UBadge>
                     <UBadge variant="subtle" color="neutral" size="sm">
@@ -411,7 +514,12 @@ function getTimeAgo(dateStr: string | null): string {
                   </div>
                 </div>
               </div>
-              <UTabs v-model="detailTab" :items="detailTabs" size="xs" class="gap-0" />
+              <UTabs
+                v-model="detailTab"
+                :items="detailTabs"
+                size="xs"
+                class="gap-0"
+              />
             </div>
 
             <!-- Tab Content -->
@@ -437,10 +545,14 @@ function getTimeAgo(dateStr: string | null): string {
                   <span class="text-(--ui-text-muted)">Status</span>
                   <span class="flex items-center gap-1.5">
                     <span class="relative flex size-2">
-                      <span class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
-                        :class="meta.selectedModule.value.isActive ? 'bg-green-400' : 'bg-orange-400'" />
-                      <span class="relative inline-flex size-2 rounded-full"
-                        :class="meta.selectedModule.value.isActive ? 'bg-green-500' : 'bg-orange-500'" />
+                      <span
+                        class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                        :class="meta.selectedModule.value.isActive ? 'bg-green-400' : 'bg-orange-400'"
+                      />
+                      <span
+                        class="relative inline-flex size-2 rounded-full"
+                        :class="meta.selectedModule.value.isActive ? 'bg-green-500' : 'bg-orange-500'"
+                      />
                     </span>
                     {{ meta.selectedModule.value.isActive ? 'Active' : 'Inactive' }}
                   </span>
@@ -475,32 +587,57 @@ function getTimeAgo(dateStr: string | null): string {
                   Quick Actions
                 </h4>
                 <div class="p-1 space-y-1">
-                  <UButton block color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-right"
-                    class="justify-between">
+                  <UButton
+                    block
+                    color="neutral"
+                    variant="ghost"
+                    trailing-icon="i-lucide-arrow-right"
+                    class="justify-between"
+                  >
                     <span class="flex items-center gap-2">
                       <UIcon name="i-lucide-eye" class="size-4" /> View Module
                     </span>
                   </UButton>
-                  <UButton block color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-right"
-                    class="justify-between">
+                  <UButton
+                    block
+                    color="neutral"
+                    variant="ghost"
+                    trailing-icon="i-lucide-arrow-right"
+                    class="justify-between"
+                  >
                     <span class="flex items-center gap-2">
                       <UIcon name="i-lucide-database" class="size-4" /> Manage Entities
                     </span>
                   </UButton>
-                  <UButton block color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-right"
-                    class="justify-between">
+                  <UButton
+                    block
+                    color="neutral"
+                    variant="ghost"
+                    trailing-icon="i-lucide-arrow-right"
+                    class="justify-between"
+                  >
                     <span class="flex items-center gap-2">
                       <UIcon name="i-lucide-file-text" class="size-4" /> Manage Forms
                     </span>
                   </UButton>
-                  <UButton block color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-right"
-                    class="justify-between">
+                  <UButton
+                    block
+                    color="neutral"
+                    variant="ghost"
+                    trailing-icon="i-lucide-arrow-right"
+                    class="justify-between"
+                  >
                     <span class="flex items-center gap-2">
                       <UIcon name="i-lucide-settings-2" class="size-4" /> Module Settings
                     </span>
                   </UButton>
-                  <UButton block color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-right"
-                    class="justify-between">
+                  <UButton
+                    block
+                    color="neutral"
+                    variant="ghost"
+                    trailing-icon="i-lucide-arrow-right"
+                    class="justify-between"
+                  >
                     <span class="flex items-center gap-2">
                       <UIcon name="i-lucide-shield" class="size-4" /> Manage Permissions
                     </span>
@@ -511,16 +648,25 @@ function getTimeAgo(dateStr: string | null): string {
 
             <!-- Entities Tab -->
             <div v-else-if="detailTab === 'entities'">
-              <div v-if="meta.moduleEntities.value.length === 0"
-                class="py-8 text-center text-sm text-(--ui-text-muted)">
+              <div
+                v-if="meta.moduleEntities.value.length === 0"
+                class="py-8 text-center text-sm text-(--ui-text-muted)"
+              >
                 <UIcon name="i-lucide-database" class="mx-auto mb-2 size-6 opacity-50" />
                 No entities in this module
               </div>
               <div v-else class="p-2 space-y-2">
-                <div v-for="entity in meta.moduleEntities.value" :key="entity.id"
-                  class="flex items-center gap-3 rounded-lg border border-(--ui-border) px-3 py-2.5">
-                  <UAvatar :icon="entity.icon || 'i-lucide-table-2'" square size="sm"
-                    class="bg-(--ui-bg-elevated) text-(--ui-text-muted)" />
+                <div
+                  v-for="entity in meta.moduleEntities.value"
+                  :key="entity.id"
+                  class="flex items-center gap-3 rounded-lg border border-(--ui-border) px-3 py-2.5"
+                >
+                  <UAvatar
+                    :icon="entity.icon || 'i-lucide-table-2'"
+                    square
+                    size="sm"
+                    class="bg-(--ui-bg-elevated) text-(--ui-text-muted)"
+                  />
                   <div class="min-w-0 flex-1">
                     <div class="text-sm font-medium">
                       {{ entity.name }}
@@ -530,15 +676,17 @@ function getTimeAgo(dateStr: string | null): string {
                     </div>
                   </div>
                   <span class="text-xs text-(--ui-text-muted)">
-                    {{(meta.moduleFieldCounts.value.find(fc => fc.entityId === entity.id)?.count ?? 0)}} fields
+                    {{ (meta.moduleFieldCounts.value.find(fc => fc.entityId === entity.id)?.count ?? 0) }} fields
                   </span>
                 </div>
               </div>
             </div>
 
             <!-- Forms Tab -->
-            <div v-else-if="detailTab === 'forms'"
-              class="py-8 text-center text-sm text-(--ui-text-muted) flex flex-col">
+            <div
+              v-else-if="detailTab === 'forms'"
+              class="py-8 text-center text-sm text-(--ui-text-muted) flex flex-col"
+            >
               <UIcon name="i-lucide-file-text" class="mx-auto mb-2 size-6 opacity-50" />
               No forms yet
             </div>
@@ -551,14 +699,16 @@ function getTimeAgo(dateStr: string | null): string {
 
             <!-- Panel Footer -->
             <template #footer>
-              <UButton block :color="meta.selectedModule.value.isActive ? 'error' : 'success'"
+              <UButton
+                block
+                :color="meta.selectedModule.value.isActive ? 'error' : 'success'"
                 :variant="meta.selectedModule.value.isActive ? 'outline' : 'solid'"
                 :icon="meta.selectedModule.value.isActive ? 'i-lucide-power' : 'i-lucide-play'"
-                @click="showDeactivateConfirm = true">
+                @click="showDeactivateConfirm = true"
+              >
                 {{ meta.selectedModule.value.isActive ? 'Deactivate Module' : 'Activate Module' }}
               </UButton>
             </template>
-
           </UCard>
         </Transition>
       </div>
@@ -582,7 +732,12 @@ function getTimeAgo(dateStr: string | null): string {
           <UInput v-model="createForm.icon" placeholder="i-lucide-puzzle" />
         </UFormField>
         <div class="flex justify-end gap-2">
-          <UButton label="Cancel" color="neutral" variant="outline" @click="showCreateModal = false" />
+          <UButton
+            label="Cancel"
+            color="neutral"
+            variant="outline"
+            @click="showCreateModal = false"
+          />
           <UButton label="Create" color="primary" @click="handleCreate" />
         </div>
       </UForm>
@@ -590,8 +745,10 @@ function getTimeAgo(dateStr: string | null): string {
   </UModal>
 
   <!-- Deactivate Confirmation Modal -->
-  <UModal v-model:open="showDeactivateConfirm"
-    :title="meta.selectedModule.value && meta.selectedModule.value.isActive ? 'Deactivate Module' : 'Activate Module'">
+  <UModal
+    v-model:open="showDeactivateConfirm"
+    :title="meta.selectedModule.value && meta.selectedModule.value.isActive ? 'Deactivate Module' : 'Activate Module'"
+  >
     <template #body>
       <p class="text-sm text-(--ui-text-muted)">
         Are you sure you want to <strong>{{ meta.selectedModule.value && meta.selectedModule.value.isActive
@@ -603,10 +760,17 @@ function getTimeAgo(dateStr: string | null): string {
     </template>
     <template #footer>
       <div class="flex justify-end gap-2">
-        <UButton label="Cancel" color="neutral" variant="outline" @click="showDeactivateConfirm = false" />
-        <UButton :label="meta.selectedModule.value && meta.selectedModule.value.isActive ? 'Deactivate' : 'Activate'"
+        <UButton
+          label="Cancel"
+          color="neutral"
+          variant="outline"
+          @click="showDeactivateConfirm = false"
+        />
+        <UButton
+          :label="meta.selectedModule.value && meta.selectedModule.value.isActive ? 'Deactivate' : 'Activate'"
           :color="meta.selectedModule.value && meta.selectedModule.value.isActive ? 'error' : 'success'"
-          @click="handleDeactivate" />
+          @click="handleDeactivate"
+        />
       </div>
     </template>
   </UModal>
