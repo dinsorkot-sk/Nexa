@@ -293,45 +293,6 @@ function getTimeAgo(dateStr: string | null): string {
             <UCard :ui="{ body: 'sm:p-0 p-0' }">
               <template #default>
                 <UTable :columns="columns" :data="paginatedModules" divide hover :on-select="handleRowSelect">
-                  <template #header-name>
-                    <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('name')">
-                      Module Name
-                      <UIcon :name="sortIcon('name')" class="size-3.5" />
-                    </span>
-                  </template>
-                  <template #header-slug>
-                    <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('slug')">
-                      Key
-                      <UIcon :name="sortIcon('slug')" class="size-3.5" />
-                    </span>
-                  </template>
-                  <template #header-category>
-                    Category
-                  </template>
-                  <template #header-status>
-                    <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('isActive')">
-                      Status
-                      <UIcon :name="sortIcon('isActive')" class="size-3.5" />
-                    </span>
-                  </template>
-                  <template #header-entityCount>
-                    <span class="inline-flex items-center gap-1">
-                      Entities
-                    </span>
-                  </template>
-                  <template #header-forms>
-                    Forms
-                  </template>
-                  <template #header-updatedAt>
-                    <span class="inline-flex items-center gap-1 cursor-pointer" @click="toggleSort('updatedAt')">
-                      Last Updated
-                      <UIcon :name="sortIcon('updatedAt')" class="size-3.5" />
-                    </span>
-                  </template>
-                  <template #header-actions>
-                    Actions
-                  </template>
-
                   <template #name-cell="{ row }">
                     <div class="flex items-center gap-3">
                       <UAvatar :icon="m(row).icon || 'i-lucide-puzzle'" square size="md" color="primary" />
