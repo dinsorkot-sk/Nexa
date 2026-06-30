@@ -179,33 +179,33 @@ function getRelativeDate(dateStr: string) {
               Select the roles assigned to this member.
             </p>
             <div class="space-y-2">
-              <div
+              <UCheckbox
                 v-for="role in roles"
                 :key="role.id"
-                class="flex items-center gap-3 p-3 rounded-lg border border-(--ui-border) cursor-pointer hover:bg-(--ui-bg-elevated) transition-colors"
-                :class="{ 'border-(--ui-primary) bg-(--ui-primary)/5': selectedRoleIds.includes(role.id) }"
+                :model-value="selectedRoleIds.includes(role.id)"
+                variant="card"
+                indicator="start"
+                :color="getRoleColor(role.slug)"
                 @click="toggleRole(role.id)"
               >
-                <UCheckbox
-                  :checked="selectedRoleIds.includes(role.id)"
-                  @click.stop="toggleRole(role.id)"
-                />
-                <div class="min-w-0 flex-1">
-                  <p class="text-sm font-medium">
-                    {{ role.name }}
-                  </p>
+                <template #label>
+                  <div class="flex items-center justify-between w-full">
+                    <span class="text-sm font-medium">{{ role.name }}</span>
+                    <UBadge
+                      :color="getRoleColor(role.slug)"
+                      size="xs"
+                      variant="solid"
+                    >
+                      {{ role.slug }}
+                    </UBadge>
+                  </div>
+                </template>
+                <template #description>
                   <p v-if="role.description" class="text-xs text-(--ui-text-muted) truncate">
                     {{ role.description }}
                   </p>
-                </div>
-                <UBadge
-                  :color="getRoleColor(role.slug)"
-                  size="xs"
-                  variant="solid"
-                >
-                  {{ role.slug }}
-                </UBadge>
-              </div>
+                </template>
+              </UCheckbox>
             </div>
           </div>
         </div>
