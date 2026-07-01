@@ -73,9 +73,6 @@ const _useAuth = () => {
     await navigateTo('/login')
   }
 
-  // Initialize on mount
-  onMounted(() => fetchUser())
-
   return {
     user,
     loading,

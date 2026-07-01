@@ -1,4 +1,4 @@
-import type { Entity, EntityWithFields, Field, Module, Relation } from '~/types/metadata'
+import type { Entity, EntityWithFields, Field, Relation } from '~/types/metadata'
 
 /**
  * Composable for managing metadata (entities, fields, relations).
@@ -179,78 +179,6 @@ export function useMetadata() {
     await loadRelations()
   }
 
-  // ── Module state ────────────────────────────────────────────────────────
-  const modules = ref<Module[]>([])
-  const selectedModule = ref<Module | null>(null)
-  const moduleEntities = ref<Entity[]>([])
-  const moduleFieldCounts = ref<{ entityId: number, count: number }[]>([])
-
-  async function loadModules() {
-    try {
-      modules.value = await $fetch<Module[]>('/api/metadata/modules')
-    } catch {
-      modules.value = []
-    }
-  }
-
-  async function loadModule(id: number) {
-    try {
-      const result = await $fetch<Module & { entities: Entity[], fieldCounts: { entityId: number, count: number }[] }>(`/api/metadata/modules/${id}`)
-      selectedModule.value = result
-      moduleEntities.value = result.entities
-      moduleFieldCounts.value = result.fieldCounts
-    } catch {
-      selectedModule.value = null
-      moduleEntities.value = []
-      moduleFieldCounts.value = []
-    }
-  }
-
-  function selectModule(mod: Module) {
-    if (selectedModule.value?.id !== mod.id) {
-      loadModule(mod.id)
-    } else {
-      selectedModule.value = null
-      moduleEntities.value = []
-      moduleFieldCounts.value = []
-    }
-  }
-
-  async function createModule(data: { name: string, slug: string, description?: string, icon?: string, color?: string, category?: string, version?: string, isActive?: boolean, navConfig?: string, permConfig?: string, entityConfig?: string }): Promise<Module> {
-    const result = await $fetch<Module>('/api/metadata/modules', {
-      method: 'POST',
-      body: data
-    })
-    await loadModules()
-    return result
-  }
-
-  async function updateModule(id: number, data: Partial<Module>): Promise<Module> {
-    const result = await $fetch<Module>(`/api/metadata/modules/${id}`, {
-      method: 'PUT',
-      body: data
-    })
-    await loadModules()
-    if (selectedModule.value?.id === id) {
-      await loadModule(id)
-    }
-    return result
-  }
-
-  async function deleteModule(id: number): Promise<void> {
-    await $fetch(`/api/metadata/modules/${id}`, { method: 'DELETE' })
-    if (selectedModule.value?.id === id) {
-      selectedModule.value = null
-      moduleEntities.value = []
-      moduleFieldCounts.value = []
-    }
-    await loadModules()
-  }
-
-  async function toggleModuleActive(id: number, isActive: boolean): Promise<Module> {
-    return updateModule(id, { isActive } as Partial<Module>)
-  }
-
   // ── Field type options ─────────────────────────────────────────────────
   const fieldTypeOptions = [
     { label: 'Text', value: 'text' },
@@ -277,10 +205,6 @@ export function useMetadata() {
     selectedEntity,
     selectedField,
     relations,
-    modules,
-    selectedModule,
-    moduleEntities,
-    moduleFieldCounts,
     loading,
     saving,
     fieldTypeOptions,
@@ -304,15 +228,6 @@ export function useMetadata() {
     loadRelations,
     createRelation,
     updateRelation,
-    deleteRelation,
-
-    // Module
-    loadModules,
-    loadModule,
-    selectModule,
-    createModule,
-    updateModule,
-    deleteModule,
-    toggleModuleActive
+    deleteRelation
   }
 }

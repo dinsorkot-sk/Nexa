@@ -88,13 +88,19 @@ export default defineTask({
       slug: 'cms',
       description: 'Manage pages, blocks, and structured content',
       icon: 'i-lucide-file-text',
+      color: '#6366F1',
+      category: 'Content',
+      version: '2.1.0',
       isActive: true
     }).returning().all()
     const [blogModule] = await db.insert(schema.modules).values({
       name: 'Blog',
       slug: 'blog',
-      description: 'Blog posts, categories, and tags',
+      description: 'Blog posts, categories, and tags with SEO support',
       icon: 'i-lucide-newspaper',
+      color: '#F59E0B',
+      category: 'Content',
+      version: '1.5.0',
       isActive: true
     }).returning().all()
     const [ecommerceModule] = await db.insert(schema.modules).values({
@@ -102,10 +108,23 @@ export default defineTask({
       slug: 'ecommerce',
       description: 'Products, orders, and customer management',
       icon: 'i-lucide-shopping-cart',
+      color: '#10B981',
+      category: 'Commerce',
+      version: '3.2.0',
+      isActive: true
+    }).returning().all()
+    const [crmModule] = await db.insert(schema.modules).values({
+      name: 'CRM',
+      slug: 'crm',
+      description: 'Customer Relationship Management module for managing customers, leads, opportunities, contacts and activities.',
+      icon: 'i-lucide-users',
+      color: '#10B981',
+      category: 'Business',
+      version: '1.0.0',
       isActive: true
     }).returning().all()
 
-    console.log(`  ✓ Modules: ${cmsModule!.name}, ${blogModule!.name}, ${ecommerceModule!.name}`)
+    console.log(`  ✓ Modules: ${cmsModule!.name}, ${blogModule!.name}, ${ecommerceModule!.name}, ${crmModule!.name}`)
 
     // ── Entities ────────────────────────────────────────────────────
     const [pagesEntity] = await db.insert(schema.entities).values({
@@ -158,6 +177,7 @@ export default defineTask({
       isActive: true
     }).returning().all()
 
+    // ── E-Commerce entities
     const [productsEntity] = await db.insert(schema.entities).values({
       moduleId: ecommerceModule!.id,
       name: 'Products',
@@ -178,7 +198,58 @@ export default defineTask({
       isActive: true
     }).returning().all()
 
-    console.log(`  ✓ Entities: ${pagesEntity!.name}, ${blocksEntity!.name}, ${postsEntity!.name}, ${categoriesEntity!.name}, ${tagsEntity!.name}, ${productsEntity!.name}, ${ordersEntity!.name}`)
+    const [customersEntity] = await db.insert(schema.entities).values({
+      moduleId: ecommerceModule!.id,
+      name: 'Customers',
+      slug: 'customers',
+      tableName: 'ecom_customers',
+      icon: 'i-lucide-users',
+      description: 'Customer records',
+      isActive: true
+    }).returning().all()
+
+    // ── CRM entities
+    const [leadsEntity] = await db.insert(schema.entities).values({
+      moduleId: crmModule!.id,
+      name: 'Leads',
+      slug: 'leads',
+      tableName: 'crm_leads',
+      icon: 'i-lucide-target',
+      description: 'Sales leads and prospects',
+      isActive: true
+    }).returning().all()
+
+    const [opportunitiesEntity] = await db.insert(schema.entities).values({
+      moduleId: crmModule!.id,
+      name: 'Opportunities',
+      slug: 'opportunities',
+      tableName: 'crm_opportunities',
+      icon: 'i-lucide-trending-up',
+      description: 'Sales opportunities and deals',
+      isActive: true
+    }).returning().all()
+
+    const [contactsEntity] = await db.insert(schema.entities).values({
+      moduleId: crmModule!.id,
+      name: 'Contacts',
+      slug: 'contacts',
+      tableName: 'crm_contacts',
+      icon: 'i-lucide-phone',
+      description: 'Contact persons',
+      isActive: true
+    }).returning().all()
+
+    const [activitiesEntity] = await db.insert(schema.entities).values({
+      moduleId: crmModule!.id,
+      name: 'Activities',
+      slug: 'activities',
+      tableName: 'crm_activities',
+      icon: 'i-lucide-calendar-check',
+      description: 'Calls, meetings, and tasks',
+      isActive: true
+    }).returning().all()
+
+    console.log(`  ✓ Entities: ${pagesEntity!.name}, ${blocksEntity!.name}, ${postsEntity!.name}, ${categoriesEntity!.name}, ${tagsEntity!.name}, ${productsEntity!.name}, ${ordersEntity!.name}, ${customersEntity!.name}, ${leadsEntity!.name}, ${opportunitiesEntity!.name}, ${contactsEntity!.name}, ${activitiesEntity!.name}`)
 
     // ── Fields ──────────────────────────────────────────────────────
     // Pages fields
@@ -245,6 +316,55 @@ export default defineTask({
       { entityId: ordersEntity!.id, name: 'Notes', slug: 'notes', fieldType: 'text', sortOrder: 5 }
     ]).returning().all()
 
+    // Customers fields
+    await db.insert(schema.fields).values([
+      { entityId: customersEntity!.id, name: 'Name', slug: 'name', fieldType: 'text', isRequired: true, sortOrder: 0 },
+      { entityId: customersEntity!.id, name: 'Email', slug: 'email', fieldType: 'text', isRequired: true, isUnique: true, sortOrder: 1 },
+      { entityId: customersEntity!.id, name: 'Phone', slug: 'phone', fieldType: 'text', sortOrder: 2 },
+      { entityId: customersEntity!.id, name: 'City', slug: 'city', fieldType: 'text', sortOrder: 3 },
+      { entityId: customersEntity!.id, name: 'Country', slug: 'country', fieldType: 'text', defaultValue: 'US', sortOrder: 4 },
+      { entityId: customersEntity!.id, name: 'Status', slug: 'status', fieldType: 'text', defaultValue: 'active', sortOrder: 5 }
+    ]).returning().all()
+
+    // CRM: Leads fields
+    await db.insert(schema.fields).values([
+      { entityId: leadsEntity!.id, name: 'First Name', slug: 'first_name', fieldType: 'text', isRequired: true, sortOrder: 0 },
+      { entityId: leadsEntity!.id, name: 'Last Name', slug: 'last_name', fieldType: 'text', isRequired: true, sortOrder: 1 },
+      { entityId: leadsEntity!.id, name: 'Email', slug: 'email', fieldType: 'text', sortOrder: 2 },
+      { entityId: leadsEntity!.id, name: 'Phone', slug: 'phone', fieldType: 'text', sortOrder: 3 },
+      { entityId: leadsEntity!.id, name: 'Company', slug: 'company', fieldType: 'text', sortOrder: 4 },
+      { entityId: leadsEntity!.id, name: 'Status', slug: 'status', fieldType: 'text', defaultValue: 'new', sortOrder: 5 },
+      { entityId: leadsEntity!.id, name: 'Source', slug: 'source', fieldType: 'text', sortOrder: 6 }
+    ]).returning().all()
+
+    // CRM: Opportunities fields
+    await db.insert(schema.fields).values([
+      { entityId: opportunitiesEntity!.id, name: 'Name', slug: 'name', fieldType: 'text', isRequired: true, sortOrder: 0 },
+      { entityId: opportunitiesEntity!.id, name: 'Amount', slug: 'amount', fieldType: 'number', isRequired: true, sortOrder: 1 },
+      { entityId: opportunitiesEntity!.id, name: 'Stage', slug: 'stage', fieldType: 'text', defaultValue: 'prospecting', sortOrder: 2 },
+      { entityId: opportunitiesEntity!.id, name: 'Close Date', slug: 'close_date', fieldType: 'date', sortOrder: 3 },
+      { entityId: opportunitiesEntity!.id, name: 'Probability', slug: 'probability', fieldType: 'number', sortOrder: 4 },
+      { entityId: opportunitiesEntity!.id, name: 'Notes', slug: 'notes', fieldType: 'text', sortOrder: 5 }
+    ]).returning().all()
+
+    // CRM: Contacts fields
+    await db.insert(schema.fields).values([
+      { entityId: contactsEntity!.id, name: 'First Name', slug: 'first_name', fieldType: 'text', isRequired: true, sortOrder: 0 },
+      { entityId: contactsEntity!.id, name: 'Last Name', slug: 'last_name', fieldType: 'text', isRequired: true, sortOrder: 1 },
+      { entityId: contactsEntity!.id, name: 'Email', slug: 'email', fieldType: 'text', sortOrder: 2 },
+      { entityId: contactsEntity!.id, name: 'Phone', slug: 'phone', fieldType: 'text', sortOrder: 3 },
+      { entityId: contactsEntity!.id, name: 'Role', slug: 'role', fieldType: 'text', sortOrder: 4 }
+    ]).returning().all()
+
+    // CRM: Activities fields
+    await db.insert(schema.fields).values([
+      { entityId: activitiesEntity!.id, name: 'Subject', slug: 'subject', fieldType: 'text', isRequired: true, sortOrder: 0 },
+      { entityId: activitiesEntity!.id, name: 'Type', slug: 'type', fieldType: 'text', isRequired: true, sortOrder: 1 },
+      { entityId: activitiesEntity!.id, name: 'Status', slug: 'status', fieldType: 'text', defaultValue: 'pending', sortOrder: 2 },
+      { entityId: activitiesEntity!.id, name: 'Due Date', slug: 'due_date', fieldType: 'date', sortOrder: 3 },
+      { entityId: activitiesEntity!.id, name: 'Notes', slug: 'notes', fieldType: 'text', sortOrder: 4 }
+    ]).returning().all()
+
     console.log('  ✓ Fields created for all entities')
 
     // ── Relations ────────────────────────────────────────────────────
@@ -274,6 +394,43 @@ export default defineTask({
         slug: 'products',
         relationType: 'N:N',
         pivotTable: 'ecom_order_items',
+        isRequired: false
+      },
+      // ── CRM Relations
+      {
+        entityId: leadsEntity!.id,
+        relatedEntityId: opportunitiesEntity!.id,
+        name: 'Opportunities',
+        slug: 'opportunities',
+        relationType: '1:N',
+        foreignKey: 'lead_id',
+        isRequired: false
+      },
+      {
+        entityId: opportunitiesEntity!.id,
+        relatedEntityId: contactsEntity!.id,
+        name: 'Contacts',
+        slug: 'contacts',
+        relationType: 'N:N',
+        pivotTable: 'crm_opportunity_contacts',
+        isRequired: false
+      },
+      {
+        entityId: contactsEntity!.id,
+        relatedEntityId: activitiesEntity!.id,
+        name: 'Activities',
+        slug: 'activities',
+        relationType: '1:N',
+        foreignKey: 'contact_id',
+        isRequired: false
+      },
+      {
+        entityId: leadsEntity!.id,
+        relatedEntityId: contactsEntity!.id,
+        name: 'Contacts',
+        slug: 'contacts',
+        relationType: '1:N',
+        foreignKey: 'lead_id',
         isRequired: false
       }
     ]).returning().all()
