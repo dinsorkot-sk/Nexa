@@ -256,7 +256,7 @@ async function deleteAccount() {
               Are you sure you want to delete your account? This action is permanent and cannot be undone.
             </p>
             <div class="flex justify-end gap-2">
-              <UButton color="neutral" variant="outline" @click="confirmDelete = false">
+              <UButton color="neutral" variant="outline" @click="() => { confirmDelete = false }">
                 Cancel
               </UButton>
               <UButton color="error" :loading="deleting" @click="deleteAccount">
@@ -266,11 +266,7 @@ async function deleteAccount() {
           </UCard>
         </UModal>
 
-        <UButton
-          label="Delete account"
-          color="error"
-          @click="confirmDelete = true"
-        />
+        <UButton label="Delete account" color="error" @click="() => { confirmDelete = true }" />
       </template>
     </UPageCard>
   </div>
