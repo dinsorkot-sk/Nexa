@@ -109,7 +109,7 @@ function getConcurrentLabel(val: boolean) {
               color="neutral"
               variant="outline"
               :disabled="!hasChanges"
-              @click="loadConfig"
+              @click="() => { loadConfig() }"
             >
               Discard Changes
             </UButton>
@@ -117,7 +117,7 @@ function getConcurrentLabel(val: boolean) {
               color="primary"
               :loading="saving"
               :disabled="!hasChanges"
-              @click="handleSave"
+              @click="() => { handleSave() }"
             >
               Save Configuration
             </UButton>
@@ -126,7 +126,7 @@ function getConcurrentLabel(val: boolean) {
                 color="neutral"
                 variant="ghost"
                 square
-                @click="isNotificationsSlideoverOpen = true"
+                @click="() => { isNotificationsSlideoverOpen = true }"
               >
                 <UChip color="error" inset>
                   <UIcon name="i-lucide-bell" class="size-5 shrink-0" />

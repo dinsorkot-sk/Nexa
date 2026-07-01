@@ -71,7 +71,7 @@ onMounted(() => fetchModules())
               color="neutral"
               variant="ghost"
               square
-              @click="isNotificationsSlideoverOpen = true"
+              @click="() => { isNotificationsSlideoverOpen = true }"
             >
               <UChip color="error" inset>
                 <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
@@ -214,7 +214,7 @@ onMounted(() => fetchModules())
                   variant="ghost"
                   square
                   size="xs"
-                  @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
+                  @click="() => { sortOrder = sortOrder === 'asc' ? 'desc' : 'asc' }"
                 />
               </div>
             </div>
@@ -304,7 +304,7 @@ onMounted(() => fetchModules())
                 square
                 size="sm"
                 :disabled="page <= 1"
-                @click="page--"
+                @click="() => { page-- }"
               />
               <span class="text-xs text-(--ui-text-muted) px-2">{{ page }} / {{ totalPages }}</span>
               <UButton
@@ -314,19 +314,20 @@ onMounted(() => fetchModules())
                 square
                 size="sm"
                 :disabled="page >= totalPages"
-                @click="page++"
+                @click="() => { page++ }"
               />
             </div>
           </div>
         </UCard>
       </UContainer>
+
+      <!-- Detail Slideover -->
+      <ModuleDetail
+        v-if="showDetailSlideover && selectedModule"
+        :open="showDetailSlideover"
+        :module="selectedModule"
+        @update:open="closeSlideover"
+      />
     </template>
   </UDashboardPanel>
-
-  <!-- Detail Slideover -->
-  <ModuleDetailSlideover
-    v-if="showDetailSlideover && selectedModule"
-    :module="selectedModule"
-    @close="closeSlideover"
-  />
 </template>

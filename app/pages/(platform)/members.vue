@@ -79,7 +79,7 @@ function handleToggleStatus(memberId: number, isActive: boolean) {
               color="neutral"
               variant="ghost"
               square
-              @click="isNotificationsSlideoverOpen = true"
+              @click="() => { isNotificationsSlideoverOpen = true }"
             >
               <UChip color="error" inset>
                 <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
@@ -103,7 +103,7 @@ function handleToggleStatus(memberId: number, isActive: boolean) {
             label="Invite people"
             color="neutral"
             class="w-fit lg:ms-auto"
-            @click="showInviteModal = true"
+            @click="() => { showInviteModal = true }"
           />
         </UPageCard>
 

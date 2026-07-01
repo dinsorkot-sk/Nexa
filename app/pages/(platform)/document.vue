@@ -15,7 +15,7 @@ const { isNotificationsSlideoverOpen } = useDashboard()
               color="neutral"
               variant="ghost"
               square
-              @click="isNotificationsSlideoverOpen = true"
+              @click="() => { isNotificationsSlideoverOpen = true }"
             >
               <UChip color="error" inset>
                 <UIcon name="i-lucide-bell" class="size-5 shrink-0" />

@@ -67,7 +67,7 @@ function canDelete(role: Role) {
             <UButton
               color="primary"
               :disabled="!hasChanges"
-              @click="savePermissions"
+              @click="() => { savePermissions() }"
             >
               <UIcon name="i-lucide-save" class="size-4" />
               Save Policy Changes
@@ -77,7 +77,7 @@ function canDelete(role: Role) {
                 color="neutral"
                 variant="ghost"
                 square
-                @click="isNotificationsSlideoverOpen = true"
+                @click="() => { isNotificationsSlideoverOpen = true }"
               >
                 <UChip color="error" inset>
                   <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
@@ -116,7 +116,7 @@ function canDelete(role: Role) {
                 size="xs"
                 square
                 icon="i-lucide-plus"
-                @click="showCreateDialog = true"
+                @click="() => { showCreateDialog = true }"
               />
             </div>
             <div class="py-1">
@@ -256,7 +256,7 @@ function canDelete(role: Role) {
     </template>
     <template #footer>
       <div class="flex items-center justify-end gap-3">
-        <UButton color="neutral" variant="ghost" @click="showCreateDialog = false">
+        <UButton color="neutral" variant="ghost" @click="() => { showCreateDialog = false }">
           Cancel
         </UButton>
         <UButton color="primary" :disabled="!newRoleName || !newRoleSlug" @click="handleCreateRole">

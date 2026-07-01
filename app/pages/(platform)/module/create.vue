@@ -186,7 +186,7 @@ onMounted(() => {
             icon="i-lucide-arrow-right"
             trailing
             :disabled="currentStep === 0 && !step1Valid"
-            @click="currentStep < totalSteps - 1 && currentStep++"
+            @click="() => { if (currentStep < totalSteps - 1) currentStep++ }"
           />
         </template>
       </UDashboardNavbar>

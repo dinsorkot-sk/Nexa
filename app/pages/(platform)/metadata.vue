@@ -363,7 +363,7 @@ function fieldTypeBadgeColor(type: string) {
                 color="neutral"
                 variant="ghost"
                 square
-                @click="isNotificationsSlideoverOpen = true"
+                @click="() => { isNotificationsSlideoverOpen = true }"
               >
                 <UChip color="error" inset>
                   <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
@@ -477,7 +477,7 @@ function fieldTypeBadgeColor(type: string) {
                   size="sm"
                   icon="i-lucide-trash-2"
                   square
-                  @click="showDeleteEntityConfirm = true"
+                  @click="() => { showDeleteEntityConfirm = true }"
                 />
               </div>
             </div>
@@ -754,7 +754,7 @@ function fieldTypeBadgeColor(type: string) {
               variant="soft"
               class="w-full"
               icon="i-lucide-trash-2"
-              @click="showDeleteFieldConfirm = true"
+              @click="() => { showDeleteFieldConfirm = true }"
             >
               Delete Field
             </UButton>
@@ -866,7 +866,7 @@ function fieldTypeBadgeColor(type: string) {
             size="sm"
             square
             icon="i-lucide-x"
-            @click="showAddEntityModal = false"
+            @click="() => { showAddEntityModal = false }"
           />
           <span class="text-sm font-semibold">Create New Entity</span>
         </div>
@@ -909,7 +909,7 @@ function fieldTypeBadgeColor(type: string) {
         </div>
         <!-- Fixed footer -->
         <div class="px-4 py-3 border-t border-(--ui-border) flex justify-end gap-2 shrink-0">
-          <UButton color="neutral" variant="ghost" @click="showAddEntityModal = false">
+          <UButton color="neutral" variant="ghost" @click="() => { showAddEntityModal = false }">
             Cancel
           </UButton>
           <UButton color="primary" :loading="meta.saving.value" @click="saveEntity">
@@ -930,7 +930,7 @@ function fieldTypeBadgeColor(type: string) {
     </template>
     <template #footer>
       <div class="flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" @click="showDeleteEntityConfirm = false">
+        <UButton color="neutral" variant="ghost" @click="() => { showDeleteEntityConfirm = false }">
           Cancel
         </UButton>
         <UButton color="error" :loading="meta.saving.value" @click="confirmDeleteEntity">
@@ -952,7 +952,7 @@ function fieldTypeBadgeColor(type: string) {
             size="sm"
             square
             icon="i-lucide-x"
-            @click="showEditEntityModal = false"
+            @click="() => { showEditEntityModal = false }"
           />
           <span class="text-sm font-semibold">Edit Entity</span>
         </div>
@@ -995,7 +995,7 @@ function fieldTypeBadgeColor(type: string) {
         </div>
         <!-- Fixed footer -->
         <div class="px-4 py-3 border-t border-(--ui-border) flex justify-end gap-2 shrink-0">
-          <UButton color="neutral" variant="ghost" @click="showEditEntityModal = false">
+          <UButton color="neutral" variant="ghost" @click="() => { showEditEntityModal = false }">
             Cancel
           </UButton>
           <UButton color="primary" :loading="meta.saving.value" @click="saveEditEntity">
@@ -1016,7 +1016,7 @@ function fieldTypeBadgeColor(type: string) {
     </template>
     <template #footer>
       <div class="flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" @click="showDeleteFieldConfirm = false">
+        <UButton color="neutral" variant="ghost" @click="() => { showDeleteFieldConfirm = false }">
           Cancel
         </UButton>
         <UButton color="error" :loading="meta.saving.value" @click="confirmDeleteField">
@@ -1099,7 +1099,7 @@ function fieldTypeBadgeColor(type: string) {
     </template>
     <template #footer>
       <div class="flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" @click="showDeleteRelationConfirm = false">
+        <UButton color="neutral" variant="ghost" @click="() => { showDeleteRelationConfirm = false }">
           Cancel
         </UButton>
         <UButton color="error" @click="confirmDeleteRelation(editingRelation!.id)">

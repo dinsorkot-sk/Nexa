@@ -1,3 +1,9 @@
+// Workaround for Nuxt typed-routes causing "Excessive stack depth" errors
+// when the route union grows too large. Cast through a generic function type
+// to bypass the typed-routes overload resolution.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const apiFetch: <T = unknown>(url: string, opts?: any) => Promise<T> = $fetch as any
+
 export interface AuthEvent {
   id: number
   timestamp: string
@@ -26,7 +32,7 @@ export function useAuthConfig() {
   async function loadConfig() {
     loading.value = true
     try {
-      config.value = await $fetch('/api/auth/config')
+      config.value = await apiFetch('/api/auth/config')
       hasChanges.value = false
     } catch {
       // use defaults
@@ -41,7 +47,7 @@ export function useAuthConfig() {
       const params = new URLSearchParams()
       if (search) params.set('search', search)
       const url = `/api/auth/events${params.toString() ? `?${params.toString()}` : ''}`
-      events.value = await $fetch<AuthEvent[]>(url)
+      events.value = await apiFetch<AuthEvent[]>(url)
     } catch {
       events.value = []
     } finally {
@@ -56,7 +62,7 @@ export function useAuthConfig() {
   async function saveConfig() {
     saving.value = true
     try {
-      await $fetch('/api/auth/config', {
+      await apiFetch('/api/auth/config', {
         method: 'POST',
         body: config.value
       })
