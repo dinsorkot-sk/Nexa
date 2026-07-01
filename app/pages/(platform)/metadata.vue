@@ -778,48 +778,62 @@ function fieldTypeBadgeColor(type: string) {
     </template>
   </UDashboardPanel>
 
-  <!-- ─── Add Entity Modal ─── -->
-  <UModal v-model:open="showAddEntityModal" title="Create New Entity">
-    <template #body>
-      <div class="space-y-4">
-        <UFormField label="Name">
-          <UInput
-            v-model="entityForm.name"
-            class="w-full"
-            placeholder="e.g. Customer"
-            autofocus
+  <!-- ─── Add Entity Slideover ─── -->
+  <USlideover :open="showAddEntityModal" @update:open="(v) => { if (!v) showAddEntityModal = false }">
+    <template #content>
+      <div class="flex flex-col h-full">
+        <!-- Fixed header -->
+        <div class="px-4 py-3 border-b border-(--ui-border) flex items-center gap-3 shrink-0">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            square
+            icon="i-lucide-x"
+            @click="showAddEntityModal = false"
           />
-        </UFormField>
-        <UFormField label="Slug">
-          <UInput v-model="entityForm.slug" class="w-full" placeholder="e.g. customer" />
-        </UFormField>
-        <UFormField label="Table Name">
-          <UInput v-model="entityForm.tableName" class="w-full" placeholder="e.g. _customers" />
-        </UFormField>
-        <UFormField label="Description (Optional)">
-          <UTextarea v-model="entityForm.description" class="w-full" placeholder="Brief description of this entity" />
-        </UFormField>
-        <UFormField label="Icon">
-          <USelect
-            v-model="entityForm.icon"
-            :items="entityIconOptions"
-            class="w-full"
-            placeholder="Select icon..."
-          />
-        </UFormField>
+          <span class="text-sm font-semibold">Create New Entity</span>
+        </div>
+        <!-- Scrollable body -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          <UFormField label="Name">
+            <UInput
+              v-model="entityForm.name"
+              class="w-full"
+              placeholder="e.g. Customer"
+              autofocus
+            />
+          </UFormField>
+          <UFormField label="Slug">
+            <UInput v-model="entityForm.slug" class="w-full" placeholder="e.g. customer" />
+          </UFormField>
+          <UFormField label="Table Name">
+            <UInput v-model="entityForm.tableName" class="w-full" placeholder="e.g. _customers" />
+          </UFormField>
+          <UFormField label="Description (Optional)">
+            <UTextarea v-model="entityForm.description" class="w-full" placeholder="Brief description of this entity" />
+          </UFormField>
+          <UFormField label="Icon">
+            <USelect
+              v-model="entityForm.icon"
+              :items="entityIconOptions"
+              class="w-full"
+              placeholder="Select icon..."
+            />
+          </UFormField>
+        </div>
+        <!-- Fixed footer -->
+        <div class="px-4 py-3 border-t border-(--ui-border) flex justify-end gap-2 shrink-0">
+          <UButton color="neutral" variant="ghost" @click="showAddEntityModal = false">
+            Cancel
+          </UButton>
+          <UButton color="primary" :loading="meta.saving.value" @click="saveEntity">
+            Create
+          </UButton>
+        </div>
       </div>
     </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" @click="showAddEntityModal = false">
-          Cancel
-        </UButton>
-        <UButton color="primary" :loading="meta.saving.value" @click="saveEntity">
-          Create
-        </UButton>
-      </div>
-    </template>
-  </UModal>
+  </USlideover>
 
   <!-- ─── Delete Entity Confirm ─── -->
   <UModal v-model:open="showDeleteEntityConfirm" title="Delete Entity">
@@ -841,48 +855,62 @@ function fieldTypeBadgeColor(type: string) {
     </template>
   </UModal>
 
-  <!-- ─── Edit Entity Modal ─── -->
-  <UModal v-model:open="showEditEntityModal" title="Edit Entity">
-    <template #body>
-      <div class="space-y-4">
-        <UFormField label="Name">
-          <UInput
-            v-model="entityEditForm.name"
-            class="w-full"
-            placeholder="e.g. Customer"
-            autofocus
+  <!-- ─── Edit Entity Slideover ─── -->
+  <USlideover :open="showEditEntityModal" @update:open="(v) => { if (!v) showEditEntityModal = false }">
+    <template #content>
+      <div class="flex flex-col h-full">
+        <!-- Fixed header -->
+        <div class="px-4 py-3 border-b border-(--ui-border) flex items-center gap-3 shrink-0">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            square
+            icon="i-lucide-x"
+            @click="showEditEntityModal = false"
           />
-        </UFormField>
-        <UFormField label="Slug">
-          <UInput v-model="entityEditForm.slug" class="w-full" placeholder="e.g. customer" />
-        </UFormField>
-        <UFormField label="Table Name">
-          <UInput v-model="entityEditForm.tableName" class="w-full" placeholder="e.g. _customers" />
-        </UFormField>
-        <UFormField label="Description (Optional)">
-          <UTextarea v-model="entityEditForm.description" class="w-full" placeholder="Brief description of this entity" />
-        </UFormField>
-        <UFormField label="Icon">
-          <USelect
-            v-model="entityEditForm.icon"
-            :items="entityIconOptions"
-            class="w-full"
-            placeholder="Select icon..."
-          />
-        </UFormField>
+          <span class="text-sm font-semibold">Edit Entity</span>
+        </div>
+        <!-- Scrollable body -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          <UFormField label="Name">
+            <UInput
+              v-model="entityEditForm.name"
+              class="w-full"
+              placeholder="e.g. Customer"
+              autofocus
+            />
+          </UFormField>
+          <UFormField label="Slug">
+            <UInput v-model="entityEditForm.slug" class="w-full" placeholder="e.g. customer" />
+          </UFormField>
+          <UFormField label="Table Name">
+            <UInput v-model="entityEditForm.tableName" class="w-full" placeholder="e.g. _customers" />
+          </UFormField>
+          <UFormField label="Description (Optional)">
+            <UTextarea v-model="entityEditForm.description" class="w-full" placeholder="Brief description of this entity" />
+          </UFormField>
+          <UFormField label="Icon">
+            <USelect
+              v-model="entityEditForm.icon"
+              :items="entityIconOptions"
+              class="w-full"
+              placeholder="Select icon..."
+            />
+          </UFormField>
+        </div>
+        <!-- Fixed footer -->
+        <div class="px-4 py-3 border-t border-(--ui-border) flex justify-end gap-2 shrink-0">
+          <UButton color="neutral" variant="ghost" @click="showEditEntityModal = false">
+            Cancel
+          </UButton>
+          <UButton color="primary" :loading="meta.saving.value" @click="saveEditEntity">
+            Update
+          </UButton>
+        </div>
       </div>
     </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" @click="showEditEntityModal = false">
-          Cancel
-        </UButton>
-        <UButton color="primary" :loading="meta.saving.value" @click="saveEditEntity">
-          Update
-        </UButton>
-      </div>
-    </template>
-  </UModal>
+  </USlideover>
 
   <!-- ─── Delete Field Confirm ─── -->
   <UModal v-model:open="showDeleteFieldConfirm" title="Delete Field">
@@ -904,63 +932,69 @@ function fieldTypeBadgeColor(type: string) {
     </template>
   </UModal>
 
-  <!-- ─── Add / Edit Relation Modal ─── -->
-  <UModal v-model:open="showAddRelationModal" :title="editingRelation ? 'Edit Relation' : 'Add Relation'">
-    <template #body>
-      <div class="space-y-4">
-        <UFormField label="Name">
-          <UInput
-            v-model="relationForm.name"
-            class="w-full"
-            placeholder="e.g. Order Items"
-            autofocus
+  <!-- ─── Add / Edit Relation Slideover ─── -->
+  <USlideover :open="showAddRelationModal" @update:open="(v) => { if (!v) { showAddRelationModal = false; editingRelation = null } }">
+    <template #content>
+      <div class="flex flex-col h-full">
+        <!-- Fixed header -->
+        <div class="px-4 py-3 border-b border-(--ui-border) flex items-center gap-3 shrink-0">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            square
+            icon="i-lucide-x"
+            @click="showAddRelationModal = false; editingRelation = null"
           />
-        </UFormField>
-        <UFormField label="Slug">
-          <UInput v-model="relationForm.slug" class="w-full" placeholder="e.g. order_items" />
-        </UFormField>
-        <UFormField label="Relation Type">
-          <USelect v-model="relationForm.relationType" :items="meta.relationTypeOptions" class="w-full" />
-        </UFormField>
-        <div class="grid grid-cols-2 gap-3">
-          <UFormField label="Source Entity">
-            <USelect
-              v-model="relationForm.entityId"
-              :items="meta.entities.value.map(e => ({ label: e.name, value: e.id }))"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField label="Target Entity">
-            <USelect
-              v-model="relationForm.relatedEntityId"
-              :items="meta.entities.value.map(e => ({ label: e.name, value: e.id }))"
-              class="w-full"
-            />
-          </UFormField>
+          <span class="text-sm font-semibold">{{ editingRelation ? 'Edit Relation' : 'Add Relation' }}</span>
         </div>
-        <UFormField label="Foreign Key (optional)">
-          <UInput v-model="relationForm.foreignKey" class="w-full" placeholder="e.g. order_id" />
-        </UFormField>
-        <UFormField label="Pivot Table (for N:N)">
-          <UInput v-model="relationForm.pivotTable" class="w-full" placeholder="e.g. orders_products" />
-        </UFormField>
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium">Is Required</span>
-          <USwitch v-model="relationForm.isRequired" color="primary" />
+        <!-- Scrollable body -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          <UFormField label="Name">
+            <UInput
+              v-model="relationForm.name"
+              class="w-full"
+              placeholder="e.g. Order Items"
+              autofocus
+            />
+          </UFormField>
+          <UFormField label="Slug">
+            <UInput v-model="relationForm.slug" class="w-full" placeholder="e.g. order_items" />
+          </UFormField>
+          <UFormField label="Relation Type">
+            <USelect v-model="relationForm.relationType" :items="meta.relationTypeOptions" class="w-full" />
+          </UFormField>
+          <div class="grid grid-cols-2 gap-3">
+            <UFormField label="Source Entity">
+              <USelect v-model="relationForm.entityId" :items="meta.entities.value.map(e => ({ label: e.name, value: e.id }))" class="w-full" />
+            </UFormField>
+            <UFormField label="Target Entity">
+              <USelect v-model="relationForm.relatedEntityId" :items="meta.entities.value.map(e => ({ label: e.name, value: e.id }))" class="w-full" />
+            </UFormField>
+          </div>
+          <UFormField label="Foreign Key (optional)">
+            <UInput v-model="relationForm.foreignKey" class="w-full" placeholder="e.g. order_id" />
+          </UFormField>
+          <UFormField label="Pivot Table (for N:N)">
+            <UInput v-model="relationForm.pivotTable" class="w-full" placeholder="e.g. orders_products" />
+          </UFormField>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium">Is Required</span>
+            <USwitch v-model="relationForm.isRequired" color="primary" />
+          </div>
+        </div>
+        <!-- Fixed footer -->
+        <div class="px-4 py-3 border-t border-(--ui-border) flex justify-end gap-2 shrink-0">
+          <UButton color="neutral" variant="ghost" @click="showAddRelationModal = false; editingRelation = null">
+            Cancel
+          </UButton>
+          <UButton color="primary" :loading="meta.saving.value" @click="saveRelation">
+            {{ editingRelation ? 'Update' : 'Create' }}
+          </UButton>
         </div>
       </div>
     </template>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" @click="showAddRelationModal = false; editingRelation = null">
-          Cancel
-        </UButton>
-        <UButton color="primary" :loading="meta.saving.value" @click="saveRelation">
-          {{ editingRelation ? 'Update' : 'Create' }}
-        </UButton>
-      </div>
-    </template>
-  </UModal>
+  </USlideover>
 
   <!-- ─── Delete Relation Confirm ─── -->
   <UModal v-model:open="showDeleteRelationConfirm" title="Delete Relation">
