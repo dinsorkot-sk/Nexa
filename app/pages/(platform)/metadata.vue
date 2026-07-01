@@ -13,6 +13,11 @@ const editingRelation = ref<Relation | null>(null)
 const showDeleteRelationConfirm = ref(false)
 const showEditEntityModal = ref(false)
 
+const modules = ref<{ id: number, name: string, slug: string }[]>([])
+const moduleOptions = computed(() =>
+  modules.value.map(m => ({ label: m.name, value: m.id }))
+)
+
 const entitySearch = ref('')
 
 const filteredEntities = computed(() => {
@@ -40,11 +45,11 @@ const entityIconOptions = [
   { label: 'Message Square', value: 'i-lucide-message-square' }
 ]
 
-const entityForm = reactive({ name: '', slug: '', tableName: '', description: '', icon: '' })
-const entityEditForm = reactive({ id: 0, name: '', slug: '', tableName: '', description: '', icon: '' })
+const entityForm = reactive({ name: '', slug: '', tableName: '', description: '', icon: '', moduleId: undefined as number | undefined })
+const entityEditForm = reactive({ id: 0, name: '', slug: '', tableName: '', description: '', icon: '', moduleId: undefined as number | undefined })
 const fieldForm = reactive({
   name: '', slug: '', fieldType: 'text',
-  isRequired: false, isUnique: false, defaultValue: '', options: '', validationRules: ''
+  isRequired: false, isUnique: false, isActive: true, defaultValue: '', options: '', validationRules: ''
 })
 const relationForm = reactive({
   name: '', slug: '', relationType: '1:N', entityId: 0, relatedEntityId: 0,
@@ -62,6 +67,9 @@ const tabs = [
 onMounted(() => {
   meta.loadEntities()
   meta.loadRelations()
+  $fetch<{ id: number, name: string, slug: string }[]>('/api/metadata/modules')
+    .then((d) => { modules.value = d || [] })
+    .catch(() => {})
 })
 
 const stats = computed(() => {
@@ -76,7 +84,7 @@ const stats = computed(() => {
 
 // ── Entity methods ─────────────────────────────────────────────────────
 function openAddEntity() {
-  Object.assign(entityForm, { name: '', slug: '', tableName: '', description: '' })
+  Object.assign(entityForm, { name: '', slug: '', tableName: '', description: '', icon: '', moduleId: undefined })
   showAddEntityModal.value = true
 }
 
@@ -85,7 +93,11 @@ async function saveEntity() {
     toast.add({ title: 'Missing fields', description: 'Name, slug, and table name are required', color: 'error' })
     return
   }
-  await meta.createEntity({ ...entityForm })
+  await meta.createEntity({
+    name: entityForm.name, slug: entityForm.slug, tableName: entityForm.tableName,
+    description: entityForm.description || null, icon: entityForm.icon || null,
+    moduleId: entityForm.moduleId
+  })
   showAddEntityModal.value = false
   toast.add({ title: 'Entity created', color: 'success' })
 }
@@ -104,7 +116,8 @@ function openEditEntity(entity: EntityWithFields) {
     slug: entity.slug,
     tableName: entity.tableName,
     description: entity.description || '',
-    icon: entity.icon || ''
+    icon: entity.icon || '',
+    moduleId: entity.moduleId
   })
   showEditEntityModal.value = true
 }
@@ -119,7 +132,8 @@ async function saveEditEntity() {
     slug: entityEditForm.slug,
     tableName: entityEditForm.tableName,
     description: entityEditForm.description || null,
-    icon: entityEditForm.icon || null
+    icon: entityEditForm.icon || null,
+    moduleId: entityEditForm.moduleId
   })
   showEditEntityModal.value = false
   toast.add({ title: 'Entity updated', color: 'success' })
@@ -134,6 +148,7 @@ function selectField(field: Field) {
     fieldType: field.fieldType,
     isRequired: !!field.isRequired,
     isUnique: !!field.isUnique,
+    isActive: field.isActive !== false,
     defaultValue: field.defaultValue || '',
     options: field.options || '',
     validationRules: field.validationRules || ''
@@ -172,7 +187,7 @@ async function onFieldBlur() {
 }
 
 const fieldFormWatcher = watch(
-  () => [fieldForm.name, fieldForm.slug, fieldForm.fieldType, fieldForm.isRequired, fieldForm.isUnique, fieldForm.defaultValue, fieldForm.validationRules],
+  () => [fieldForm.name, fieldForm.slug, fieldForm.fieldType, fieldForm.isRequired, fieldForm.isUnique, fieldForm.isActive, fieldForm.defaultValue, fieldForm.validationRules],
   () => { if (meta.selectedField.value) debouncedSaveField() }
 )
 
@@ -180,7 +195,7 @@ const debouncedSaveField = useDebounceFn(async () => {
   if (!meta.selectedField.value) return
   await meta.updateField(meta.selectedField.value.id, {
     name: fieldForm.name, slug: fieldForm.slug, fieldType: fieldForm.fieldType,
-    isRequired: fieldForm.isRequired, isUnique: fieldForm.isUnique,
+    isRequired: fieldForm.isRequired, isUnique: fieldForm.isUnique, isActive: fieldForm.isActive,
     defaultValue: fieldForm.defaultValue || null, options: fieldForm.options || null,
     validationRules: fieldForm.validationRules || null
   })
@@ -201,6 +216,24 @@ async function deployAll() {
     await meta.syncSchema(entity.slug)
   }
   toast.add({ title: 'Deployment complete', color: 'success' })
+}
+
+async function exportEntityJSON() {
+  if (!meta.selectedEntity.value) return
+  const slug = meta.selectedEntity.value.slug
+  window.open(`/api/metadata/export/${slug}`, '_blank')
+}
+
+async function moveField(index: number, direction: -1 | 1) {
+  if (!meta.selectedEntity.value) return
+  const fields = meta.selectedEntity.value.fields
+  const target = index + direction
+  if (target < 0 || target >= fields.length) return
+  const a = fields[index]!
+  const b = fields[target]!
+  await meta.updateField(a.id, { sortOrder: b.sortOrder })
+  await meta.updateField(b.id, { sortOrder: a.sortOrder })
+  toast.add({ title: 'Field reordered', color: 'success' })
 }
 
 // ── Relation methods ────────────────────────────────────────────────────
@@ -411,7 +444,7 @@ function fieldTypeBadgeColor(type: string) {
                   variant="outline"
                   size="sm"
                   icon="i-lucide-download"
-                  @click="syncCurrentEntity"
+                  @click="exportEntityJSON"
                 >
                   Export Metadata
                 </UButton>
@@ -424,6 +457,20 @@ function fieldTypeBadgeColor(type: string) {
                 >
                   Edit
                 </UButton>
+                <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-(--ui-border) bg-(--ui-bg-elevated)/40">
+                  <span class="text-xs text-(--ui-text-muted)">Active</span>
+                  <USwitch
+                    :model-value="meta.selectedEntity.value.isActive !== false"
+                    color="primary"
+                    size="sm"
+                    @update:model-value="async (v) => {
+                      if (meta.selectedEntity.value) {
+                        await meta.updateEntity(meta.selectedEntity.value.id, { isActive: v })
+                        toast.add({ title: v ? 'Entity enabled' : 'Entity disabled', color: 'success' })
+                      }
+                    }"
+                  />
+                </div>
                 <UButton
                   color="error"
                   variant="ghost"
@@ -498,15 +545,18 @@ function fieldTypeBadgeColor(type: string) {
                         >
                           Default
                         </th>
+                        <th class="px-4 py-2.5 w-16 text-center">
+                          <UIcon name="i-lucide-arrow-up-down" class="size-3 text-(--ui-text-muted)" />
+                        </th>
                         <th class="px-4 py-2.5 w-10" />
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-(--ui-border)">
                       <tr
-                        v-for="field in meta.selectedEntity.value.fields || []"
+                        v-for="(field, fi) in meta.selectedEntity.value.fields || []"
                         :key="field.id"
                         class="cursor-pointer transition-colors hover:bg-(--ui-bg-elevated)/60"
-                        :class="meta.selectedField.value?.id === field.id ? 'bg-(--ui-primary)/8' : ''"
+                        :class="[meta.selectedField.value?.id === field.id ? 'bg-(--ui-primary)/8' : '', field.isActive === false ? 'opacity-50' : '']"
                         @click="selectField(field)"
                       >
                         <td class="px-4 py-3 text-center">
@@ -533,6 +583,28 @@ function fieldTypeBadgeColor(type: string) {
                         </td>
                         <td class="px-4 py-3 text-sm text-(--ui-text-muted) font-mono max-w-40 truncate">
                           {{ field.defaultValue || 'null' }}
+                        </td>
+                        <td class="px-4 py-3">
+                          <div class="flex items-center justify-center gap-0.5">
+                            <UButton
+                              icon="i-lucide-chevron-up"
+                              variant="ghost"
+                              size="xs"
+                              square
+                              color="neutral"
+                              :disabled="fi === 0"
+                              @click.stop="moveField(fi, -1)"
+                            />
+                            <UButton
+                              icon="i-lucide-chevron-down"
+                              variant="ghost"
+                              size="xs"
+                              square
+                              color="neutral"
+                              :disabled="fi === (meta.selectedEntity.value?.fields?.length || 0) - 1"
+                              @click.stop="moveField(fi, 1)"
+                            />
+                          </div>
                         </td>
                         <td class="px-4 py-3">
                           <UDropdownMenu
@@ -636,6 +708,10 @@ function fieldTypeBadgeColor(type: string) {
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium">Is Unique</span>
                 <USwitch v-model="fieldForm.isUnique" color="primary" @change="onFieldBlur" />
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">Active</span>
+                <USwitch v-model="fieldForm.isActive" color="primary" @change="onFieldBlur" />
               </div>
             </div>
 
@@ -821,6 +897,15 @@ function fieldTypeBadgeColor(type: string) {
               placeholder="Select icon..."
             />
           </UFormField>
+          <UFormField label="Module (Optional)">
+            <USelect
+              v-model="entityForm.moduleId"
+              :items="moduleOptions"
+              class="w-full"
+              placeholder="None"
+              clearable
+            />
+          </UFormField>
         </div>
         <!-- Fixed footer -->
         <div class="px-4 py-3 border-t border-(--ui-border) flex justify-end gap-2 shrink-0">
@@ -896,6 +981,15 @@ function fieldTypeBadgeColor(type: string) {
               :items="entityIconOptions"
               class="w-full"
               placeholder="Select icon..."
+            />
+          </UFormField>
+          <UFormField label="Module">
+            <USelect
+              v-model="entityEditForm.moduleId"
+              :items="moduleOptions"
+              class="w-full"
+              placeholder="None"
+              clearable
             />
           </UFormField>
         </div>
