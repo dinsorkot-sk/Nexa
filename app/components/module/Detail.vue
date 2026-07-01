@@ -7,6 +7,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
+  'update:module': [module: ModuleRow]
 }>()
 
 const { fetchModuleDetail, updateModule, deleteModule } = useModules()
@@ -32,12 +33,15 @@ function handleClose() {
 }
 
 async function handleToggleActive() {
+  const newIsActive = !props.module.isActive
   const ok = await updateModule(props.module.id, {
-    isActive: !props.module.isActive
+    isActive: newIsActive
   })
   if (ok) {
+    // Notify parent to update its selectedModule state so the UI reflects the change
+    emit('update:module', { ...props.module, isActive: newIsActive })
     toast.add({
-      title: `Module ${props.module.isActive ? 'deactivated' : 'activated'}`,
+      title: `Module ${newIsActive ? 'activated' : 'deactivated'}`,
       color: 'success'
     })
   }

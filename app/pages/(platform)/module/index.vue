@@ -40,6 +40,11 @@ function selectModule(row: ModuleRow) {
   showDetailSlideover.value = true
 }
 
+function handleModuleUpdate(updated: ModuleRow) {
+  // Keep selectedModule in sync when child updates the module (e.g. toggle active)
+  selectedModule.value = updated
+}
+
 // Watch for slideover close to clear selected module
 watch(showDetailSlideover, (open) => {
   if (!open) {
@@ -328,6 +333,7 @@ onMounted(() => fetchModules())
         v-if="showDetailSlideover && selectedModule"
         v-model:open="showDetailSlideover"
         :module="selectedModule"
+        @update:module="handleModuleUpdate"
       />
     </template>
   </UDashboardPanel>
