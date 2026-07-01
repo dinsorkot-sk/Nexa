@@ -188,6 +188,7 @@ export function useMetadata() {
     { label: 'Date', value: 'date' },
     { label: 'Email', value: 'email' },
     { label: 'URL', value: 'url' },
+    { label: 'UUID', value: 'uuid' },
     { label: 'Select', value: 'select' },
     { label: 'JSON', value: 'json' }
   ]

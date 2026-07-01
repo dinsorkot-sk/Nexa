@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Entity, Field, Relation } from '~/types/metadata'
+import type { Entity, EntityWithFields, Field, Relation } from '~/types/metadata'
 
 const { isNotificationsSlideoverOpen } = useDashboard()
 const meta = useMetadata()
@@ -11,11 +11,40 @@ const showDeleteFieldConfirm = ref(false)
 const showAddRelationModal = ref(false)
 const editingRelation = ref<Relation | null>(null)
 const showDeleteRelationConfirm = ref(false)
+const showEditEntityModal = ref(false)
 
-const entityForm = reactive({ name: '', slug: '', tableName: '', description: '' })
+const entitySearch = ref('')
+
+const filteredEntities = computed(() => {
+  if (!entitySearch.value) return meta.entities.value
+  const q = entitySearch.value.toLowerCase()
+  return meta.entities.value.filter(e =>
+    e.name.toLowerCase().includes(q)
+    || e.slug.toLowerCase().includes(q)
+    || (e.tableName && e.tableName.toLowerCase().includes(q))
+  )
+})
+
+const entityIconOptions = [
+  { label: 'Table', value: 'i-lucide-table-2' },
+  { label: 'Folder', value: 'i-lucide-folder' },
+  { label: 'Users', value: 'i-lucide-users' },
+  { label: 'Shopping Cart', value: 'i-lucide-shopping-cart' },
+  { label: 'File Text', value: 'i-lucide-file-text' },
+  { label: 'Box', value: 'i-lucide-box' },
+  { label: 'Tag', value: 'i-lucide-tag' },
+  { label: 'Settings', value: 'i-lucide-settings' },
+  { label: 'Activity', value: 'i-lucide-activity' },
+  { label: 'Globe', value: 'i-lucide-globe' },
+  { label: 'Credit Card', value: 'i-lucide-credit-card' },
+  { label: 'Message Square', value: 'i-lucide-message-square' }
+]
+
+const entityForm = reactive({ name: '', slug: '', tableName: '', description: '', icon: '' })
+const entityEditForm = reactive({ id: 0, name: '', slug: '', tableName: '', description: '', icon: '' })
 const fieldForm = reactive({
   name: '', slug: '', fieldType: 'text',
-  isRequired: false, isUnique: false, defaultValue: '', options: ''
+  isRequired: false, isUnique: false, defaultValue: '', options: '', validationRules: ''
 })
 const relationForm = reactive({
   name: '', slug: '', relationType: '1:N', entityId: 0, relatedEntityId: 0,
@@ -68,6 +97,34 @@ async function confirmDeleteEntity() {
   toast.add({ title: 'Entity deleted', color: 'success' })
 }
 
+function openEditEntity(entity: EntityWithFields) {
+  Object.assign(entityEditForm, {
+    id: entity.id,
+    name: entity.name,
+    slug: entity.slug,
+    tableName: entity.tableName,
+    description: entity.description || '',
+    icon: entity.icon || ''
+  })
+  showEditEntityModal.value = true
+}
+
+async function saveEditEntity() {
+  if (!entityEditForm.name || !entityEditForm.slug || !entityEditForm.tableName) {
+    toast.add({ title: 'Missing fields', description: 'Name, slug, and table name are required', color: 'error' })
+    return
+  }
+  await meta.updateEntity(entityEditForm.id, {
+    name: entityEditForm.name,
+    slug: entityEditForm.slug,
+    tableName: entityEditForm.tableName,
+    description: entityEditForm.description || null,
+    icon: entityEditForm.icon || null
+  })
+  showEditEntityModal.value = false
+  toast.add({ title: 'Entity updated', color: 'success' })
+}
+
 // ── Field methods ──────────────────────────────────────────────────────
 function selectField(field: Field) {
   meta.selectedField.value = field
@@ -78,7 +135,8 @@ function selectField(field: Field) {
     isRequired: !!field.isRequired,
     isUnique: !!field.isUnique,
     defaultValue: field.defaultValue || '',
-    options: field.options || ''
+    options: field.options || '',
+    validationRules: field.validationRules || ''
   })
 }
 
@@ -114,7 +172,7 @@ async function onFieldBlur() {
 }
 
 const fieldFormWatcher = watch(
-  () => [fieldForm.name, fieldForm.slug, fieldForm.fieldType, fieldForm.isRequired, fieldForm.isUnique, fieldForm.defaultValue],
+  () => [fieldForm.name, fieldForm.slug, fieldForm.fieldType, fieldForm.isRequired, fieldForm.isUnique, fieldForm.defaultValue, fieldForm.validationRules],
   () => { if (meta.selectedField.value) debouncedSaveField() }
 )
 
@@ -123,7 +181,8 @@ const debouncedSaveField = useDebounceFn(async () => {
   await meta.updateField(meta.selectedField.value.id, {
     name: fieldForm.name, slug: fieldForm.slug, fieldType: fieldForm.fieldType,
     isRequired: fieldForm.isRequired, isUnique: fieldForm.isUnique,
-    defaultValue: fieldForm.defaultValue || null, options: fieldForm.options || null
+    defaultValue: fieldForm.defaultValue || null, options: fieldForm.options || null,
+    validationRules: fieldForm.validationRules || null
   })
 }, 800)
 
@@ -307,6 +366,7 @@ function fieldTypeBadgeColor(type: string) {
           <!-- Search -->
           <div class="px-3 py-2 border-b border-(--ui-border)">
             <UInput
+              v-model="entitySearch"
               placeholder="Filter..."
               size="sm"
               icon="i-lucide-search"
@@ -316,7 +376,7 @@ function fieldTypeBadgeColor(type: string) {
           <!-- Entity list -->
           <div class="flex-1 overflow-y-auto divide-y divide-(--ui-border)">
             <button
-              v-for="entity in meta.entities.value"
+              v-for="entity in filteredEntities"
               :key="entity.id"
               class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left transition-colors hover:bg-(--ui-bg-elevated)"
               :class="meta.selectedEntity.value?.id === entity.id
@@ -354,6 +414,15 @@ function fieldTypeBadgeColor(type: string) {
                   @click="syncCurrentEntity"
                 >
                   Export Metadata
+                </UButton>
+                <UButton
+                  color="neutral"
+                  variant="outline"
+                  size="sm"
+                  icon="i-lucide-pencil"
+                  @click="openEditEntity(meta.selectedEntity.value)"
+                >
+                  Edit
                 </UButton>
                 <UButton
                   color="error"
@@ -590,6 +659,16 @@ function fieldTypeBadgeColor(type: string) {
                 @blur="onFieldBlur"
               />
             </UFormField>
+
+            <UFormField label="Validation Rules">
+              <UTextarea
+                v-model="fieldForm.validationRules"
+                placeholder="e.g. {&quot;minLength&quot;: 2, &quot;maxLength&quot;: 50}"
+                class="w-full"
+                :rows="2"
+                @blur="onFieldBlur"
+              />
+            </UFormField>
           </div>
 
           <!-- Footer action -->
@@ -720,6 +799,14 @@ function fieldTypeBadgeColor(type: string) {
         <UFormField label="Description (Optional)">
           <UTextarea v-model="entityForm.description" class="w-full" placeholder="Brief description of this entity" />
         </UFormField>
+        <UFormField label="Icon">
+          <USelect
+            v-model="entityForm.icon"
+            :items="entityIconOptions"
+            class="w-full"
+            placeholder="Select icon..."
+          />
+        </UFormField>
       </div>
     </template>
     <template #footer>
@@ -749,6 +836,49 @@ function fieldTypeBadgeColor(type: string) {
         </UButton>
         <UButton color="error" :loading="meta.saving.value" @click="confirmDeleteEntity">
           Delete
+        </UButton>
+      </div>
+    </template>
+  </UModal>
+
+  <!-- ─── Edit Entity Modal ─── -->
+  <UModal v-model:open="showEditEntityModal" title="Edit Entity">
+    <template #body>
+      <div class="space-y-4">
+        <UFormField label="Name">
+          <UInput
+            v-model="entityEditForm.name"
+            class="w-full"
+            placeholder="e.g. Customer"
+            autofocus
+          />
+        </UFormField>
+        <UFormField label="Slug">
+          <UInput v-model="entityEditForm.slug" class="w-full" placeholder="e.g. customer" />
+        </UFormField>
+        <UFormField label="Table Name">
+          <UInput v-model="entityEditForm.tableName" class="w-full" placeholder="e.g. _customers" />
+        </UFormField>
+        <UFormField label="Description (Optional)">
+          <UTextarea v-model="entityEditForm.description" class="w-full" placeholder="Brief description of this entity" />
+        </UFormField>
+        <UFormField label="Icon">
+          <USelect
+            v-model="entityEditForm.icon"
+            :items="entityIconOptions"
+            class="w-full"
+            placeholder="Select icon..."
+          />
+        </UFormField>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton color="neutral" variant="ghost" @click="showEditEntityModal = false">
+          Cancel
+        </UButton>
+        <UButton color="primary" :loading="meta.saving.value" @click="saveEditEntity">
+          Update
         </UButton>
       </div>
     </template>

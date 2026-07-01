@@ -1,5 +1,5 @@
 import { db, schema } from '@nuxthub/db'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = parseInt(getRouterParam(event, 'id') || '')
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
       icon: body.icon,
       moduleId: body.moduleId,
       isActive: body.isActive,
-      updatedAt: 'datetime(\'now\')'
+      updatedAt: sql`(datetime('now'))`
     })
     .where(eq(schema.entities.id, id))
     .returning().get()
