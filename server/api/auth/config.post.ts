@@ -1,10 +1,7 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
-import { join } from 'path'
+import { db, schema } from '@nuxthub/db'
 import { requireAuth } from '~~/server/utils/session'
+import { saveAuthConfig } from '~~/server/utils/auth-config'
 import { z } from 'zod'
-
-const CONFIG_DIR = join(process.cwd(), '.data')
-const CONFIG_PATH = join(CONFIG_DIR, 'auth-config.json')
 
 const bodySchema = z.object({
   providers: z.object({
@@ -24,35 +21,17 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
+  const userId = await requireAuth(event)
   const body = await readValidatedBody(event, bodySchema.parse)
 
-  if (!existsSync(CONFIG_DIR)) {
-    mkdirSync(CONFIG_DIR, { recursive: true })
-  }
+  await saveAuthConfig(body, userId)
 
-  writeFileSync(CONFIG_PATH, JSON.stringify(body, null, 2), 'utf-8')
-
-  // Log the config change as an event
-  const eventsPath = join(CONFIG_DIR, 'auth-events.json')
-  const events = []
-  try {
-    if (existsSync(eventsPath)) {
-      const existing = JSON.parse(readFileSync(eventsPath, 'utf-8'))
-      if (Array.isArray(existing)) events.push(...existing)
-    }
-  } catch { /* ignore */ }
-
-  events.unshift({
-    id: Date.now(),
-    timestamp: new Date().toISOString(),
+  // Log the event
+  await db.insert(schema.authEvents).values({
     eventType: 'config.updated',
-    actor: body.providers.password ? 'System' : 'Admin',
-    status: 'completed'
+    actor: `user:${userId}`,
+    metadata: JSON.stringify(body)
   })
-
-  // Keep only latest 50
-  writeFileSync(eventsPath, JSON.stringify(events.slice(0, 50), null, 2), 'utf-8')
 
   return { success: true }
 })

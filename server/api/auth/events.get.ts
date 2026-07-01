@@ -1,29 +1,38 @@
-import { readFileSync, existsSync } from 'fs'
-import { join } from 'path'
+import { db, schema } from '@nuxthub/db'
 import { requireAuth } from '~~/server/utils/session'
+import { desc } from 'drizzle-orm'
 
-const EVENTS_PATH = join(process.cwd(), '.data', 'auth-events.json')
-
-const MOCK_EVENTS = [
-  { id: 1, timestamp: 'Mar 10, 19:45', eventType: 'ethan.harris@example.com', actor: 'Romaguera-Crona', status: 'Paid' },
-  { id: 2, timestamp: 'Mar 10, 15:55', eventType: 'emma.davis@example.com', actor: 'Deckow-Crist', status: 'Paid' },
-  { id: 3, timestamp: 'Mar 11, 15:30', eventType: 'william.brown@example.com', actor: 'Romaguera-Jacobson', status: 'Refunded' },
-  { id: 4, timestamp: 'Mar 11, 10:10', eventType: 'mia.white@example.com', actor: 'Robel-Corkery', status: 'Failed' },
-  { id: 5, timestamp: 'Mar 11, 15:30', eventType: 'james.anderson@example.com', actor: 'Keebler LLC', status: 'Paid' }
-]
+const PAGE_SIZE = 50
 
 export default defineEventHandler(async (event) => {
   await requireAuth(event)
 
-  try {
-    if (existsSync(EVENTS_PATH)) {
-      const data = readFileSync(EVENTS_PATH, 'utf-8')
-      const parsed = JSON.parse(data)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed
-      }
-    }
-  } catch { /* ignore */ }
+  const query = getQuery(event)
+  const page = Math.max(1, Number(query.page) || 1)
 
-  return MOCK_EVENTS
+  const events = await db
+    .select()
+    .from(schema.authEvents)
+    .orderBy(desc(schema.authEvents.id))
+    .limit(PAGE_SIZE)
+    .offset((page - 1) * PAGE_SIZE)
+    .all()
+
+  // Try to parse metadata for display
+  return events.map(e => ({
+    id: e.id,
+    timestamp: e.createdAt,
+    eventType: e.eventType,
+    actor: e.actor || 'System',
+    status: e.metadata ? tryParseStatus(e.metadata) : 'completed'
+  }))
+
+  function tryParseStatus(metadata: string): string {
+    try {
+      const parsed = JSON.parse(metadata)
+      return parsed.status || 'completed'
+    } catch {
+      return 'completed'
+    }
+  }
 })

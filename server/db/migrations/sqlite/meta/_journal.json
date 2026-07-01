@@ -36,6 +36,13 @@
       "when": 1782809889439,
       "tag": "0004_fair_randall",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1782876783366,
+      "tag": "0005_safe_landau",
+      "breakpoints": true
     }
   ]
 }

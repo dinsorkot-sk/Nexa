@@ -53,3 +53,32 @@ export const invites = sqliteTable('_invites', {
   expiresAt: text('expires_at').notNull(),
   createdAt: text('created_at').default(sql`(datetime('now'))`)
 })
+
+// ─── Password Resets ────────────────────────────────────────────────────
+export const passwordResets = sqliteTable('_password_resets', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text('token').notNull().unique(),
+  expiresAt: text('expires_at').notNull(),
+  usedAt: text('used_at'),
+  createdAt: text('created_at').default(sql`(datetime('now'))`)
+})
+
+// ─── Auth Config (singleton row id=1) ──────────────────────────────────
+export const authConfig = sqliteTable('_auth_config', {
+  id: integer('id').primaryKey().default(1),
+  providers: text('providers').notNull().default('{"password":true,"oauth2":false,"saml":false}'),
+  session: text('session').notNull().default('{"absoluteTimeout":1440,"idleTimeout":30,"refreshTokenTTL":7}'),
+  security: text('security').notNull().default('{"concurrentSessions":true,"mfaEnabled":false}'),
+  updatedAt: text('updated_at').default(sql`(datetime('now'))`),
+  updatedBy: integer('updated_by').references(() => users.id, { onDelete: 'set null' })
+})
+
+// ─── Auth Events ────────────────────────────────────────────────────────
+export const authEvents = sqliteTable('_auth_events', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  eventType: text('event_type').notNull(),
+  actor: text('actor'),
+  metadata: text('metadata'),
+  createdAt: text('created_at').default(sql`(datetime('now'))`)
+})
