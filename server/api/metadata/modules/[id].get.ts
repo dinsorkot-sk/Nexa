@@ -7,7 +7,8 @@ export default defineEventHandler(async (event) => {
 
   const mod = await db.get(
     sql`SELECT m.id, m.name, m.slug, m.description, m.icon, m.color, m.category, m.version, m.is_active, m.created_at, m.updated_at,
-      (SELECT COUNT(*) FROM _entities WHERE _entities.module_id = m.id) as "entityCount"
+      (SELECT COUNT(*) FROM _entities WHERE _entities.module_id = m.id) as "entityCount",
+      (SELECT COUNT(*) FROM _fields f JOIN _entities e ON f.entity_id = e.id WHERE e.module_id = m.id) as "formCount"
       FROM _modules m WHERE m.id = ${id}`
   ) as Record<string, unknown> | undefined
   if (!mod) throw createError({ statusCode: 404, statusMessage: 'Module not found' })

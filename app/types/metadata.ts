@@ -65,3 +65,39 @@ export interface Relation {
   entityName?: string
   relatedEntityName?: string
 }
+
+export interface ModuleRow extends Module {
+  name: string
+  category: string | null
+  color: string | null
+  version: string | null
+  isActive: boolean
+  entityCount?: number
+  formCount?: number
+  createdAt: string | null
+  updatedAt: string | null
+}
+
+export interface ModuleDetail extends ModuleRow {
+  entities: Entity[]
+}
+
+export interface ModuleStats {
+  total: number
+  active: number
+  inactive: number
+}
+
+export interface CreateModulePayload {
+  name: string
+  slug: string
+  description?: string
+  icon?: string
+  color?: string
+  category?: string
+  version?: string
+  isActive?: boolean
+  navConfig?: string
+  permConfig?: string
+  entityIds?: number[]
+}
