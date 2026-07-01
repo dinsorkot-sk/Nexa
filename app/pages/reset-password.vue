@@ -2,6 +2,16 @@
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
+definePageMeta({
+  layout: 'auth'
+})
+
+useSeoMeta({
+  title: 'Reset Password',
+  description: 'Enter your new password below'
+})
+
+
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -48,7 +58,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div class="flex min-h-dvh items-center justify-center px-4">
+  <div>
     <UCard v-if="!token" class="w-full max-w-sm">
       <template #header>
         <div class="text-center">

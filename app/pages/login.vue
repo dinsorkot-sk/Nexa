@@ -55,41 +55,46 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <UAuthForm
-    :fields="fields"
-    :schema="schema"
-    title="Welcome back"
-    icon="i-lucide-lock"
-    :loading="loading"
-    @submit="onSubmit"
+  <UPageCard
+  variant="subtle"
+  class="max-w-sm w-full"
   >
-    <template #description>
-      Sign in to your account.
-    </template>
+    <UAuthForm
+      :fields="fields"
+      :schema="schema"
+      title="Welcome back"
+      icon="i-lucide-lock"
+      :loading="loading"
+      @submit="onSubmit"
+    >
+      <template #description>
+        Sign in to your account.
+      </template>
 
-    <template #password-hint>
-      <ULink
-        to="/forgot-password"
-        class="text-primary font-medium"
-        tabindex="-1"
-      >Forgot password?</ULink>
-    </template>
+      <template #password-hint>
+        <ULink
+          to="/forgot-password"
+          class="text-primary font-medium"
+          tabindex="-1"
+        >Forgot password?</ULink>
+      </template>
 
-    <template #validation>
-      <UAlert
-        v-if="error"
-        color="error"
-        variant="subtle"
-        :title="error"
-        icon="i-lucide-circle-alert"
-      />
-    </template>
+      <template #validation>
+        <UAlert
+          v-if="error"
+          color="error"
+          variant="subtle"
+          :title="error"
+          icon="i-lucide-circle-alert"
+        />
+      </template>
 
-    <template #footer>
-      By signing in, you agree to our <ULink
-        to="/"
-        class="text-primary font-medium"
-      >Terms of Service</ULink>.
-    </template>
-  </UAuthForm>
+      <template #footer>
+        By signing in, you agree to our <ULink
+          to="/"
+          class="text-primary font-medium"
+        >Terms of Service</ULink>.
+      </template>
+    </UAuthForm>
+  </UPageCard>
 </template>
