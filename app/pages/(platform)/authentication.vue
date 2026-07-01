@@ -2,8 +2,25 @@
 const { isNotificationsSlideoverOpen } = useDashboard()
 const {
   config, events, saving, hasChanges,
-  saveConfig, markChanged, loadConfig
+  saveConfig, loadConfig, loadEvents, loading, markChanged
 } = useAuthConfig()
+
+// Helper for template — Vue templates don't narrow nullable types from v-if
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function e(row: { original: unknown }): any {
+  return row.original
+}
+
+const search = ref('')
+
+// Debounced search with manual trigger
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+watch(search, (val) => {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    loadEvents(val || undefined)
+  }, 300)
+})
 
 async function handleSave() {
   const ok = await saveConfig()
@@ -20,6 +37,54 @@ function getStatusColor(status: string) {
     default: return 'neutral' as const
   }
 }
+
+function getStatusIcon(status: string) {
+  switch (status) {
+    case 'success': return 'i-lucide-circle-check'
+    case 'failed': return 'i-lucide-circle-x'
+    case 'warning': return 'i-lucide-circle-alert'
+    default: return 'i-lucide-circle'
+  }
+}
+
+function getEventIcon(eventType: string) {
+  switch (eventType) {
+    case 'LOGIN': return 'i-lucide-log-in'
+    case 'LOGIN_FAILED': return 'i-lucide-log-in'
+    case 'LOGOUT': return 'i-lucide-log-out'
+    case 'REGISTER': return 'i-lucide-user-plus'
+    case 'forgot-password': return 'i-lucide-key-round'
+    case 'reset-password': return 'i-lucide-key-round'
+    case 'settings.general.updated': return 'i-lucide-sliders-horizontal'
+    case 'settings.notifications.updated': return 'i-lucide-bell'
+    default: return 'i-lucide-shield'
+  }
+}
+
+function formatTimestamp(iso: string) {
+  const d = new Date(iso)
+  return d.toLocaleString('en-US', {
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+    hour12: false
+  })
+}
+
+function formatEventLabel(eventType: string) {
+  return eventType
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
+}
+
+const columns = [
+  { accessorKey: 'timestamp', header: 'Time' },
+  { accessorKey: 'user', header: 'User' },
+  { accessorKey: 'eventType', header: 'Event' },
+  { accessorKey: 'status', header: 'Status' },
+  { accessorKey: 'detail', header: 'Detail' }
+]
+
+onMounted(() => loadEvents())
 
 const sessionOptions = [
   'Allow multiple sessions',
@@ -238,57 +303,120 @@ function getConcurrentLabel(val: boolean) {
           </UCard>
         </div>
 
-        <!-- Data Table: Activity Log -->
+        <!-- Activity Log Table -->
         <UCard>
           <template #header>
             <div class="flex items-center justify-between w-full">
               <UInput
-                placeholder="Filters..."
+                v-model="search"
+                placeholder="Search events..."
                 size="sm"
-                class="w-44"
-              />
-              <UDropdownMenu :items="[[{ label: 'Columns', icon: 'i-lucide-columns-3' }]]">
+                class="w-56"
+              >
+                <template #leading>
+                  <UIcon name="i-lucide-search" class="size-4 shrink-0 text-(--ui-text-muted)" />
+                </template>
+              </UInput>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-(--ui-text-muted)">
+                  {{ events.length }} events
+                </span>
                 <UButton
                   color="neutral"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  trailing-icon="i-lucide-chevron-down"
-                >
-                  Columns
-                </UButton>
-              </UDropdownMenu>
+                  icon="i-lucide-refresh-cw"
+                  @click="loadEvents(search || undefined)"
+                />
+              </div>
             </div>
           </template>
 
           <UTable
+            :loading="loading"
             :rows="events"
-            :columns="[
-              { accessorKey: 'timestamp', header: 'Timestamp' },
-              { accessorKey: 'eventType', header: 'Event Type' },
-              { accessorKey: 'actor', header: 'Engine' },
-              { accessorKey: 'status', header: 'Status' }
-            ]"
+            :columns="columns"
+            :ui="{ td: 'py-3' }"
           >
+            <!-- Time column -->
             <template #timestamp-data="{ row }">
-              <div class="flex items-center gap-3">
-                <UCheckbox />
-                <span class="text-sm text-(--ui-text-highlighted)">{{ row.original.timestamp }}</span>
+              <div class="flex items-center gap-2">
+                <UIcon
+                  :name="getEventIcon(e(row).eventType)"
+                  class="size-4 shrink-0 text-(--ui-text-muted)"
+                />
+                <span class="text-sm whitespace-nowrap text-(--ui-text-highlighted)">
+                  {{ formatTimestamp(e(row).timestamp) }}
+                </span>
               </div>
             </template>
+
+            <!-- User column -->
+            <template #user-data="{ row }">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <UAvatar
+                  v-if="e(row).userName"
+                  :src="e(row).userAvatarUrl || undefined"
+                  :text="e(row).userName.charAt(0).toUpperCase()"
+                  size="sm"
+                  class="shrink-0"
+                />
+                <UAvatar
+                  v-else
+                  icon="i-lucide-shield-question"
+                  size="sm"
+                  class="shrink-0"
+                />
+                <div class="flex flex-col min-w-0">
+                  <span class="text-sm font-medium truncate text-(--ui-text-highlighted)">
+                    {{ e(row).userName || e(row).actor || 'System' }}
+                  </span>
+                  <span v-if="e(row).userEmail" class="text-xs truncate text-(--ui-text-muted)">
+                    {{ e(row).userEmail }}
+                  </span>
+                </div>
+              </div>
+            </template>
+
+            <!-- Event type column -->
             <template #eventType-data="{ row }">
-              <span class="text-sm">{{ row.original.eventType }}</span>
+              <span class="text-sm font-medium capitalize">
+                {{ formatEventLabel(e(row).eventType) }}
+              </span>
             </template>
-            <template #actor-data="{ row }">
-              <span class="text-sm text-(--ui-text-muted)">{{ row.original.actor }}</span>
-            </template>
+
+            <!-- Status column -->
             <template #status-data="{ row }">
               <UBadge
-                :color="getStatusColor(row.original.status)"
+                :color="getStatusColor(e(row).status)"
                 variant="subtle"
                 size="sm"
               >
-                {{ row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1) }}
+                <template #leading>
+                  <UIcon :name="getStatusIcon(e(row).status)" class="size-3.5" />
+                </template>
+                {{ e(row).status.charAt(0).toUpperCase() + e(row).status.slice(1) }}
               </UBadge>
+            </template>
+
+            <!-- Detail column -->
+            <template #detail-data="{ row }">
+              <template v-if="e(row).metadata">
+                <div v-if="e(row).eventType === 'LOGIN_FAILED' && e(row).metadata.reason" class="text-xs text-(--ui-text-muted)">
+                  <span v-if="e(row).metadata.reason === 'invalid_password'">Wrong password</span>
+                  <span v-else-if="e(row).metadata.reason === 'user_not_found'">Unknown email</span>
+                  <span v-else-if="e(row).metadata.reason === 'account_disabled'">Account disabled</span>
+                  <span v-else>{{ e(row).metadata.reason }}</span>
+                </div>
+                <div v-else-if="e(row).eventType === 'REGISTER' && e(row).metadata" class="text-xs text-(--ui-text-muted)">
+                  Invite accepted
+                </div>
+                <div v-else-if="e(row).eventType === 'settings.general.updated'" class="text-xs text-(--ui-text-muted)">
+                  Config changed
+                </div>
+                <UIcon v-else name="i-lucide-minus" class="size-3.5 text-(--ui-text-muted)" />
+              </template>
+              <UIcon v-else name="i-lucide-minus" class="size-3.5 text-(--ui-text-muted)" />
             </template>
           </UTable>
         </UCard>

@@ -1,3 +1,16 @@
+export interface AuthEvent {
+  id: number
+  timestamp: string
+  eventType: string
+  actor: string
+  userId: number | null
+  userName: string | null
+  userEmail: string | null
+  userAvatarUrl: string | null
+  status: string
+  metadata: Record<string, unknown> | null
+}
+
 export function useAuthConfig() {
   const config = useState('auth-config', () => ({
     providers: { password: true, oauth2: false, saml: false },
@@ -5,7 +18,7 @@ export function useAuthConfig() {
     security: { concurrentSessions: true, mfaEnabled: false }
   }))
 
-  const events = useState<{ id: number, timestamp: string, eventType: string, actor: string, status: string }[]>('auth-events', () => [])
+  const events = useState<AuthEvent[]>('auth-events', () => [])
   const loading = ref(false)
   const saving = ref(false)
   const hasChanges = ref(false)
@@ -22,11 +35,17 @@ export function useAuthConfig() {
     }
   }
 
-  async function loadEvents() {
+  async function loadEvents(search?: string) {
+    loading.value = true
     try {
-      events.value = await $fetch('/api/auth/events')
+      const params = new URLSearchParams()
+      if (search) params.set('search', search)
+      const url = `/api/auth/events${params.toString() ? `?${params.toString()}` : ''}`
+      events.value = await $fetch<AuthEvent[]>(url)
     } catch {
       events.value = []
+    } finally {
+      loading.value = false
     }
   }
 

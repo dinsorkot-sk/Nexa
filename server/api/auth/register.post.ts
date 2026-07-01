@@ -101,6 +101,13 @@ export default defineEventHandler(async (event) => {
   // Create session
   const session = await createSession(event, user!.id)
 
+  // Log registration
+  await db.insert(schema.authEvents).values({
+    eventType: 'REGISTER',
+    actor: `user:${user!.id}`,
+    metadata: JSON.stringify({ name: user!.name, email: user!.email, invitedBy: invite.invitedBy })
+  })
+
   return {
     id: user!.id,
     name: user!.name,

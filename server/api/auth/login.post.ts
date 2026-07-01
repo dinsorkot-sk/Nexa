@@ -19,10 +19,29 @@ export default defineEventHandler(async (event) => {
     .limit(1)
 
   if (!user || !verifyPassword(body.password, user.passwordHash)) {
+    // Log failed attempt
+    if (user) {
+      await db.insert(schema.authEvents).values({
+        eventType: 'LOGIN_FAILED',
+        actor: `user:${user.id}`,
+        metadata: JSON.stringify({ reason: 'invalid_password' })
+      })
+    } else {
+      await db.insert(schema.authEvents).values({
+        eventType: 'LOGIN_FAILED',
+        actor: body.email,
+        metadata: JSON.stringify({ reason: 'user_not_found' })
+      })
+    }
     throw createError({ statusCode: 401, statusMessage: 'Invalid email or password' })
   }
 
   if (!user.isActive) {
+    await db.insert(schema.authEvents).values({
+      eventType: 'LOGIN_FAILED',
+      actor: `user:${user.id}`,
+      metadata: JSON.stringify({ reason: 'account_disabled' })
+    })
     throw createError({ statusCode: 403, statusMessage: 'Account is disabled' })
   }
 
@@ -35,6 +54,13 @@ export default defineEventHandler(async (event) => {
 
   // Create session
   const session = await createSession(event, user.id)
+
+  // Log successful login
+  await db.insert(schema.authEvents).values({
+    eventType: 'LOGIN',
+    actor: `user:${user.id}`,
+    metadata: JSON.stringify({ roles: userRoles.map(r => r.slug) })
+  })
 
   return {
     id: user.id,
