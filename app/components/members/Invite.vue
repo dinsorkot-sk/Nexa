@@ -3,11 +3,12 @@ import type { Role } from '~/composables/useMembers'
 
 defineProps<{
   roles: Role[]
+  open?: boolean
 }>()
 
 const emit = defineEmits<{
-  invite: [email: string, roleSlug?: string]
-  close: []
+  'invite': [email: string, roleSlug?: string]
+  'update:open': [value: boolean]
 }>()
 
 const email = ref('')
@@ -17,6 +18,10 @@ const submitting = ref(false)
 
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+}
+
+function handleClose() {
+  emit('update:open', false)
 }
 
 async function handleInvite() {
@@ -47,25 +52,14 @@ async function handleInvite() {
 
 <template>
   <USlideover
-    :open="true"
-    :modal="false"
-    class="w-96"
-    @update:open="(v) => !v && emit('close')"
+    :open="open"
+    class="sm:max-w-96"
+    @update:open="(v) => { if (!v) emit('update:open', false) }"
   >
     <template #header>
-      <div class="flex items-center justify-between">
-        <h3 class="text-base font-semibold">
-          Invite People
-        </h3>
-        <UButton
-          color="neutral"
-          variant="ghost"
-          size="sm"
-          square
-          icon="i-lucide-x"
-          @click="emit('close')"
-        />
-      </div>
+      <h3 class="text-base font-semibold">
+        Invite People
+      </h3>
     </template>
 
     <template #body>
@@ -104,12 +98,12 @@ async function handleInvite() {
     </template>
 
     <template #footer>
-      <div class="flex items-center justify-end gap-3 p-4">
+      <div class="flex items-center justify-end gap-3 w-full">
         <UButton
           color="neutral"
           variant="ghost"
           :disabled="submitting"
-          @click="emit('close')"
+          @click="handleClose"
         >
           Cancel
         </UButton>

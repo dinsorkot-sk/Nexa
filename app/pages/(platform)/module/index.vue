@@ -40,10 +40,12 @@ function selectModule(row: ModuleRow) {
   showDetailSlideover.value = true
 }
 
-function closeSlideover() {
-  selectedModule.value = null
-  showDetailSlideover.value = false
-}
+// Watch for slideover close to clear selected module
+watch(showDetailSlideover, (open) => {
+  if (!open) {
+    selectedModule.value = null
+  }
+})
 
 const columns = [
   { accessorKey: 'name', header: 'Module' },
@@ -324,9 +326,8 @@ onMounted(() => fetchModules())
       <!-- Detail Slideover -->
       <ModuleDetail
         v-if="showDetailSlideover && selectedModule"
-        :open="showDetailSlideover"
+        v-model:open="showDetailSlideover"
         :module="selectedModule"
-        @update:open="closeSlideover"
       />
     </template>
   </UDashboardPanel>

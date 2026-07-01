@@ -63,39 +63,28 @@ watch(() => props.module.id, () => {
   <USlideover
     side="right"
     :open="open"
-    @update:open="emit('update:open', $event)"
+    @update:open="(v) => { if (!v) emit('update:open', false) }"
   >
-    <!-- ─── Custom Header ─── -->
     <template #header>
       <div class="flex items-center gap-2">
-        <UButton
-          icon="i-lucide-x"
-          color="neutral"
-          variant="ghost"
-          square
-          @click="() => { handleClose() }"
-        />
-        <div class="flex items-center gap-2 min-w-0">
-          <div
-            v-if="module.icon"
-            class="size-7 rounded flex items-center justify-center bg-(--ui-primary)/10 shrink-0"
-          >
-            <UIcon :name="module.icon" class="size-4 text-(--ui-primary)" />
-          </div>
-          <div class="min-w-0">
-            <p class="font-semibold text-sm truncate">
-              {{ module.name }}
-            </p>
-            <p class="text-xs text-(--ui-text-muted) truncate">
-              {{ module.slug }}
-            </p>
-          </div>
+        <div
+          v-if="module.icon"
+          class="size-7 rounded flex items-center justify-center bg-(--ui-primary)/10 shrink-0"
+        >
+          <UIcon :name="module.icon" class="size-4 text-(--ui-primary)" />
+        </div>
+        <div class="min-w-0">
+          <p class="font-semibold text-sm truncate">
+            {{ module.name }}
+          </p>
+          <p class="text-xs text-(--ui-text-muted) truncate">
+            {{ module.slug }}
+          </p>
         </div>
       </div>
     </template>
 
-    <!-- ─── Content ─── -->
-    <template #content>
+    <template #body>
       <!-- Tab bar -->
       <UTabs
         v-model="tab"
@@ -280,9 +269,8 @@ watch(() => props.module.id, () => {
       </div>
     </template>
 
-    <!-- ─── Footer ─── -->
-    <template #footer="{ close }">
-      <div class="flex items-center justify-between px-4 py-3 border-t border-(--ui-border)">
+    <template #footer>
+      <div class="flex items-center justify-between w-full">
         <p class="text-xs text-(--ui-text-muted)">
           ID: {{ module.id }}
         </p>
@@ -291,40 +279,35 @@ watch(() => props.module.id, () => {
           color="neutral"
           variant="ghost"
           size="sm"
-          @click="close"
+          @click="handleClose"
         />
       </div>
     </template>
   </USlideover>
 
   <!-- ─── Delete Confirmation Modal ─── -->
-  <UModal v-if="showDeleteModal" :open="true" @update:open="showDeleteModal = $event">
-    <UCard>
-      <template #header>
-        <p class="font-semibold">
-          Delete Module
-        </p>
-      </template>
+  <UModal v-model:open="showDeleteModal" title="Delete Module">
+    <template #body>
       <p class="text-sm text-(--ui-text-muted)">
         Are you sure you want to delete <strong class="text-(--ui-text-highlighted)">{{ module.name }}</strong>?
         This action cannot be undone.
       </p>
-      <template #footer>
-        <div class="flex items-center justify-end gap-2">
-          <UButton
-            label="Cancel"
-            color="neutral"
-            variant="ghost"
-            @click="() => { showDeleteModal = false }"
-          />
-          <UButton
-            label="Delete"
-            color="error"
-            :loading="deleting"
-            @click="handleDelete"
-          />
-        </div>
-      </template>
-    </UCard>
+    </template>
+    <template #footer>
+      <div class="flex items-center justify-end gap-2 w-full">
+        <UButton
+          label="Cancel"
+          color="neutral"
+          variant="ghost"
+          @click="() => { showDeleteModal = false }"
+        />
+        <UButton
+          label="Delete"
+          color="error"
+          :loading="deleting"
+          @click="handleDelete"
+        />
+      </div>
+    </template>
   </UModal>
 </template>

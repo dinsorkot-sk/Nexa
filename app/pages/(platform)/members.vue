@@ -6,9 +6,16 @@ const { isNotificationsSlideoverOpen } = useDashboard()
 const {
   members, roles, selectedMember,
   showInviteModal, showSlideover,
-  selectMember, closeSlideover,
+  selectMember,
   inviteMember, updateMemberRoles, toggleMemberStatus
 } = useMembers()
+
+// Watch for slideover close to clear selected member
+watch(showSlideover, (open) => {
+  if (!open) {
+    selectedMember.value = null
+  }
+})
 
 const q = ref('')
 
@@ -51,10 +58,6 @@ function getDropdownActions(member: Member): DropdownMenuItem[] {
 async function handleInvite(email: string, roleSlug?: string) {
   await inviteMember(email, roleSlug)
   showInviteModal.value = false
-}
-
-function handleCloseSlideover() {
-  closeSlideover()
 }
 
 function handleUpdateRoles(memberId: number, roleIds: number[]) {
@@ -188,17 +191,17 @@ function handleToggleStatus(memberId: number, isActive: boolean) {
       <!-- Invite Modal -->
       <MembersInvite
         v-if="showInviteModal"
+        v-model:open="showInviteModal"
         :roles="roles"
         @invite="handleInvite"
-        @close="showInviteModal = false"
       />
 
       <!-- Member Details -->
       <MembersDetails
         v-if="showSlideover && selectedMember"
+        v-model:open="showSlideover"
         :member="selectedMember"
         :roles="roles"
-        @close="handleCloseSlideover"
         @update-roles="handleUpdateRoles"
         @toggle-status="handleToggleStatus"
       />
