@@ -43,11 +43,6 @@ const links = [[{
   icon: 'i-lucide-file-text',
   to: '/document',
   onSelect: () => { open.value = false }
-}, {
-  label: 'Profile',
-  icon: 'i-lucide-user',
-  to: '/profile',
-  onSelect: () => { open.value = false }
 }], [{
   label: 'Settings',
   to: '/settings',
@@ -55,6 +50,10 @@ const links = [[{
   defaultOpen: true,
   type: 'trigger',
   children: [{
+    label: 'Profile',
+    to: '/settings/profile',
+    onSelect: () => { open.value = false }
+  }, {
     label: 'General',
     to: '/settings',
     exact: true,

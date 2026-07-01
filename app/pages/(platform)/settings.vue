@@ -2,11 +2,14 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 
 const links = [[{
-  label: 'General',
+  label: 'Profile',
   icon: 'i-lucide-user',
+  to: '/settings/profile'
+}, {
+  label: 'General',
+  icon: 'i-lucide-sliders-horizontal',
   to: '/settings',
   exact: true
-}, {
 }, {
   label: 'Notifications',
   icon: 'i-lucide-bell',
@@ -33,7 +36,6 @@ const links = [[{
       </UDashboardNavbar>
 
       <UDashboardToolbar>
-        <!-- NOTE: The `-mx-1` class is used to align with the `DashboardSidebarCollapse` button here. -->
         <UNavigationMenu :items="links" highlight class="-mx-1 flex-1" />
       </UDashboardToolbar>
     </template>

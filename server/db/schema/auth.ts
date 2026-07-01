@@ -82,3 +82,27 @@ export const authEvents = sqliteTable('_auth_events', {
   metadata: text('metadata'),
   createdAt: text('created_at').default(sql`(datetime('now'))`)
 })
+
+// ─── App Config (singleton row id=1) ───────────────────────────────────
+export const appConfig = sqliteTable('_app_config', {
+  id: integer('id').primaryKey().default(1),
+  siteName: text('site_name').notNull().default('Nexa'),
+  locale: text('locale').notNull().default('en'),
+  timezone: text('timezone').notNull().default('UTC'),
+  logoUrl: text('logo_url'),
+  updatedAt: text('updated_at').default(sql`(datetime('now'))`),
+  updatedBy: integer('updated_by').references(() => users.id, { onDelete: 'set null' })
+})
+
+// ─── Notification Preferences (per-user singleton) ─────────────────────
+export const notificationPrefs = sqliteTable('_notification_prefs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
+  emailEnabled: integer('email_enabled', { mode: 'boolean' }).default(true),
+  desktopEnabled: integer('desktop_enabled', { mode: 'boolean' }).default(false),
+  weeklyDigest: integer('weekly_digest', { mode: 'boolean' }).default(false),
+  productUpdates: integer('product_updates', { mode: 'boolean' }).default(true),
+  importantUpdates: integer('important_updates', { mode: 'boolean' }).default(true),
+  createdAt: text('created_at').default(sql`(datetime('now'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now'))`)
+})

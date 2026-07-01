@@ -11,7 +11,6 @@ useSeoMeta({
   description: 'Enter your new password below'
 })
 
-
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()

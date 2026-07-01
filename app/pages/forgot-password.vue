@@ -55,8 +55,15 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       </div>
     </template>
 
-    <UAlert v-if="sent" color="success" variant="subtle" icon="i-lucide-check-circle" title="Check your email"
-      :description="resetUrl ? `For development, use the link below:` : undefined" class="mb-4">
+    <UAlert
+      v-if="sent"
+      color="success"
+      variant="subtle"
+      icon="i-lucide-check-circle"
+      title="Check your email"
+      :description="resetUrl ? `For development, use the link below:` : undefined"
+      class="mb-4"
+    >
       <template v-if="resetUrl" #description>
         <ULink :to="resetUrl" class="text-sm font-medium break-all">
           {{ resetUrl }}
@@ -64,12 +71,32 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       </template>
     </UAlert>
 
-    <UForm v-if="!sent" :schema="schema" :state="form" @submit="onSubmit">
-      <UFormField label="Email" name="email" required class="mb-4">
-        <UInput v-model="form.email" type="email" placeholder="you@example.com" class="w-full" />
+    <UForm
+      v-if="!sent"
+      :schema="schema"
+      :state="form"
+      @submit="onSubmit"
+    >
+      <UFormField
+        label="Email"
+        name="email"
+        required
+        class="mb-4"
+      >
+        <UInput
+          v-model="form.email"
+          type="email"
+          placeholder="you@example.com"
+          class="w-full"
+        />
       </UFormField>
 
-      <UButton type="submit" color="primary" block :loading="loading">
+      <UButton
+        type="submit"
+        color="primary"
+        block
+        :loading="loading"
+      >
         Send Reset Link
       </UButton>
     </UForm>

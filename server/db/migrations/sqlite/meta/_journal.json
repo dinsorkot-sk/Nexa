@@ -43,6 +43,13 @@
       "when": 1782876783366,
       "tag": "0005_safe_landau",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1782879063130,
+      "tag": "0006_illegal_supernaut",
+      "breakpoints": true
     }
   ]
 }

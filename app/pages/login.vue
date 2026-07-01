@@ -56,8 +56,8 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 
 <template>
   <UPageCard
-  variant="subtle"
-  class="max-w-sm w-full"
+    variant="subtle"
+    class="max-w-sm w-full"
   >
     <UAuthForm
       :fields="fields"
