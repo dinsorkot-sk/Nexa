@@ -14,10 +14,7 @@ async function handleSave() {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case 'Paid': return 'success' as const
-    case 'Refunded': return 'neutral' as const
-    case 'Failed': return 'error' as const
-    case 'completed': return 'success' as const
+    case 'success': return 'success' as const
     case 'warning': return 'warning' as const
     case 'failed': return 'error' as const
     default: return 'neutral' as const

@@ -40,7 +40,7 @@ const _useAuth = () => {
    * Login with email + password.
    */
   async function login(email: string, password: string) {
-    const data = await $fetch<{ id: number, name: string, email: string, roles: Array<{ id: number, name: string, slug: string }> }>('/api/auth/login', {
+    const data = await $fetch<{ id: number, name: string, email: string, avatarUrl: string | null, roles: Array<{ id: number, name: string, slug: string }> }>('/api/auth/login', {
       method: 'POST',
       body: { email, password }
     })
@@ -48,20 +48,12 @@ const _useAuth = () => {
       id: data.id,
       name: data.name,
       email: data.email,
-      avatarUrl: null,
+      avatarUrl: data.avatarUrl ?? null,
       roles: data.roles
     }
+    // Reset fetchAttempted so subsequent fetchUser() calls work
+    fetchAttempted = false
     return data
-  }
-
-  /**
-   * Register a new user.
-   */
-  async function register(name: string, email: string, password: string) {
-    return $fetch('/api/auth/register', {
-      method: 'POST',
-      body: { name, email, password }
-    })
   }
 
   /**
@@ -79,7 +71,6 @@ const _useAuth = () => {
     isAuthenticated,
     isAdmin,
     login,
-    register,
     logout,
     fetchUser
   }

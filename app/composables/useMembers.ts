@@ -5,7 +5,7 @@ export interface Role {
   name: string
   slug: string
   description: string | null
-  isSystem: number | null
+  isSystem: boolean
 }
 
 export function useMembers() {
