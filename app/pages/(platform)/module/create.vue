@@ -32,7 +32,10 @@ const moduleVersion = ref('1.0.0')
 const moduleActive = ref(true)
 
 watch(moduleName, (val) => {
-  if (!val) { moduleSlug.value = ''; return }
+  if (!val) {
+    moduleSlug.value = ''
+    return
+  }
   moduleSlug.value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 })
 
@@ -75,8 +78,8 @@ const filteredEntities = computed(() => {
   if (entitySearch.value) {
     const q = entitySearch.value.toLowerCase()
     list = list.filter(e =>
-      e.name.toLowerCase().includes(q) ||
-      (e.description || '').toLowerCase().includes(q)
+      e.name.toLowerCase().includes(q)
+      || (e.description || '').toLowerCase().includes(q)
     )
   }
   if (entityTab.value === 'selected') {
@@ -126,14 +129,6 @@ const permPreset = ref('admin_only')
 // ── Step 5: Review + Submit ──────────────────────────────────────────
 const submitting = ref(false)
 
-function findOption<T extends { label: string; value: any }>(items: T[], value: any): T | undefined {
-  return items.find(i => i.value === value)
-}
-
-function upd(val: any, target: any) {
-  if (val?.value !== undefined) target.value = val.value
-}
-
 async function handleSubmit() {
   if (!step1Valid.value) return
   submitting.value = true
@@ -158,7 +153,9 @@ async function handleSubmit() {
   }
 }
 
-onMounted(() => { fetchEntities() })
+onMounted(() => {
+  fetchEntities()
+})
 </script>
 
 <template>
@@ -166,7 +163,13 @@ onMounted(() => { fetchEntities() })
     <template #header>
       <UDashboardNavbar title="Create Module">
         <template #leading>
-          <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" square :to="'/module'" />
+          <UButton
+            icon="i-lucide-arrow-left"
+            color="neutral"
+            variant="ghost"
+            square
+            :to="'/module'"
+          />
         </template>
         <template #right>
           <UButton
@@ -232,8 +235,12 @@ onMounted(() => { fetchEntities() })
             <div v-if="currentStep === 0">
               <UCard>
                 <template #header>
-                  <p class="text-lg font-bold text-(--ui-text-highlighted)">Basic Information</p>
-                  <p class="text-sm text-(--ui-text-muted)">Define the core details of your module.</p>
+                  <p class="text-lg font-bold text-(--ui-text-highlighted)">
+                    Basic Information
+                  </p>
+                  <p class="text-sm text-(--ui-text-muted)">
+                    Define the core details of your module.
+                  </p>
                 </template>
                 <div class="space-y-5">
                   <UFormField label="Module Name" required>
@@ -263,20 +270,20 @@ onMounted(() => { fetchEntities() })
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <UFormField label="Icon">
                       <USelectMenu
-                        :model-value="findOption(iconOptions, moduleIcon) ?? iconOptions[0]"
+                        :model-value="iconOptions.find(o => o.value === moduleIcon) ?? iconOptions[0]"
                         :items="iconOptions"
-                        @update:model-value="upd($event, moduleIcon)"
                         class="w-full"
+                        @update:model-value="moduleIcon = ($event?.value as string) ?? 'i-lucide-puzzle'"
                       />
                     </UFormField>
 
                     <UFormField label="Color">
                       <div class="flex items-center gap-2">
                         <input
-                          type="color"
                           v-model="moduleColor"
+                          type="color"
                           class="size-9 rounded border border-default cursor-pointer shrink-0"
-                        />
+                        >
                         <code class="text-xs text-(--ui-text-muted)">{{ moduleColor }}</code>
                       </div>
                     </UFormField>
@@ -285,10 +292,10 @@ onMounted(() => { fetchEntities() })
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <UFormField label="Category">
                       <USelectMenu
-                        :model-value="findOption(categoryOptions, moduleCategory) ?? categoryOptions[0]"
+                        :model-value="categoryOptions.find(o => o.value === moduleCategory) ?? categoryOptions[0]"
                         :items="categoryOptions"
-                        @update:model-value="upd($event, moduleCategory)"
                         class="w-full"
+                        @update:model-value="moduleCategory = ($event?.value as string) ?? 'Business'"
                       />
                     </UFormField>
 
@@ -322,8 +329,12 @@ onMounted(() => { fetchEntities() })
                 <template #header>
                   <div class="flex items-center justify-between">
                     <div>
-                      <p class="text-lg font-bold text-(--ui-text-highlighted)">Entities</p>
-                      <p class="text-sm text-(--ui-text-muted)">Select entities to include in this module.</p>
+                      <p class="text-lg font-bold text-(--ui-text-highlighted)">
+                        Entities
+                      </p>
+                      <p class="text-sm text-(--ui-text-muted)">
+                        Select entities to include in this module.
+                      </p>
                     </div>
                     <span class="text-xs font-medium text-(--ui-success)">{{ selectedEntityIds.size }} selected</span>
                   </div>
@@ -347,19 +358,35 @@ onMounted(() => { fetchEntities() })
                   />
                   <div class="flex-1" />
                   <div v-if="entityTab === 'all'" class="flex gap-1">
-                    <UButton label="Select All" color="neutral" variant="ghost" size="xs" @click="selectAllEntities" />
-                    <UButton label="Clear" color="neutral" variant="ghost" size="xs" @click="deselectAllEntities" />
+                    <UButton
+                      label="Select All"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      @click="selectAllEntities"
+                    />
+                    <UButton
+                      label="Clear"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      @click="deselectAllEntities"
+                    />
                   </div>
                 </div>
 
                 <!-- Entity list -->
                 <div v-if="entitiesLoading" class="py-12 text-center">
                   <UIcon name="i-lucide-loader-circle" class="size-6 text-(--ui-text-muted) animate-spin mx-auto mb-2" />
-                  <p class="text-sm text-(--ui-text-muted)">Loading entities...</p>
+                  <p class="text-sm text-(--ui-text-muted)">
+                    Loading entities...
+                  </p>
                 </div>
                 <div v-else-if="filteredEntities.length === 0" class="py-12 text-center">
                   <UIcon name="i-lucide-search-x" class="size-8 text-(--ui-text-muted) mx-auto mb-2" />
-                  <p class="text-sm text-(--ui-text-muted)">No entities found</p>
+                  <p class="text-sm text-(--ui-text-muted)">
+                    No entities found
+                  </p>
                 </div>
                 <div v-else class="space-y-1 max-h-96 overflow-y-auto">
                   <div
@@ -375,7 +402,9 @@ onMounted(() => { fetchEntities() })
                       @click.stop="toggleEntity(entity.id)"
                     />
                     <div class="flex-1 min-w-0">
-                      <p class="text-xs text-(--ui-text-muted) truncate">{{ entity.tableName }}</p>
+                      <p class="text-xs text-(--ui-text-muted) truncate">
+                        {{ entity.tableName }}
+                      </p>
                     </div>
                     <span
                       class="inline-block size-1.5 rounded-full shrink-0"
@@ -390,8 +419,12 @@ onMounted(() => { fetchEntities() })
             <div v-if="currentStep === 2">
               <UCard>
                 <template #header>
-                  <p class="text-lg font-bold text-(--ui-text-highlighted)">Navigation Settings</p>
-                  <p class="text-sm text-(--ui-text-muted)">Configure how this module appears in the sidebar.</p>
+                  <p class="text-lg font-bold text-(--ui-text-highlighted)">
+                    Navigation Settings
+                  </p>
+                  <p class="text-sm text-(--ui-text-muted)">
+                    Configure how this module appears in the sidebar.
+                  </p>
                 </template>
                 <div class="space-y-5">
                   <UFormField label="Menu Label">
@@ -407,10 +440,10 @@ onMounted(() => { fetchEntities() })
                         <UIcon :name="navIcon" class="size-4 text-(--ui-primary)" />
                       </div>
                       <USelectMenu
-                        :model-value="findOption(iconOptions, navIcon) ?? iconOptions[0]"
+                        :model-value="iconOptions.find(o => o.value === navIcon) ?? iconOptions[0]"
                         :items="iconOptions"
-                        @update:model-value="upd($event, navIcon)"
                         class="w-full"
+                        @update:model-value="navIcon = ($event?.value as string) ?? 'i-lucide-folder'"
                       />
                     </div>
                   </UFormField>
@@ -430,23 +463,27 @@ onMounted(() => { fetchEntities() })
             <div v-if="currentStep === 3">
               <UCard>
                 <template #header>
-                  <p class="text-lg font-bold text-(--ui-text-highlighted)">Permissions</p>
-                  <p class="text-sm text-(--ui-text-muted)">Define access control for this module.</p>
+                  <p class="text-lg font-bold text-(--ui-text-highlighted)">
+                    Permissions
+                  </p>
+                  <p class="text-sm text-(--ui-text-muted)">
+                    Define access control for this module.
+                  </p>
                 </template>
                 <div class="space-y-4">
                   <USelectMenu
-                    :model-value="findOption([
+                    :model-value="([
                       { label: 'Admin Only', value: 'admin_only' },
                       { label: 'Admin + Manager', value: 'admin_manager' },
                       { label: 'All Roles', value: 'all_roles' }
-                    ], permPreset) ?? { label: 'Admin Only', value: 'admin_only' }"
+                    ] as const).find(o => o.value === permPreset) ?? { label: 'Admin Only', value: 'admin_only' }"
                     :items="[
                       { label: 'Admin Only', value: 'admin_only' },
                       { label: 'Admin + Manager', value: 'admin_manager' },
                       { label: 'All Roles', value: 'all_roles' }
                     ]"
-                    @update:model-value="upd($event, permPreset)"
                     class="w-full"
+                    @update:model-value="permPreset = ($event?.value as string) ?? 'admin_only'"
                   />
                   <p class="text-xs text-(--ui-text-muted)">
                     Fine-grained permissions coming in a future release.
@@ -459,30 +496,52 @@ onMounted(() => { fetchEntities() })
             <div v-if="currentStep === 4">
               <UCard>
                 <template #header>
-                  <p class="text-lg font-bold text-(--ui-text-highlighted)">Review &amp; Create</p>
-                  <p class="text-sm text-(--ui-text-muted)">Verify module details before creating.</p>
+                  <p class="text-lg font-bold text-(--ui-text-highlighted)">
+                    Review &amp; Create
+                  </p>
+                  <p class="text-sm text-(--ui-text-muted)">
+                    Verify module details before creating.
+                  </p>
                 </template>
                 <div class="space-y-6">
                   <!-- Summary Grid -->
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-xs font-medium text-(--ui-text-muted)">Name</p>
-                      <p class="text-sm font-medium">{{ moduleName }}</p>
+                      <p class="text-xs font-medium text-(--ui-text-muted)">
+                        Name
+                      </p>
+                      <p class="text-sm font-medium">
+                        {{ moduleName }}
+                      </p>
                     </div>
                     <div>
-                      <p class="text-xs font-medium text-(--ui-text-muted)">Slug</p>
-                      <p class="text-sm">{{ moduleSlug }}</p>
+                      <p class="text-xs font-medium text-(--ui-text-muted)">
+                        Slug
+                      </p>
+                      <p class="text-sm">
+                        {{ moduleSlug }}
+                      </p>
                     </div>
                     <div>
-                      <p class="text-xs font-medium text-(--ui-text-muted)">Category</p>
-                      <p class="text-sm">{{ moduleCategory }}</p>
+                      <p class="text-xs font-medium text-(--ui-text-muted)">
+                        Category
+                      </p>
+                      <p class="text-sm">
+                        {{ moduleCategory }}
+                      </p>
                     </div>
                     <div>
-                      <p class="text-xs font-medium text-(--ui-text-muted)">Version</p>
-                      <p class="text-sm">{{ moduleVersion }}</p>
+                      <p class="text-xs font-medium text-(--ui-text-muted)">
+                        Version
+                      </p>
+                      <p class="text-sm">
+                        {{ moduleVersion }}
+                      </p>
                     </div>
                     <div>
-                      <p class="text-xs font-medium text-(--ui-text-muted)">Status</p>
+                      <p class="text-xs font-medium text-(--ui-text-muted)">
+                        Status
+                      </p>
                       <div class="flex items-center gap-1.5">
                         <span
                           class="inline-block size-1.5 rounded-full"
@@ -492,15 +551,23 @@ onMounted(() => { fetchEntities() })
                       </div>
                     </div>
                     <div>
-                      <p class="text-xs font-medium text-(--ui-text-muted)">Entities</p>
-                      <p class="text-sm">{{ selectedEntityIds.size }} selected</p>
+                      <p class="text-xs font-medium text-(--ui-text-muted)">
+                        Entities
+                      </p>
+                      <p class="text-sm">
+                        {{ selectedEntityIds.size }} selected
+                      </p>
                     </div>
                   </div>
 
                   <!-- Description -->
                   <div v-if="moduleDescription">
-                    <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Description</p>
-                    <p class="text-sm">{{ moduleDescription }}</p>
+                    <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                      Description
+                    </p>
+                    <p class="text-sm">
+                      {{ moduleDescription }}
+                    </p>
                   </div>
 
                   <!-- Pills -->
@@ -523,7 +590,9 @@ onMounted(() => { fetchEntities() })
           <!-- ── Live Preview (xl+) ─────────────────── -->
           <div class="hidden xl:block xl:col-span-2">
             <div class="sticky top-6">
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-3 uppercase tracking-wider">Live Preview</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-3 uppercase tracking-wider">
+                Live Preview
+              </p>
               <UCard>
                 <template #header>
                   <div class="flex items-center gap-2">
@@ -534,8 +603,12 @@ onMounted(() => { fetchEntities() })
                       <UIcon :name="moduleIcon || 'i-lucide-package'" class="size-4 text-white" />
                     </div>
                     <div class="min-w-0">
-                      <p class="font-semibold text-sm truncate">{{ moduleName || 'Module Name' }}</p>
-                      <p class="text-xs text-(--ui-text-muted) truncate">{{ moduleSlug || 'module-slug' }}</p>
+                      <p class="font-semibold text-sm truncate">
+                        {{ moduleName || 'Module Name' }}
+                      </p>
+                      <p class="text-xs text-(--ui-text-muted) truncate">
+                        {{ moduleSlug || 'module-slug' }}
+                      </p>
                     </div>
                   </div>
                   <div class="flex items-center gap-1.5 mt-2">
@@ -550,16 +623,34 @@ onMounted(() => { fetchEntities() })
                 </template>
                 <div class="space-y-3">
                   <div>
-                    <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Description</p>
-                    <p class="text-sm">{{ moduleDescription || '(no description)' }}</p>
+                    <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                      Description
+                    </p>
+                    <p class="text-sm">
+                      {{ moduleDescription || '(no description)' }}
+                    </p>
                   </div>
                   <div>
-                    <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Category</p>
-                    <UBadge :label="moduleCategory" color="neutral" variant="subtle" size="sm" />
+                    <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                      Category
+                    </p>
+                    <UBadge
+                      :label="moduleCategory"
+                      color="neutral"
+                      variant="subtle"
+                      size="sm"
+                    />
                   </div>
                   <div v-if="selectedEntityIds.size > 0">
-                    <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Entities</p>
-                    <UBadge :label="`${selectedEntityIds.size} entities`" color="success" variant="subtle" size="sm" />
+                    <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                      Entities
+                    </p>
+                    <UBadge
+                      :label="`${selectedEntityIds.size} entities`"
+                      color="success"
+                      variant="subtle"
+                      size="sm"
+                    />
                   </div>
                 </div>
               </UCard>
@@ -568,7 +659,9 @@ onMounted(() => { fetchEntities() })
               <UCard class="mt-4">
                 <div class="space-y-1">
                   <UIcon name="i-lucide-rocket" class="size-5 text-(--ui-primary)" />
-                  <p class="text-sm font-medium text-(--ui-text-highlighted)">Almost there!</p>
+                  <p class="text-sm font-medium text-(--ui-text-highlighted)">
+                    Almost there!
+                  </p>
                   <p class="text-xs text-(--ui-text-muted)">
                     Review the details and click <strong>Create Module</strong> to finalize.
                   </p>

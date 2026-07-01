@@ -14,8 +14,8 @@ export function useModules() {
     try {
       const data = await $fetch<ModuleRow[]>('/api/metadata/modules')
       modules.value = data
-    } catch (e: any) {
-      error.value = e?.message || 'Failed to fetch modules'
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Failed to fetch modules'
       toast.add({ title: error.value!, color: 'error' })
     } finally {
       loading.value = false
@@ -25,8 +25,8 @@ export function useModules() {
   async function fetchModuleDetail(id: number): Promise<ModuleDetail | null> {
     try {
       return await $fetch<ModuleDetail>(`/api/metadata/modules/${id}`)
-    } catch (e: any) {
-      toast.add({ title: e?.message || 'Failed to fetch detail', color: 'error' })
+    } catch (e: unknown) {
+      toast.add({ title: e instanceof Error ? e.message : 'Failed to fetch detail', color: 'error' })
       return null
     }
   }
@@ -41,8 +41,8 @@ export function useModules() {
       modules.value.unshift(mod)
       toast.add({ title: `"${mod.name}" created`, color: 'success' })
       return mod
-    } catch (e: any) {
-      toast.add({ title: e?.message || 'Failed to create', color: 'error' })
+    } catch (e: unknown) {
+      toast.add({ title: e instanceof Error ? e.message : 'Failed to create', color: 'error' })
       return null
     } finally {
       loading.value = false
@@ -58,8 +58,8 @@ export function useModules() {
       const idx = modules.value.findIndex(m => m.id === id)
       if (idx !== -1) modules.value[idx] = updated
       return true
-    } catch (e: any) {
-      toast.add({ title: e?.message || 'Failed to update', color: 'error' })
+    } catch (e: unknown) {
+      toast.add({ title: e instanceof Error ? e.message : 'Failed to update', color: 'error' })
       return false
     }
   }
@@ -70,8 +70,8 @@ export function useModules() {
       modules.value = modules.value.filter(m => m.id !== id)
       toast.add({ title: 'Module deleted', color: 'success' })
       return true
-    } catch (e: any) {
-      toast.add({ title: e?.message || 'Failed to delete', color: 'error' })
+    } catch (e: unknown) {
+      toast.add({ title: e instanceof Error ? e.message : 'Failed to delete', color: 'error' })
       return false
     }
   }
@@ -86,16 +86,16 @@ export function useModules() {
   })
 
   const categoryBreakdown = computed(() => {
-    const map = new Map<string, { count: number; color: string; icon: string }>()
-    const defaults: Record<string, { color: string; icon: string }> = {
-      'Business': { color: 'success', icon: 'i-lucide-briefcase' },
-      'Inventory': { color: 'info', icon: 'i-lucide-package' },
-      'HRM': { color: 'warning', icon: 'i-lucide-users' },
-      'Accounting': { color: 'error', icon: 'i-lucide-calculator' },
-      'Sales': { color: 'primary', icon: 'i-lucide-shopping-cart' },
-      'Support': { color: 'neutral', icon: 'i-lucide-life-buoy' },
-      'Marketing': { color: 'info', icon: 'i-lucide-megaphone' },
-      'Procurement': { color: 'neutral', icon: 'i-lucide-clipboard-list' }
+    const map = new Map<string, { count: number, color: string, icon: string }>()
+    const defaults: Record<string, { color: string, icon: string }> = {
+      Business: { color: 'success', icon: 'i-lucide-briefcase' },
+      Inventory: { color: 'info', icon: 'i-lucide-package' },
+      HRM: { color: 'warning', icon: 'i-lucide-users' },
+      Accounting: { color: 'error', icon: 'i-lucide-calculator' },
+      Sales: { color: 'primary', icon: 'i-lucide-shopping-cart' },
+      Support: { color: 'neutral', icon: 'i-lucide-life-buoy' },
+      Marketing: { color: 'info', icon: 'i-lucide-megaphone' },
+      Procurement: { color: 'neutral', icon: 'i-lucide-clipboard-list' }
     }
     for (const m of modules.value) {
       const cat = m.category || 'Uncategorized'
@@ -122,9 +122,9 @@ export function useModules() {
     if (searchQuery.value) {
       const q = searchQuery.value.toLowerCase()
       list = list.filter(m =>
-        m.name.toLowerCase().includes(q) ||
-        (m.description || '').toLowerCase().includes(q) ||
-        (m.category || '').toLowerCase().includes(q)
+        m.name.toLowerCase().includes(q)
+        || (m.description || '').toLowerCase().includes(q)
+        || (m.category || '').toLowerCase().includes(q)
       )
     }
 
@@ -136,7 +136,7 @@ export function useModules() {
     else if (statusFilter.value === 'inactive') list = list.filter(m => !m.isActive)
 
     list.sort((a, b) => {
-      let cmp = 0
+      let cmp
       switch (sortBy.value) {
         case 'name':
           cmp = a.name.localeCompare(b.name)

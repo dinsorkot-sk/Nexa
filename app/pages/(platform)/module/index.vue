@@ -3,14 +3,12 @@ import type { ModuleRow } from '~/types/metadata'
 
 const { isNotificationsSlideoverOpen } = useDashboard()
 const {
-  modules, loading, stats, categoryBreakdown,
-  fetchModules, fetchModuleDetail, updateModule, deleteModule,
+  loading, stats, categoryBreakdown,
+  fetchModules,
   searchQuery, categoryFilter, statusFilter, sortBy, sortOrder,
   filteredModules, categoryOptions, sortOptions, getStatusFilterOptions,
   cssVar
 } = useModules()
-
-const toast = useToast()
 const showDetailSlideover = ref(false)
 const selectedModule = ref<ModuleRow | null>(null)
 const page = ref(1)
@@ -19,14 +17,6 @@ const pageSize = ref(10)
 const catOptions = computed(() => [{ label: 'Category: All', value: '' }, ...categoryOptions.value])
 
 const statusOpts = computed(() => getStatusFilterOptions())
-
-function sel(items: { label: string; value: any }[], val: any) {
-  return items.find(i => i.value === val) || items[0]
-}
-
-function upd(val: any, target: any) {
-  if (val?.value !== undefined) target.value = val.value
-}
 
 const paginatedModules = computed(() => {
   const start = (page.value - 1) * pageSize.value
@@ -37,7 +27,13 @@ const totalPages = computed(() =>
   Math.max(1, Math.ceil(filteredModules.value.length / pageSize.value))
 )
 
-watch([searchQuery, categoryFilter, statusFilter], () => { page.value = 1 })
+watch([searchQuery, categoryFilter, statusFilter], () => {
+  page.value = 1
+})
+
+watch(pageSize, () => {
+  page.value = 1
+})
 
 function selectModule(row: ModuleRow) {
   selectedModule.value = row
@@ -72,7 +68,9 @@ onMounted(() => fetchModules())
         <template #right>
           <UTooltip text="Notifications" :shortcuts="['N']">
             <UButton
-              color="neutral" variant="ghost" square
+              color="neutral"
+              variant="ghost"
+              square
               @click="isNotificationsSlideoverOpen = true"
             >
               <UChip color="error" inset>
@@ -94,8 +92,12 @@ onMounted(() => fetchModules())
                 <UIcon name="i-lucide-puzzle" class="size-5 text-white" />
               </div>
               <div class="min-w-0">
-                <p class="text-sm font-medium text-(--ui-text-muted)">Total Modules</p>
-                <p class="text-2xl font-bold text-(--ui-text-highlighted)">{{ stats.total }}</p>
+                <p class="text-sm font-medium text-(--ui-text-muted)">
+                  Total Modules
+                </p>
+                <p class="text-2xl font-bold text-(--ui-text-highlighted)">
+                  {{ stats.total }}
+                </p>
               </div>
             </div>
           </UCard>
@@ -106,8 +108,12 @@ onMounted(() => fetchModules())
                 <UIcon name="i-lucide-check-circle" class="size-5 text-white" />
               </div>
               <div class="min-w-0">
-                <p class="text-sm font-medium text-(--ui-text-muted)">Active</p>
-                <p class="text-2xl font-bold text-(--ui-success)">{{ stats.active }}</p>
+                <p class="text-sm font-medium text-(--ui-text-muted)">
+                  Active
+                </p>
+                <p class="text-2xl font-bold text-(--ui-success)">
+                  {{ stats.active }}
+                </p>
               </div>
             </div>
           </UCard>
@@ -118,8 +124,12 @@ onMounted(() => fetchModules())
                 <UIcon name="i-lucide-pause-circle" class="size-5 text-white" />
               </div>
               <div class="min-w-0">
-                <p class="text-sm font-medium text-(--ui-text-muted)">Inactive</p>
-                <p class="text-2xl font-bold text-(--ui-warning)">{{ stats.inactive }}</p>
+                <p class="text-sm font-medium text-(--ui-text-muted)">
+                  Inactive
+                </p>
+                <p class="text-2xl font-bold text-(--ui-warning)">
+                  {{ stats.inactive }}
+                </p>
               </div>
             </div>
           </UCard>
@@ -133,8 +143,12 @@ onMounted(() => fetchModules())
                 <UIcon :name="categoryBreakdown[0].icon" class="size-5 text-white" />
               </div>
               <div class="min-w-0">
-                <p class="text-sm font-medium text-(--ui-text-muted)">{{ categoryBreakdown[0].category }}</p>
-                <p class="text-2xl font-bold text-(--ui-text-highlighted)">{{ categoryBreakdown[0].count }}</p>
+                <p class="text-sm font-medium text-(--ui-text-muted)">
+                  {{ categoryBreakdown[0].category }}
+                </p>
+                <p class="text-2xl font-bold text-(--ui-text-highlighted)">
+                  {{ categoryBreakdown[0].count }}
+                </p>
               </div>
             </div>
           </UCard>
@@ -153,16 +167,16 @@ onMounted(() => fetchModules())
               />
               <div class="flex items-center gap-2 w-full sm:w-auto">
                 <USelectMenu
-                  :model-value="sel(catOptions, categoryFilter)"
+                  :model-value="catOptions.find(o => o.value === categoryFilter) ?? catOptions[0]"
                   :items="catOptions"
-                  @update:model-value="upd($event, categoryFilter)"
                   class="min-w-36"
+                  @update:model-value="categoryFilter = ($event?.value as string) ?? ''"
                 />
                 <USelectMenu
-                  :model-value="sel(statusOpts, statusFilter)"
+                  :model-value="statusOpts.find(o => o.value === statusFilter) ?? statusOpts[0]"
                   :items="statusOpts"
-                  @update:model-value="upd($event, statusFilter)"
                   class="min-w-32"
+                  @update:model-value="statusFilter = ($event?.value as string) ?? ''"
                 />
                 <UButton
                   label="Create Module"
@@ -173,7 +187,9 @@ onMounted(() => fetchModules())
                 <UTooltip text="Refresh">
                   <UButton
                     icon="i-lucide-refresh-cw"
-                    color="neutral" variant="ghost" square
+                    color="neutral"
+                    variant="ghost"
+                    square
                     :loading="loading"
                     @click="fetchModules"
                   />
@@ -186,15 +202,18 @@ onMounted(() => fetchModules())
               <div class="flex items-center gap-2">
                 <span class="text-xs text-(--ui-text-muted)">Sort by:</span>
                 <USelectMenu
-                  :model-value="sel(sortOptions, sortBy)"
+                  :model-value="sortOptions.find(o => o.value === sortBy) ?? sortOptions[0]"
                   :items="sortOptions"
-                  @update:model-value="upd($event, sortBy)"
                   size="xs"
                   class="min-w-32"
+                  @update:model-value="sortBy = ($event?.value as string) ?? 'name'"
                 />
                 <UButton
                   :icon="sortOrder === 'asc' ? 'i-lucide-arrow-up-wide-narrow' : 'i-lucide-arrow-down-wide-narrow'"
-                  color="neutral" variant="ghost" square size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  square
+                  size="xs"
                   @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
                 />
               </div>
@@ -270,24 +289,30 @@ onMounted(() => fetchModules())
             <div class="flex items-center gap-2">
               <span class="text-xs text-(--ui-text-muted)">Rows per page:</span>
               <USelectMenu
-                :model-value="sel([{ label: '10 / page', value: 10 }, { label: '20 / page', value: 20 }, { label: '50 / page', value: 50 }], pageSize)"
+                :model-value="([{ label: '10 / page', value: 10 }, { label: '20 / page', value: 20 }, { label: '50 / page', value: 50 }] as const).find(o => o.value === pageSize) ?? { label: '10 / page', value: 10 }"
                 :items="[{ label: '10 / page', value: 10 }, { label: '20 / page', value: 20 }, { label: '50 / page', value: 50 }]"
-                @update:model-value="(val: any) => { pageSize = val?.value ?? 10; page = 1 }"
                 size="sm"
                 class="min-w-28"
+                @update:model-value="pageSize = ($event?.value as number) ?? 10"
               />
             </div>
             <div class="flex items-center gap-1">
               <UButton
                 icon="i-lucide-chevron-left"
-                color="neutral" variant="ghost" square size="sm"
+                color="neutral"
+                variant="ghost"
+                square
+                size="sm"
                 :disabled="page <= 1"
                 @click="page--"
               />
               <span class="text-xs text-(--ui-text-muted) px-2">{{ page }} / {{ totalPages }}</span>
               <UButton
                 icon="i-lucide-chevron-right"
-                color="neutral" variant="ghost" square size="sm"
+                color="neutral"
+                variant="ghost"
+                square
+                size="sm"
                 :disabled="page >= totalPages"
                 @click="page++"
               />

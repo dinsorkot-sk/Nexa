@@ -59,7 +59,13 @@ watch(() => props.module.id, () => {
   <USlideover :open="true" @close="emit('close')">
     <template #header>
       <div class="flex items-center gap-2">
-        <UButton icon="i-lucide-x" color="neutral" variant="ghost" square @click="emit('close')" />
+        <UButton
+          icon="i-lucide-x"
+          color="neutral"
+          variant="ghost"
+          square
+          @click="emit('close')"
+        />
         <div class="flex items-center gap-2 min-w-0">
           <div
             v-if="module.icon"
@@ -68,8 +74,12 @@ watch(() => props.module.id, () => {
             <UIcon :name="module.icon" class="size-4 text-(--ui-primary)" />
           </div>
           <div class="min-w-0">
-            <p class="font-semibold text-sm truncate">{{ module.name }}</p>
-            <p class="text-xs text-(--ui-text-muted) truncate">{{ module.slug }}</p>
+            <p class="font-semibold text-sm truncate">
+              {{ module.name }}
+            </p>
+            <p class="text-xs text-(--ui-text-muted) truncate">
+              {{ module.slug }}
+            </p>
           </div>
         </div>
       </div>
@@ -94,7 +104,9 @@ watch(() => props.module.id, () => {
         <UCard>
           <div class="space-y-4">
             <div>
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Status</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                Status
+              </p>
               <div class="flex items-center gap-1.5">
                 <span
                   class="inline-block size-1.5 rounded-full"
@@ -110,38 +122,66 @@ watch(() => props.module.id, () => {
             </div>
 
             <div v-if="module.description">
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Description</p>
-              <p class="text-sm">{{ module.description }}</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                Description
+              </p>
+              <p class="text-sm">
+                {{ module.description }}
+              </p>
             </div>
 
             <div>
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Category</p>
-              <p class="text-sm">{{ module.category || '—' }}</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                Category
+              </p>
+              <p class="text-sm">
+                {{ module.category || '—' }}
+              </p>
             </div>
 
             <div>
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Version</p>
-              <p class="text-sm">{{ module.version || '—' }}</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                Version
+              </p>
+              <p class="text-sm">
+                {{ module.version || '—' }}
+              </p>
             </div>
 
             <div>
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Entities</p>
-              <p class="text-sm">{{ module.entityCount ?? 0 }}</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                Entities
+              </p>
+              <p class="text-sm">
+                {{ module.entityCount ?? 0 }}
+              </p>
             </div>
 
             <div>
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Forms</p>
-              <p class="text-sm">{{ module.formCount ?? 0 }}</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                Forms
+              </p>
+              <p class="text-sm">
+                {{ module.formCount ?? 0 }}
+              </p>
             </div>
 
             <div>
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Created</p>
-              <p class="text-sm">{{ module.createdAt ? new Date(module.createdAt).toLocaleDateString() : '—' }}</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                Created
+              </p>
+              <p class="text-sm">
+                {{ module.createdAt ? new Date(module.createdAt).toLocaleDateString() : '—' }}
+              </p>
             </div>
 
             <div>
-              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">Last Updated</p>
-              <p class="text-sm">{{ module.updatedAt ? new Date(module.updatedAt).toLocaleDateString() : '—' }}</p>
+              <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
+                Last Updated
+              </p>
+              <p class="text-sm">
+                {{ module.updatedAt ? new Date(module.updatedAt).toLocaleDateString() : '—' }}
+              </p>
             </div>
           </div>
         </UCard>
@@ -149,7 +189,9 @@ watch(() => props.module.id, () => {
         <!-- Quick actions -->
         <UCard>
           <template #header>
-            <p class="text-sm font-medium">Quick Actions</p>
+            <p class="text-sm font-medium">
+              Quick Actions
+            </p>
           </template>
           <div class="space-y-2">
             <UButton
@@ -159,8 +201,20 @@ watch(() => props.module.id, () => {
               block
               @click="handleToggleActive"
             />
-            <UButton label="Edit Module" color="neutral" variant="outline" block disabled />
-            <UButton label="Delete Module" color="error" variant="outline" block @click="showDeleteModal = true" />
+            <UButton
+              label="Edit Module"
+              color="neutral"
+              variant="outline"
+              block
+              disabled
+            />
+            <UButton
+              label="Delete Module"
+              color="error"
+              variant="outline"
+              block
+              @click="showDeleteModal = true"
+            />
           </div>
         </UCard>
       </div>
@@ -169,7 +223,9 @@ watch(() => props.module.id, () => {
       <div v-if="tab === 'entities'">
         <div v-if="loading" class="py-8 text-center">
           <UIcon name="i-lucide-loader-circle" class="size-6 text-(--ui-text-muted) animate-spin mx-auto mb-2" />
-          <p class="text-sm text-(--ui-text-muted)">Loading entities...</p>
+          <p class="text-sm text-(--ui-text-muted)">
+            Loading entities...
+          </p>
         </div>
 
         <div v-else-if="detail?.entities?.length" class="space-y-2">
@@ -183,8 +239,12 @@ watch(() => props.module.id, () => {
                   <UIcon :name="entity.icon" class="size-3.5 text-(--ui-primary)" />
                 </div>
                 <div class="min-w-0">
-                  <p class="text-sm font-medium truncate">{{ entity.name }}</p>
-                  <p class="text-xs text-(--ui-text-muted) truncate">{{ entity.tableName }}</p>
+                  <p class="text-sm font-medium truncate">
+                    {{ entity.name }}
+                  </p>
+                  <p class="text-xs text-(--ui-text-muted) truncate">
+                    {{ entity.tableName }}
+                  </p>
                 </div>
               </div>
               <span
@@ -197,14 +257,18 @@ watch(() => props.module.id, () => {
 
         <div v-else class="py-8 text-center">
           <UIcon name="i-lucide-database" class="size-8 text-(--ui-text-muted) mx-auto mb-2" />
-          <p class="text-sm text-(--ui-text-muted)">No entities assigned</p>
+          <p class="text-sm text-(--ui-text-muted)">
+            No entities assigned
+          </p>
         </div>
       </div>
 
       <!-- ════════ Relations Tab ════════ -->
       <div v-if="tab === 'relations'" class="py-8 text-center">
         <UIcon name="i-lucide-share-2" class="size-8 text-(--ui-text-muted) mx-auto mb-2" />
-        <p class="text-sm text-(--ui-text-muted)">Relations coming soon</p>
+        <p class="text-sm text-(--ui-text-muted)">
+          Relations coming soon
+        </p>
       </div>
     </div>
   </USlideover>
@@ -213,7 +277,9 @@ watch(() => props.module.id, () => {
   <UModal v-if="showDeleteModal" :open="true" @close="showDeleteModal = false">
     <UCard>
       <template #header>
-        <p class="font-semibold">Delete Module</p>
+        <p class="font-semibold">
+          Delete Module
+        </p>
       </template>
       <p class="text-sm text-(--ui-text-muted)">
         Are you sure you want to delete <strong class="text-(--ui-text-highlighted)">{{ module.name }}</strong>?
@@ -221,8 +287,18 @@ watch(() => props.module.id, () => {
       </p>
       <template #footer>
         <div class="flex items-center justify-end gap-2">
-          <UButton label="Cancel" color="neutral" variant="ghost" @click="showDeleteModal = false" />
-          <UButton label="Delete" color="error" :loading="deleting" @click="handleDelete" />
+          <UButton
+            label="Cancel"
+            color="neutral"
+            variant="ghost"
+            @click="showDeleteModal = false"
+          />
+          <UButton
+            label="Delete"
+            color="error"
+            :loading="deleting"
+            @click="handleDelete"
+          />
         </div>
       </template>
     </UCard>
