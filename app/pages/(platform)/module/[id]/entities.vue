@@ -1,0 +1,65 @@
+<script setup lang="ts">
+import type { ModuleDetail } from '~/types/metadata'
+
+const route = useRoute()
+const moduleId = computed(() => Number(route.params.id))
+
+// Share state with parent [id].vue via the same useAsyncData key
+const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
+</script>
+
+<template>
+  <div class="max-w-4xl space-y-4">
+    <UCard>
+      <template #header>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <UIcon name="i-lucide-database" class="size-5 text-(--ui-primary)" />
+            <p class="text-sm font-semibold">
+              Entities
+            </p>
+          </div>
+          <span class="text-xs text-(--ui-text-muted)">
+            {{ detail?.entities?.length ?? 0 }} total
+          </span>
+        </div>
+      </template>
+
+      <div v-if="detail?.entities?.length" class="space-y-2">
+        <div
+          v-for="entity in detail.entities"
+          :key="entity.id"
+          class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-(--ui-border)"
+        >
+          <div class="flex items-center gap-2 min-w-0">
+            <div
+              v-if="entity.icon"
+              class="size-6 rounded flex items-center justify-center bg-(--ui-primary)/10 shrink-0"
+            >
+              <UIcon :name="entity.icon" class="size-3.5 text-(--ui-primary)" />
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium truncate">
+                {{ entity.name }}
+              </p>
+              <p class="text-xs text-(--ui-text-muted) truncate">
+                {{ entity.tableName }}
+              </p>
+            </div>
+          </div>
+          <span
+            class="inline-block size-1.5 rounded-full shrink-0"
+            :class="entity.isActive ? 'bg-(--ui-success)' : 'bg-(--ui-warning)'"
+          />
+        </div>
+      </div>
+
+      <div v-else class="py-12 text-center">
+        <UIcon name="i-lucide-database" class="size-8 text-(--ui-text-muted) mx-auto mb-2" />
+        <p class="text-sm text-(--ui-text-muted)">
+          No entities assigned to this module
+        </p>
+      </div>
+    </UCard>
+  </div>
+</template>

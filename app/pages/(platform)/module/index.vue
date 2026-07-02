@@ -36,6 +36,8 @@ watch(pageSize, () => {
 })
 
 function selectModule(row: ModuleRow) {
+  // Show quick-view slideover (read-only preview)
+  // User can click "Open Full Editor" inside slideover to navigate to detail page
   selectedModule.value = row
   showDetailSlideover.value = true
 }
@@ -328,7 +330,7 @@ onMounted(() => fetchModules())
         </UCard>
       </UContainer>
 
-      <!-- Detail Slideover -->
+      <!-- Detail Slideover (quick view) -->
       <ModuleDetail
         v-if="showDetailSlideover && selectedModule"
         v-model:open="showDetailSlideover"
