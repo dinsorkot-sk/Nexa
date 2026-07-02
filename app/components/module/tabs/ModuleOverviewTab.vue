@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import type { ModuleDetail } from '~/types/metadata'
 
-const route = useRoute()
-const moduleId = computed(() => Number(route.params.id))
-
-// Share state with parent [id].vue via the same useAsyncData key
-const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
+defineProps<{
+  moduleData: ModuleDetail
+}>()
 </script>
 
 <template>
-  <div v-if="detail" class="space-y-4 max-w-4xl">
+  <div class="space-y-4 max-w-4xl">
     <UCard>
       <div class="space-y-4">
         <div>
@@ -19,23 +17,23 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
           <div class="flex items-center gap-1.5">
             <span
               class="inline-block size-1.5 rounded-full"
-              :class="detail.isActive ? 'bg-(--ui-success)' : 'bg-(--ui-warning)'"
+              :class="moduleData.isActive ? 'bg-(--ui-success)' : 'bg-(--ui-warning)'"
             />
             <span
               class="text-sm font-medium"
-              :class="detail.isActive ? 'text-(--ui-success)' : 'text-(--ui-warning)'"
+              :class="moduleData.isActive ? 'text-(--ui-success)' : 'text-(--ui-warning)'"
             >
-              {{ detail.isActive ? 'Active' : 'Inactive' }}
+              {{ moduleData.isActive ? 'Active' : 'Inactive' }}
             </span>
           </div>
         </div>
 
-        <div v-if="detail.description">
+        <div v-if="moduleData.description">
           <p class="text-xs font-medium text-(--ui-text-muted) mb-1">
             Description
           </p>
           <p class="text-sm">
-            {{ detail.description }}
+            {{ moduleData.description }}
           </p>
         </div>
 
@@ -45,7 +43,7 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
               Category
             </p>
             <p class="text-sm">
-              {{ detail.category || '—' }}
+              {{ moduleData.category || '—' }}
             </p>
           </div>
           <div>
@@ -53,7 +51,7 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
               Version
             </p>
             <p class="text-sm">
-              {{ detail.version || '—' }}
+              {{ moduleData.version || '—' }}
             </p>
           </div>
           <div>
@@ -61,7 +59,7 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
               Entities
             </p>
             <p class="text-sm">
-              {{ detail.entityCount ?? 0 }}
+              {{ moduleData.entityCount ?? 0 }}
             </p>
           </div>
           <div>
@@ -69,7 +67,7 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
               Forms
             </p>
             <p class="text-sm">
-              {{ detail.formCount ?? 0 }}
+              {{ moduleData.formCount ?? 0 }}
             </p>
           </div>
         </div>
@@ -80,7 +78,7 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
               Created
             </p>
             <p class="text-sm">
-              {{ detail.createdAt ? new Date(detail.createdAt).toLocaleDateString() : '—' }}
+              {{ moduleData.createdAt ? new Date(moduleData.createdAt).toLocaleDateString() : '—' }}
             </p>
           </div>
           <div>
@@ -88,14 +86,14 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
               Last Updated
             </p>
             <p class="text-sm">
-              {{ detail.updatedAt ? new Date(detail.updatedAt).toLocaleDateString() : '—' }}
+              {{ moduleData.updatedAt ? new Date(moduleData.updatedAt).toLocaleDateString() : '—' }}
             </p>
           </div>
         </div>
       </div>
     </UCard>
 
-    <UCard v-if="detail?.entities?.length">
+    <UCard v-if="moduleData?.entities?.length">
       <template #header>
         <p class="text-sm font-medium">
           Quick Stats
@@ -104,7 +102,7 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
           <p class="text-2xl font-bold text-(--ui-primary)">
-            {{ detail.entities.length }}
+            {{ moduleData.entities.length }}
           </p>
           <p class="text-xs text-(--ui-text-muted)">
             Entities
@@ -112,7 +110,7 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
         </div>
         <div>
           <p class="text-2xl font-bold text-(--ui-success)">
-            {{ detail.entities.filter(e => e.isActive).length }}
+            {{ moduleData.entities.filter(e => e.isActive).length }}
           </p>
           <p class="text-xs text-(--ui-text-muted)">
             Active
@@ -120,7 +118,7 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
         </div>
         <div>
           <p class="text-2xl font-bold text-(--ui-warning)">
-            {{ detail.entities.filter(e => !e.isActive).length }}
+            {{ moduleData.entities.filter(e => !e.isActive).length }}
           </p>
           <p class="text-xs text-(--ui-text-muted)">
             Inactive

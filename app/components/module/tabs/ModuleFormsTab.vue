@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import type { ModuleDetail } from '~/types/metadata'
 
-const route = useRoute()
-const moduleId = computed(() => Number(route.params.id))
-
-// Share state with parent [id].vue via the same useAsyncData key
-const moduleData = useState<ModuleDetail | null>(`module-${moduleId.value}`)
+defineProps<{
+  moduleData: ModuleDetail
+}>()
 </script>
 
 <template>

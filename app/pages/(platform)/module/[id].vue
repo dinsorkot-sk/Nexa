@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import type { ModuleRow, ModuleDetail } from '~/types/metadata'
+import ModuleOverviewTab from '~/components/module/tabs/ModuleOverviewTab.vue'
+import ModuleEntitiesTab from '~/components/module/tabs/ModuleEntitiesTab.vue'
+import ModuleFormsTab from '~/components/module/tabs/ModuleFormsTab.vue'
+import ModuleRelationsTab from '~/components/module/tabs/ModuleRelationsTab.vue'
+import ModuleSettingsTab from '~/components/module/tabs/ModuleSettingsTab.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -15,8 +20,7 @@ const moduleId = computed(() => {
 
 // ── Async data loading (Nuxt 4 standard pattern) ───────────────────────
 // useAsyncData keys are scoped to the component instance, so using
-// `module-${id}` makes the cache invalidate when navigating between modules
-// while remaining stable when switching tabs.
+// `module-${id}` makes the cache invalidate when navigating between modules.
 const { data, error: loadError, pending: loading } = await useAsyncData<
   ModuleDetail | null
 >(
@@ -32,30 +36,44 @@ const { data, error: loadError, pending: loading } = await useAsyncData<
   },
   {
     watch: [moduleId],
-    // Don't refetch when only the tab sub-path changes
     deep: false
   }
 )
 
-// Derived state — ref-backed so children can useState the same key
-const moduleData = computed<ModuleRow | null>(() => data.value ?? null)
+// Module data — single source of truth for all tab components
+const moduleData = computed<ModuleDetail | null>(() => data.value ?? null)
 
-// ── Tab navigation ─────────────────────────────────────────────────────
-// Derive active tab from URL path. /module/5/forms → 'forms'.
-const activeTab = computed<string>(() => {
-  const segments = route.path.split('/').filter(Boolean)
-  const last = segments[segments.length - 1] ?? ''
-  const knownTabs = ['forms', 'entities', 'relations', 'settings']
-  return knownTabs.includes(last) ? last : ''
-})
+// ── Tab state (Approach B: dynamic component, no nested routes) ────────
+type TabKey = 'overview' | 'entities' | 'forms' | 'relations' | 'settings'
 
-function navigateToTab(value: string) {
-  const base = `/module/${moduleId.value}`
-  router.push(value ? `${base}/${value}` : base)
+const activeTab = ref<TabKey>('overview')
+
+// Tab registry — drives UTabs items + dynamic component rendering
+const tabItems = [
+  { value: 'overview', label: 'Overview', icon: 'i-lucide-info' },
+  { value: 'forms', label: 'Forms', icon: 'i-lucide-file-text' },
+  { value: 'entities', label: 'Entities', icon: 'i-lucide-database' },
+  { value: 'relations', label: 'Relations', icon: 'i-lucide-share-2' },
+  { value: 'settings', label: 'Settings', icon: 'i-lucide-settings' }
+] as const
+
+// Map tab key → component
+const tabComponents = {
+  overview: ModuleOverviewTab,
+  entities: ModuleEntitiesTab,
+  forms: ModuleFormsTab,
+  relations: ModuleRelationsTab,
+  settings: ModuleSettingsTab
+} as const
+
+const activeTabComponent = computed(() => tabComponents[activeTab.value])
+
+// Handle tab change — UTabs gives us the new value as string
+function onTabChange(value: string | number) {
+  if (typeof value === 'string' && value in tabComponents) {
+    activeTab.value = value as TabKey
+  }
 }
-
-const showDeleteModal = ref(false)
-const deleting = ref(false)
 
 // ── Actions ────────────────────────────────────────────────────────────
 async function handleToggleActive() {
@@ -63,7 +81,6 @@ async function handleToggleActive() {
   const newIsActive = !moduleData.value.isActive
   const ok = await updateModule(moduleData.value.id, { isActive: newIsActive })
   if (ok) {
-    // Refresh async data so children pick up the new isActive
     await refreshNuxtData(`module-${moduleId.value}`)
     toast.add({
       title: `Module ${newIsActive ? 'activated' : 'deactivated'}`,
@@ -71,6 +88,16 @@ async function handleToggleActive() {
     })
   }
 }
+
+// Tab event: child updated moduleData (e.g. settings saved)
+function handleModuleRefreshed(updated: ModuleDetail) {
+  if (data.value) {
+    data.value = updated
+  }
+}
+
+const showDeleteModal = ref(false)
+const deleting = ref(false)
 
 async function handleDelete() {
   if (!moduleData.value) return
@@ -87,18 +114,14 @@ function handleRetry() {
   refreshNuxtData(`module-${moduleId.value}`)
 }
 
-// Keep parent mounted across tab switches — keyed only by module id, NOT
-// by fullPath. Without this, navigating /module/5 → /module/5/forms
-// would remount the whole page and re-run the load.
-definePageMeta({
-  key: 'module-detail'
-})
+// Reuse ModuleRow for the navbar type slot
+const moduleRow = computed<ModuleRow | null>(() => moduleData.value)
 </script>
 
 <template>
   <UDashboardPanel :id="`module-${moduleId}`">
     <template #header>
-      <UDashboardNavbar :title="moduleData?.name || 'Module'">
+      <UDashboardNavbar :title="moduleRow?.name || 'Module'">
         <template #leading>
           <UButton
             icon="i-lucide-arrow-left"
@@ -165,22 +188,22 @@ definePageMeta({
             <div class="w-56 shrink-0 border-r border-(--ui-border) bg-(--ui-bg-elevated)/30 p-3">
               <UTabs
                 :model-value="activeTab"
-                :items="[
-                  { value: '', label: 'Overview', icon: 'i-lucide-info' },
-                  { value: 'forms', label: 'Forms', icon: 'i-lucide-file-text' },
-                  { value: 'entities', label: 'Entities', icon: 'i-lucide-database' },
-                  { value: 'relations', label: 'Relations', icon: 'i-lucide-share-2' },
-                  { value: 'settings', label: 'Settings', icon: 'i-lucide-settings' }
-                ]"
+                :items="[...tabItems]"
                 orientation="vertical"
                 :ui="{ root: 'w-full' }"
-                @update:model-value="(v: string | number) => { if (typeof v === 'string') navigateToTab(v) }"
+                @update:model-value="onTabChange"
               />
             </div>
 
-            <!-- Tab content (rendered by child route) -->
+            <!-- Tab content — dynamic component + KeepAlive cache -->
             <div class="flex-1 overflow-y-auto p-6">
-              <NuxtPage />
+              <KeepAlive>
+                <component
+                  :is="activeTabComponent"
+                  :module-data="moduleData"
+                  @refreshed="handleModuleRefreshed"
+                />
+              </KeepAlive>
             </div>
           </div>
 
@@ -188,24 +211,24 @@ definePageMeta({
           <div class="border-t border-(--ui-border) px-6 py-3 bg-(--ui-bg-elevated)/30 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-3">
               <div
-                v-if="moduleData.icon"
+                v-if="moduleRow?.icon"
                 class="size-7 rounded flex items-center justify-center bg-(--ui-primary)/10 shrink-0"
               >
-                <UIcon :name="moduleData.icon" class="size-4 text-(--ui-primary)" />
+                <UIcon :name="moduleRow.icon" class="size-4 text-(--ui-primary)" />
               </div>
               <div class="min-w-0">
                 <p class="text-sm font-medium truncate">
-                  {{ moduleData.name }}
+                  {{ moduleRow?.name }}
                 </p>
                 <p class="text-xs text-(--ui-text-muted) truncate">
-                  {{ moduleData.slug }}
+                  {{ moduleRow?.slug }}
                 </p>
               </div>
             </div>
             <div class="flex items-center gap-2">
               <UButton
-                :label="moduleData.isActive ? 'Deactivate' : 'Activate'"
-                :color="moduleData.isActive ? 'warning' : 'success'"
+                :label="moduleRow?.isActive ? 'Deactivate' : 'Activate'"
+                :color="moduleRow?.isActive ? 'warning' : 'success'"
                 variant="outline"
                 size="sm"
                 @click="handleToggleActive"

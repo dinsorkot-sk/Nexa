@@ -1,39 +1,38 @@
 <script setup lang="ts">
 import type { ModuleDetail } from '~/types/metadata'
 
-const route = useRoute()
-const moduleId = computed(() => Number(route.params.id))
+const props = defineProps<{
+  moduleData: ModuleDetail
+}>()
 
-// Share state with parent [id].vue via the same useAsyncData key
-const moduleData = useState<ModuleDetail | null>(`module-${moduleId.value}`)
+const emit = defineEmits<{
+  refreshed: [ModuleDetail]
+}>()
 
 // Local form state — bound to moduleData
 const form = reactive({
-  name: moduleData.value?.name || '',
-  slug: moduleData.value?.slug || '',
-  description: moduleData.value?.description || '',
-  category: moduleData.value?.category || '',
-  version: moduleData.value?.version || '1.0.0'
+  name: props.moduleData.name,
+  slug: props.moduleData.slug,
+  description: props.moduleData.description || '',
+  category: props.moduleData.category || '',
+  version: props.moduleData.version || '1.0.0'
 })
 
-// Re-sync when moduleData changes (e.g. after refresh)
-watch(moduleData, (m) => {
-  if (m) {
-    form.name = m.name
-    form.slug = m.slug
-    form.description = m.description || ''
-    form.category = m.category || ''
-    form.version = m.version || '1.0.0'
-  }
-}, { immediate: true })
+// Re-sync when parent moduleData changes (e.g. after refresh)
+watch(() => props.moduleData, (m) => {
+  form.name = m.name
+  form.slug = m.slug
+  form.description = m.description || ''
+  form.category = m.category || ''
+  form.version = m.version || '1.0.0'
+}, { deep: true })
 
 const dirty = computed(() => {
-  if (!moduleData.value) return false
-  return form.name !== moduleData.value.name
-    || form.slug !== moduleData.value.slug
-    || (form.description || '') !== (moduleData.value.description || '')
-    || (form.category || '') !== (moduleData.value.category || '')
-    || form.version !== (moduleData.value.version || '1.0.0')
+  return form.name !== props.moduleData.name
+    || form.slug !== props.moduleData.slug
+    || (form.description || '') !== (props.moduleData.description || '')
+    || (form.category || '') !== (props.moduleData.category || '')
+    || form.version !== (props.moduleData.version || '1.0.0')
 })
 
 const saving = ref(false)
@@ -41,10 +40,10 @@ const { updateModule } = useModules()
 const toast = useToast()
 
 async function save() {
-  if (!moduleData.value || !dirty.value) return
+  if (!dirty.value) return
   saving.value = true
   try {
-    const ok = await updateModule(moduleData.value.id, {
+    const ok = await updateModule(props.moduleData.id, {
       name: form.name,
       slug: form.slug,
       description: form.description || undefined,
@@ -52,19 +51,27 @@ async function save() {
       version: form.version
     })
     if (ok) {
-      moduleData.value = {
-        ...moduleData.value,
+      emit('refreshed', {
+        ...props.moduleData,
         name: form.name,
         slug: form.slug,
         description: form.description || null,
         category: form.category || null,
         version: form.version
-      }
+      })
       toast.add({ title: 'Settings saved', color: 'success' })
     }
   } finally {
     saving.value = false
   }
+}
+
+function discard() {
+  form.name = props.moduleData.name
+  form.slug = props.moduleData.slug
+  form.description = props.moduleData.description || ''
+  form.category = props.moduleData.category || ''
+  form.version = props.moduleData.version || '1.0.0'
 }
 
 const categoryOptions = [
@@ -131,15 +138,7 @@ const categoryOptions = [
         label="Discard"
         color="neutral"
         variant="ghost"
-        @click="() => {
-          if (moduleData) {
-            form.name = moduleData.name
-            form.slug = moduleData.slug
-            form.description = moduleData.description || ''
-            form.category = moduleData.category || ''
-            form.version = moduleData.version || '1.0.0'
-          }
-        }"
+        @click="discard"
       />
       <UButton
         label="Save Changes"

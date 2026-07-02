@@ -47,7 +47,7 @@ test/         Vitest projects: unit/, nuxt/, e2e/
 ```
 
 - Settings uses nested routing: `pages/settings.vue` + `pages/settings/*.vue`
-- **Module detail page** uses nested routes at `pages/(platform)/module/[id]/{index,entities,forms,relations,settings}.vue` with `useState('module-${id}')` for shared state across tabs. The old USlideover-based `components/module/Detail.vue` is superseded.
+- **Module detail page** is a single route `pages/(platform)/module/[id].vue` with tab content rendered via dynamic `<component :is>` + `<KeepAlive>`. Tab components live in `app/components/module/tabs/` (`ModuleOverviewTab`, `ModuleEntitiesTab`, `ModuleFormsTab`, `ModuleRelationsTab`, `ModuleSettingsTab`). All tabs share the same `moduleData` source via props. The legacy USlideover-based `components/module/Detail.vue` is kept but no longer used.
 - 4 mock endpoints (notifications, members, mails, customers) return hardcoded arrays.
 - Diagram: `nexa-architecture.drawio` contains C4 architecture diagrams (6 pages).
 - Metadata ERD uses Vue Flow, field-level handles, and virtual pivot nodes for `N:N` relations.
@@ -83,11 +83,11 @@ Track the build order of the Module management UI. Update this table as phases s
 |-------|-------|--------|-------|
 | **M0** | Module list (CRUD) | ✅ Done | `pages/(platform)/module/index.vue` + `useModules` + create/deactivate |
 | **M1** | Builder wizard | ✅ Done | `pages/(platform)/module/create.vue` — 5-step stepper + `LivePreview` |
-| **M2** | Detail page refactor | ✅ Done | Nested routes at `pages/(platform)/module/[id]/*.vue` + `useState('module-${id}')` |
-| **M3** | Entities tab | ✅ Done | `pages/(platform)/module/[id]/entities.vue` |
-| **M4** | Settings tab | ✅ Done | `pages/(platform)/module/[id]/settings.vue` |
-| **M5** | Form Builder tab | 📍 Next | `forms.vue` currently placeholder — Form Builder UI |
-| **M6** | Relation Builder tab | 📍 Pending | `relations.vue` currently placeholder — visual relation editor |
+| **M2** | Detail page refactor | ✅ Done | Single page `pages/(platform)/module/[id].vue` with dynamic `<component :is>` + `<KeepAlive>`. Tab content in `app/components/module/tabs/` (5 components). |
+| **M3** | Entities tab | ✅ Done | `app/components/module/tabs/ModuleEntitiesTab.vue` |
+| **M4** | Settings tab | ✅ Done | `app/components/module/tabs/ModuleSettingsTab.vue` |
+| **M5** | Form Builder tab | 📍 Next | `app/components/module/tabs/ModuleFormsTab.vue` (currently placeholder) — Form Builder UI |
+| **M6** | Relation Builder tab | 📍 Pending | `app/components/module/tabs/ModuleRelationsTab.vue` (currently placeholder) — visual relation editor |
 | **M7** | View Builder | 📍 Pending | List/Table/Card view config per entity |
 
 ## Installed Skills

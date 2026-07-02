@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import type { ModuleDetail } from '~/types/metadata'
 
-const route = useRoute()
-const moduleId = computed(() => Number(route.params.id))
-
-// Share state with parent [id].vue via the same useAsyncData key
-const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
+defineProps<{
+  moduleData: ModuleDetail
+}>()
 </script>
 
 <template>
@@ -20,14 +18,14 @@ const detail = useState<ModuleDetail | null>(`module-${moduleId.value}`)
             </p>
           </div>
           <span class="text-xs text-(--ui-text-muted)">
-            {{ detail?.entities?.length ?? 0 }} total
+            {{ moduleData?.entities?.length ?? 0 }} total
           </span>
         </div>
       </template>
 
-      <div v-if="detail?.entities?.length" class="space-y-2">
+      <div v-if="moduleData?.entities?.length" class="space-y-2">
         <div
-          v-for="entity in detail.entities"
+          v-for="entity in moduleData.entities"
           :key="entity.id"
           class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-(--ui-border)"
         >
