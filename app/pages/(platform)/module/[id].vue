@@ -19,8 +19,6 @@ const moduleId = computed(() => {
 })
 
 // ── Async data loading (Nuxt 4 standard pattern) ───────────────────────
-// useAsyncData keys are scoped to the component instance, so using
-// `module-${id}` makes the cache invalidate when navigating between modules.
 const { data, error: loadError, pending: loading } = await useAsyncData<
   ModuleDetail | null
 >(
@@ -30,7 +28,6 @@ const { data, error: loadError, pending: loading } = await useAsyncData<
     try {
       return await $fetch<ModuleDetail>(`/api/metadata/modules/${moduleId.value}`)
     } catch (e: unknown) {
-      // Re-throw so useAsyncData sets error state
       throw e instanceof Error ? e : new Error('Failed to load module')
     }
   },
@@ -40,8 +37,8 @@ const { data, error: loadError, pending: loading } = await useAsyncData<
   }
 )
 
-// Module data — single source of truth for all tab components
 const moduleData = computed<ModuleDetail | null>(() => data.value ?? null)
+const moduleRow = computed<ModuleRow | null>(() => moduleData.value)
 
 // ── Tab state (Approach B: dynamic component, no nested routes) ────────
 type TabKey = 'overview' | 'entities' | 'forms' | 'relations' | 'settings'
@@ -57,7 +54,6 @@ const tabItems = [
   { value: 'settings', label: 'Settings', icon: 'i-lucide-settings' }
 ] as const
 
-// Map tab key → component
 const tabComponents = {
   overview: ModuleOverviewTab,
   entities: ModuleEntitiesTab,
@@ -68,7 +64,6 @@ const tabComponents = {
 
 const activeTabComponent = computed(() => tabComponents[activeTab.value])
 
-// Handle tab change — UTabs gives us the new value as string
 function onTabChange(value: string | number) {
   if (typeof value === 'string' && value in tabComponents) {
     activeTab.value = value as TabKey
@@ -113,9 +108,6 @@ async function handleDelete() {
 function handleRetry() {
   refreshNuxtData(`module-${moduleId.value}`)
 }
-
-// Reuse ModuleRow for the navbar type slot
-const moduleRow = computed<ModuleRow | null>(() => moduleData.value)
 </script>
 
 <template>
@@ -123,6 +115,7 @@ const moduleRow = computed<ModuleRow | null>(() => moduleData.value)
     <template #header>
       <UDashboardNavbar :title="moduleRow?.name || 'Module'">
         <template #leading>
+          <UDashboardSidebarCollapse />
           <UButton
             icon="i-lucide-arrow-left"
             color="neutral"
@@ -146,6 +139,19 @@ const moduleRow = computed<ModuleRow | null>(() => moduleData.value)
           </UTooltip>
         </template>
       </UDashboardNavbar>
+
+      <!-- Horizontal tabs as sub-navbar (Nuxt UI v4 standard pattern) -->
+      <UDashboardToolbar v-if="moduleData">
+        <template #default>
+          <UTabs
+            :model-value="activeTab"
+            :items="[...tabItems]"
+            variant="link"
+            class="w-full"
+            @update:model-value="onTabChange"
+          />
+        </template>
+      </UDashboardToolbar>
     </template>
 
     <template #body>
@@ -181,68 +187,58 @@ const moduleRow = computed<ModuleRow | null>(() => moduleData.value)
           </div>
         </div>
 
-        <!-- Main content -->
+        <!-- Main content — tab body with quick actions footer -->
         <div v-else-if="moduleData" class="flex flex-col flex-1 min-h-0">
-          <div class="flex flex-1 min-h-0">
-            <!-- Tabs sidebar -->
-            <div class="w-56 shrink-0 border-r border-(--ui-border) bg-(--ui-bg-elevated)/30 p-3">
-              <UTabs
-                :model-value="activeTab"
-                :items="[...tabItems]"
-                orientation="vertical"
-                :ui="{ root: 'w-full' }"
-                @update:model-value="onTabChange"
+          <div class="flex-1 overflow-y-auto p-6">
+            <KeepAlive>
+              <component
+                :is="activeTabComponent"
+                :module-data="moduleData"
+                @refreshed="handleModuleRefreshed"
               />
-            </div>
-
-            <!-- Tab content — dynamic component + KeepAlive cache -->
-            <div class="flex-1 overflow-y-auto p-6">
-              <KeepAlive>
-                <component
-                  :is="activeTabComponent"
-                  :module-data="moduleData"
-                  @refreshed="handleModuleRefreshed"
-                />
-              </KeepAlive>
-            </div>
+            </KeepAlive>
           </div>
 
-          <!-- Quick actions footer -->
-          <div class="border-t border-(--ui-border) px-6 py-3 bg-(--ui-bg-elevated)/30 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-3">
-              <div
-                v-if="moduleRow?.icon"
-                class="size-7 rounded flex items-center justify-center bg-(--ui-primary)/10 shrink-0"
-              >
-                <UIcon :name="moduleRow.icon" class="size-4 text-(--ui-primary)" />
+          <!-- Quick actions toolbar — native Nuxt UI v4 pattern -->
+          <UDashboardToolbar>
+            <template #default>
+              <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div
+                    v-if="moduleRow?.icon"
+                    class="size-7 rounded flex items-center justify-center bg-(--ui-primary)/10 shrink-0"
+                  >
+                    <UIcon :name="moduleRow.icon" class="size-4 text-(--ui-primary)" />
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium truncate">
+                      {{ moduleRow?.name }}
+                    </p>
+                    <p class="text-xs text-(--ui-text-muted) truncate">
+                      {{ moduleRow?.slug }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <UButton
+                    :label="moduleRow?.isActive ? 'Deactivate' : 'Activate'"
+                    :color="moduleRow?.isActive ? 'warning' : 'success'"
+                    variant="outline"
+                    size="sm"
+                    @click="handleToggleActive"
+                  />
+                  <UButton
+                    label="Delete"
+                    color="error"
+                    variant="outline"
+                    size="sm"
+                    icon="i-lucide-trash-2"
+                    @click="() => { showDeleteModal = true }"
+                  />
+                </div>
               </div>
-              <div class="min-w-0">
-                <p class="text-sm font-medium truncate">
-                  {{ moduleRow?.name }}
-                </p>
-                <p class="text-xs text-(--ui-text-muted) truncate">
-                  {{ moduleRow?.slug }}
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <UButton
-                :label="moduleRow?.isActive ? 'Deactivate' : 'Activate'"
-                :color="moduleRow?.isActive ? 'warning' : 'success'"
-                variant="outline"
-                size="sm"
-                @click="handleToggleActive"
-              />
-              <UButton
-                label="Delete"
-                color="error"
-                variant="outline"
-                size="sm"
-                icon="i-lucide-trash-2"
-                @click="() => { showDeleteModal = true }"
-              />
-            </div>
-          </div>
+            </template>
+          </UDashboardToolbar>
         </div>
       </div>
     </template>

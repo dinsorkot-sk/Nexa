@@ -8,28 +8,19 @@ defineProps<{
 
 <template>
   <div class="max-w-4xl">
-    <UCard>
-      <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-file-text" class="size-5 text-(--ui-primary)" />
-          <p class="text-sm font-semibold">
-            Forms
-          </p>
-        </div>
+    <UEmpty
+      icon="i-lucide-file-plus"
+      title="Form Builder — Coming Soon"
+      :description="`Build forms for ${moduleData?.name || 'this module'} with a visual drag-and-drop editor.`"
+    >
+      <template #actions>
+        <UBadge color="neutral" variant="subtle" size="sm">
+          <template #default>
+            <UIcon name="i-lucide-clock" class="size-3" />
+            Phase 2 — Form Builder
+          </template>
+        </UBadge>
       </template>
-      <div class="py-12 text-center">
-        <UIcon name="i-lucide-file-plus" class="size-12 text-(--ui-text-muted) mx-auto mb-3" />
-        <p class="text-sm font-medium text-(--ui-text-highlighted)">
-          Form Builder — Coming Soon
-        </p>
-        <p class="text-xs text-(--ui-text-muted) mt-1">
-          Build forms for {{ moduleData?.name || 'this module' }} with a visual drag-and-drop editor.
-        </p>
-        <div class="mt-4 inline-flex items-center gap-2 text-xs text-(--ui-text-muted)">
-          <UIcon name="i-lucide-clock" class="size-3" />
-          Phase 2 — Form Builder
-        </div>
-      </div>
-    </UCard>
+    </UEmpty>
   </div>
 </template>

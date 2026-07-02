@@ -52,11 +52,12 @@ defineProps<{
         </div>
       </div>
 
-      <div v-else class="py-12 text-center">
-        <UIcon name="i-lucide-database" class="size-8 text-(--ui-text-muted) mx-auto mb-2" />
-        <p class="text-sm text-(--ui-text-muted)">
-          No entities assigned to this module
-        </p>
+      <div v-else class="py-12">
+        <UEmpty
+          icon="i-lucide-database"
+          title="No entities assigned"
+          :description="`This module doesn't have any entities yet. Create one from the Metadata page.`"
+        />
       </div>
     </UCard>
   </div>
