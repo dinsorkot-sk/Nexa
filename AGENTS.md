@@ -47,6 +47,7 @@ test/         Vitest projects: unit/, nuxt/, e2e/
 ```
 
 - Settings uses nested routing: `pages/settings.vue` + `pages/settings/*.vue`
+- **Module detail page** uses nested routes at `pages/(platform)/module/[id]/{index,entities,forms,relations,settings}.vue` with `useState('module-${id}')` for shared state across tabs. The old USlideover-based `components/module/Detail.vue` is superseded.
 - 4 mock endpoints (notifications, members, mails, customers) return hardcoded arrays.
 - Diagram: `nexa-architecture.drawio` contains C4 architecture diagrams (6 pages).
 - Metadata ERD uses Vue Flow, field-level handles, and virtual pivot nodes for `N:N` relations.
@@ -73,6 +74,21 @@ test/         Vitest projects: unit/, nuxt/, e2e/
 - `compatibilityDate`: `2024-07-11`
 - `nitro.experimental.tasks: true` (required for `db:seed` task)
 - Global CSS: `~/assets/css/main.css`
+
+## Module Phases
+
+Track the build order of the Module management UI. Update this table as phases ship.
+
+| Phase | Scope | Status | Notes |
+|-------|-------|--------|-------|
+| **M0** | Module list (CRUD) | ✅ Done | `pages/(platform)/module/index.vue` + `useModules` + create/deactivate |
+| **M1** | Builder wizard | ✅ Done | `pages/(platform)/module/create.vue` — 5-step stepper + `LivePreview` |
+| **M2** | Detail page refactor | ✅ Done | Nested routes at `pages/(platform)/module/[id]/*.vue` + `useState('module-${id}')` |
+| **M3** | Entities tab | ✅ Done | `pages/(platform)/module/[id]/entities.vue` |
+| **M4** | Settings tab | ✅ Done | `pages/(platform)/module/[id]/settings.vue` |
+| **M5** | Form Builder tab | 📍 Next | `forms.vue` currently placeholder — Form Builder UI |
+| **M6** | Relation Builder tab | 📍 Pending | `relations.vue` currently placeholder — visual relation editor |
+| **M7** | View Builder | 📍 Pending | List/Table/Card view config per entity |
 
 ## Installed Skills
 
